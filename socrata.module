@@ -37,6 +37,100 @@ function socrata_permission() {
 }
 
 /**
+ * General-purpose query function
+ *
+ * @param endpoint
+ * @param app_token
+ *
+ * @return FALSE on error, nested array containing 'headers', 'fields' and 'data'
+ */
+function socrata_query($endpoint, $params = array(), $app_token = NULL) {
+  $retval = FALSE;
+
+  // Prepare authorization headers
+  if (!$params) {
+    $params = array();
+  }
+  if (!empty($app_token)) {
+    $params['$$app_token'] = $app_token;
+  }
+
+  // Construct URL
+  $soda_url = url($endpoint, array('query' => $params, 'absolute' => TRUE));
+  dpm($soda_url);
+
+  // Create a new cURL resource
+  $ch = curl_init();
+  if ($ch) {
+    // Set required curl options
+    $curlopts = array(
+      CURLOPT_HEADER => TRUE,
+      CURLOPT_RETURNTRANSFER => TRUE,
+      CURLOPT_URL => $soda_url,
+      CURLOPT_CUSTOMREQUEST => 'GET',
+    );
+
+    // Merge extra options, preventing overwrite of required options
+    /*
+    foreach ($this->curlopts as $opt_key => $opt_value) {
+      if (!isset($curlopts[$opt_key])) {
+        $curlopts[$opt_key] = $opt_value;
+      }
+    }
+    */
+
+    // Execute the request and cleanup
+    curl_setopt_array($ch, $curlopts);
+    $resp = curl_exec($ch);
+    if (FALSE !== $resp) {
+      // Pull info from response and see if we had an error
+      $info = curl_getinfo($ch);
+      if ($info['http_code'] >= 400) {
+      }
+      else {
+        // Split out response headers into name => value array
+        list($headers, $data) = explode("\r\n\r\n", $resp, 2);
+        $headers = explode("\r\n", $headers);
+        foreach ($headers as $header) {
+          if ('HTTP' == substr($header, 0, 4)) {
+            continue;
+          }
+          list($name, $value) = explode(':', $header, 2);
+          $name = strtolower(trim($name));
+          if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
+            $retval['headers'][$name] = json_decode($value);
+          }
+          else {
+            $retval['headers'][$name] = trim($value);
+          }
+        }
+
+        // Generate an array mapping fields to types, if provided
+        if (isset($retval['headers']['x-soda2-fields']) && isset($retval['headers']['x-soda2-types'])) {
+          foreach ($retval['headers']['x-soda2-fields'] as $idx => $name) {
+            $retval['fields'][$name] = $retval['headers']['x-soda2-types'][$idx];
+          }
+        }
+
+        // Decode data payload
+        $retval['data'] = json_decode($data, TRUE);
+      }
+    }
+    else {
+      // Handle curl_exec error
+    }
+
+    // Close and cleanup
+    curl_close($ch);
+  }
+  else {
+    // Handle curl_init error
+  }
+
+  return $retval;
+}
+
+/**
  * Generates a watchdog log entry during debugging and tried to call dpm from
  * the devel module; when debugging is disabled, nothing happens.
  *

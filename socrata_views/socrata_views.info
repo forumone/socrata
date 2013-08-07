@@ -1,0 +1,17 @@
+name = Socrata Views
+description = Provides queryable datasource for Views
+package = Socrata
+core = 7.x
+
+files[] = socrata_views.module
+
+;; Plugin class files
+files[] = plugins/socrata_views_plugin_query.inc
+
+;; Field handler class files
+
+;; Filter handler class files
+
+dependencies[] = socrata
+dependencies[] = views
+dependencies[] = ctools

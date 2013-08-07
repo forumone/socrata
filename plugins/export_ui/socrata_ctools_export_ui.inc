@@ -27,15 +27,16 @@ $plugin = array(
 
   // Define the names of the functions that provide the add/edit forms.
   'form' => array(
-    'settings' => 'socrata_ctools_export_ui_form',
+    'settings' => '_socrata_ctools_export_ui_form',
+    'submit' => '_socrata_ctools_export_ui_form_submit',
     // 'submit' and 'validate' are also valid callbacks.
   ),
 );
 
 /**
- * Define the preset add/edit form.
+ * Define the source add/edit form
  */
-function socrata_ctools_export_ui_form(&$form, &$form_state) {
+function _socrata_ctools_export_ui_form(&$form, &$form_state) {
   $source = $form_state['item'];
 
   $form['description'] = array(
@@ -62,4 +63,12 @@ function socrata_ctools_export_ui_form(&$form, &$form_state) {
     '#required' => FALSE,
   );
 
+}
+
+/**
+ * Handle submission of the source add/edit form
+ */
+function _socrata_ctools_export_ui_form_submit(&$form, &$form_state) {
+  // Clear out Views table definition caches so rebuilds will pick up added/removed/edited sources
+  cache_clear_all(NULL, 'cache_views', TRUE);
 }
