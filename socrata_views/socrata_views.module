@@ -87,7 +87,7 @@ function socrata_views_data() {
 
       // Add fields to table
       foreach ($resp['fields'] as $field_name => $field_type) {
-        $handlers = _socrata_views_handlers($field_type);
+        $handlers = _socrata_views_handlers($field_name, $field_type);
         $table[$field_name] = array_merge_recursive(
           $handlers,
           array(
@@ -116,7 +116,7 @@ function socrata_views_data() {
 /**
  * Util function to map field handlers to Socrata field types
  */
-function _socrata_views_handlers($type) {
+function _socrata_views_handlers($name, $type) {
   // Default handlers we start off with; should work for any generic text field
   $handlers = array(
     'field' => array(
@@ -131,26 +131,50 @@ function _socrata_views_handlers($type) {
     'relationship' => array(),
   );
 
+  // Catch the special "meta" fields and override their types so they make sense
+  if ('meta_data' == $type) {
+    switch ($name) {
+      case ':created_at':
+      case ':updated_at':
+        $type = 'timestamp';
+        break;
+
+      case ':id':
+        $type = 'plaintext';
+        break;
+
+      default:
+        $type = 'plaintext';
+    }
+  }
+
   // Now override based on field type:
   switch($type) {
+    case 'money':
+    case 'number':
+    case 'percent':
+    case 'star':
+      $handlers['field']['handler'] = 'views_handler_field_numeric';
+      break;
+
     case 'checkbox':
+    case 'linkeddataset':
+      //$handlers['field']['handler'] = 'views_handler_field_boolean';
+      break;
+
     case 'datetime':
     case 'datetimewtimezone':
-    case 'document': // Compound type
+    case 'document': // Compound type: file_id, filename
     case 'email':
     case 'flag':
     case 'formattedtext':
-    case 'linkeddataset':
-    case 'location': // Compound type
-    case 'money':
+    case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
     case 'multiplechoice':
-    case 'number':
-    case 'percent':
-    case 'phone': // Compound type
+    case 'phone': // Compound type: phone_number, phone_type
     case 'photo':
     case 'plaintext':
-    case 'star':
-    case 'url': // Compound type
+    case 'timestamp':
+    case 'url': // Compound type: description, url
       break;
   }
 
