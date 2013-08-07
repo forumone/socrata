@@ -131,7 +131,7 @@ function _socrata_views_handlers($name, $type) {
     'relationship' => array(),
   );
 
-  // Catch the special "meta" fields and override their types so they make sense
+  // Catch the special "meta_data" fields and override their types so they make sense
   if ('meta_data' == $type) {
     switch ($name) {
       case ':created_at':
@@ -148,7 +148,7 @@ function _socrata_views_handlers($name, $type) {
     }
   }
 
-  // Now override based on field type:
+  // Now override defaults based on field type:
   switch($type) {
     case 'money':
     case 'number':
