@@ -1,0 +1,64 @@
+<?php
+/**
+ * @file
+ *
+ * Main code for Socrata module
+ */
+
+/**
+ * Implements hook_ctools_plugin_api
+ */
+function socrata_ctools_plugin_api($module, $api) {
+  if ($module == 'socrata' && $api == 'socrata') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_directory
+ */
+function socrata_ctools_plugin_directory($module, $type) {
+  // Load the export_ui plugin
+  if ($type =='export_ui') {
+    return 'plugins/export_ui';
+  }
+}
+
+/**
+ * Implements hook_permission
+ */
+function socrata_permission() {
+  return array(
+    'administer socrata' => array(
+      'title' => t('Administer Socrata integration'),
+      'description' => t('Perform administration tasks for Socrata integration'),
+    ),
+  );
+}
+
+/**
+ * Generates a watchdog log entry during debugging and tried to call dpm from
+ * the devel module; when debugging is disabled, nothing happens.
+ *
+ * Set the config variable socrata_debug = TRUE to generate log output
+ */
+function _socrata_dbg($msg, $vars = array(), $link = NULL) {
+  if (variable_get('socrata_debug', FALSE)) {
+    watchdog('socrata', (is_array($msg) || is_object($msg)) ? '<pre>' . print_r($msg, TRUE) . '</pre>' : $msg, $vars, WATCHDOG_DEBUG, $link);
+    if (function_exists('dpm')) {
+      dpm((is_array($msg) || is_object($msg)) ? $msg : t($msg, $vars));
+    }
+  }
+}
+
+/**
+ * Generates a watchdog log entry during execution of module
+ */
+function _socrata_log($msg, $vars = array(), $severity = WATCHDOG_INFO, $link = NULL) {
+  // Catch passed-in objects or arrays and dump them accordingly
+  if (is_array($msg) || is_object($msg)) {
+    $msg = print_r($msg, TRUE);
+  }
+  watchdog('socrata', $msg, $vars, $severity, $link);
+}
+

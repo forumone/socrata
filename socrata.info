@@ -1,0 +1,8 @@
+name = Socrata
+description = Provides basic integration points for Socrata SODA API service
+package = Socrata
+core = 7.x
+
+files[] = socrata.module
+
+dependencies[] = ctools
