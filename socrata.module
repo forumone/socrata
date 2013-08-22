@@ -57,27 +57,23 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
 
   // Construct URL
   $soda_url = url($endpoint, array('query' => $params, 'absolute' => TRUE));
-  //dpm($soda_url);
 
   // Create a new cURL resource
   $ch = curl_init();
   if ($ch) {
+    // Pull and set custom curl options
+    $curlopts = variable_get('socrata_curl_options', array());
+    drupal_alter('socrata_curl_options', $curlopts);
+    curl_setopt_array($ch, $curlopts);
+
     // Set required curl options
-    $curlopts = array(
+    $req_curlopts = array(
       CURLOPT_HEADER => TRUE,
       CURLOPT_RETURNTRANSFER => TRUE,
       CURLOPT_URL => $soda_url,
       CURLOPT_CUSTOMREQUEST => 'GET',
     );
-
-    // Merge extra options, preventing overwrite of required options
-    /*
-    foreach ($this->curlopts as $opt_key => $opt_value) {
-      if (!isset($curlopts[$opt_key])) {
-        $curlopts[$opt_key] = $opt_value;
-      }
-    }
-    */
+    curl_setopt_array($ch, $req_curlopts);
 
     // Execute the request and cleanup
     curl_setopt_array($ch, $curlopts);

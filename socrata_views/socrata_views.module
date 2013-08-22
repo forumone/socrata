@@ -115,6 +115,8 @@ function socrata_views_data() {
 
 /**
  * Util function to map field handlers to Socrata field types
+ *
+ * http://dev.socrata.com/docs/datatypes
  */
 function _socrata_views_handlers($name, $type) {
   // Default handlers we start off with; should work for any generic text field
