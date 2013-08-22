@@ -164,20 +164,25 @@ function _socrata_views_handlers($name, $type) {
       //$handlers['field']['handler'] = 'views_handler_field_boolean';
       break;
 
+    case 'url': // Compound type: description, url
+      $handlers['field']['handler'] = 'socrata_views_handler_field_url';
+      break;
+
+    case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
+      $handlers['field']['handler'] = 'socrata_views_handler_field_location';
+      break;
+
     case 'datetime':
     case 'datetimewtimezone':
     case 'document': // Compound type: file_id, filename
     case 'email':
     case 'flag':
     case 'formattedtext':
-    case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
     case 'multiplechoice':
     case 'phone': // Compound type: phone_number, phone_type
     case 'photo':
     case 'plaintext':
     case 'timestamp':
-    case 'url': // Compound type: description, url
-      break;
   }
 
   return $handlers;

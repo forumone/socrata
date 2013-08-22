@@ -9,6 +9,8 @@ files[] = socrata_views.module
 files[] = plugins/socrata_views_plugin_query.inc
 
 ;; Field handler class files
+files[] = handlers/socrata_views_handler_field_url.inc
+files[] = handlers/socrata_views_handler_field_location.inc
 
 ;; Filter handler class files
 
