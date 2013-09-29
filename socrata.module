@@ -113,14 +113,14 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
       }
     }
     else {
-      // Handle curl_exec error
+      // TODO Handle curl_exec error
     }
 
     // Close and cleanup
     curl_close($ch);
   }
   else {
-    // Handle curl_init error
+    // TODO Handle curl_init error
   }
 
   return $retval;
@@ -146,7 +146,7 @@ function _socrata_dbg($msg, $vars = array(), $link = NULL) {
  */
 function _socrata_log($msg, $vars = array(), $severity = WATCHDOG_INFO, $link = NULL) {
   // Catch passed-in objects or arrays and dump them accordingly
-  if (is_array($msg) || is_object($msg)) {
+  if (!is_string($msg)) {
     $msg = print_r($msg, TRUE);
   }
   watchdog('socrata', $msg, $vars, $severity, $link);

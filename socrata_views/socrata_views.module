@@ -172,10 +172,13 @@ function _socrata_views_handlers($name, $type) {
       $handlers['field']['handler'] = 'socrata_views_handler_field_location';
       break;
 
+    case 'email':
+      $handlers['field']['handler'] = 'socrata_views_handler_field_email';
+      break;
+
     case 'datetime':
     case 'datetimewtimezone':
     case 'document': // Compound type: file_id, filename
-    case 'email':
     case 'flag':
     case 'formattedtext':
     case 'multiplechoice':
@@ -183,6 +186,7 @@ function _socrata_views_handlers($name, $type) {
     case 'photo':
     case 'plaintext':
     case 'timestamp':
+      break;
   }
 
   return $handlers;

@@ -11,6 +11,9 @@
  * @ingroup views_field_handlers
  */
 class socrata_views_handler_field_url extends views_handler_field {
+  /**
+   * Collect options for field display
+   */
   function option_definition() {
     $options = parent::option_definition();
 
@@ -20,9 +23,6 @@ class socrata_views_handler_field_url extends views_handler_field {
     return $options;
   }
 
-  /**
-   * Provide link to the page being visited.
-   */
   function options_form(&$form, &$form_state) {
     $form['display_as_link'] = array(
       '#title' => t('Display as link'),
@@ -37,10 +37,11 @@ class socrata_views_handler_field_url extends views_handler_field {
     parent::options_form($form, $form_state);
   }
 
+  /**
+   * Provide link to the page being visited.
+   */
   function render($values) {
     $value = $this->get_value($values);
-    dpm($this->options);
-    dpm($value);
     $text = (!empty($this->options['display_description']) && !empty($this->value['description'])) ? $this->sanitize_value($value, 'description') : $this->sanitize_value($value, 'url');
     if (!empty($this->options['display_as_link'])) {
       $this->options['alter']['make_link'] = TRUE;

@@ -8,7 +8,7 @@
 /**
  * hook_socrata_curl_options_alter
  *
- * This hook allows modules to alter the curl options used to connnect to the
+ * This hook allows modules to alter the curl options used to connect to the
  * Socrata endpoint.  See the following for various options:
  *
  * http://php.net/manual/en/function.curl-setopt.php

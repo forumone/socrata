@@ -19,9 +19,6 @@ class socrata_views_plugin_query extends views_plugin_query {
    */
   function init($base_table, $base_field, $options) {
     parent::init($base_table, $base_field, $options);
-
-    // Initialize the QuickBase object we'll use for queries
-    //$this->qb = quickbase();
   }
 
   /**
@@ -162,24 +159,6 @@ class socrata_views_plugin_query extends views_plugin_query {
         }
       }
     }
-    /***
-    // Execute main result set query
-    if ($this->qb) {
-      $resp = $this->qb->DoQuery($table, array($query['query']), $query['clist'], $query['slist'], $query['options']);
-      if ($resp && !empty($resp->table->records)) {
-        $fields = $resp->table->fields->field;
-        foreach ($resp->table->records->record as $record) {
-          $row = new stdClass();
-          foreach ($record->f as $f) {
-            if (isset($query['clist'][(string) $f->attributes()->id])) {
-              $row->{$query['clist'][(string) $f->attributes()->id]} = (string) $f[0];
-            }
-          }
-          $result[] = $row;
-        }
-      }
-    }
-    ***/
 
     // Store off values from query in View
     $view->result = $result;
