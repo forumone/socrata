@@ -179,30 +179,37 @@ function _socrata_views_handlers($name, $type) {
 
     case 'url': // Compound type: description, url
       $handlers['field']['handler'] = 'socrata_views_handler_field_url';
+      $handlers['field']['click sortable'] = FALSE;
       break;
 
     case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
       $handlers['field']['handler'] = 'socrata_views_handler_field_location';
+      $handlers['field']['click sortable'] = FALSE;
       break;
 
     case 'email':
       $handlers['field']['handler'] = 'socrata_views_handler_field_email';
+      $handlers['field']['click sortable'] = FALSE;
       break;
 
     case 'document': // Compound type: file_id, filename
       $handlers['field']['handler'] = 'socrata_views_handler_field_document';
+      $handlers['field']['click sortable'] = FALSE;
       break;
 
     case 'photo':
       $handlers['field']['handler'] = 'socrata_views_handler_field_photo';
+      $handlers['field']['click sortable'] = FALSE;
       break;
 
     case 'phone': // Compound type: phone_number, phone_type
       $handlers['field']['handler'] = 'socrata_views_handler_field_phone';
+      $handlers['field']['click sortable'] = FALSE;
       break;
 
     case 'html':
       $handlers['field']['handler'] = 'socrata_views_handler_field_html';
+      $handlers['field']['click sortable'] = FALSE;
       break;
 
     case 'date':
