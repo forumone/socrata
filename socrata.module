@@ -127,6 +127,25 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
 }
 
 /**
+ * Util function to split out the dataset identifier from an endpoint URL
+ */
+function socrata_dataset_from_endpoint($endpoint) {
+  $dataset = '';
+  $path = parse_url($endpoint, PHP_URL_PATH);
+  if ($path) {
+    $parts = explode('/', $path);
+    if (!empty($parts)) {
+      $tmp = explode('.', array_pop($parts));
+      if (!empty($tmp)) {
+        $dataset = $tmp[0];
+      }
+    }
+  }
+
+  return $dataset;
+}
+
+/**
  * Generates a watchdog log entry during debugging and tried to call dpm from
  * the devel module; when debugging is disabled, nothing happens.
  *

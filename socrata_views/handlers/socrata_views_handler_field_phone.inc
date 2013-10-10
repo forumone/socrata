@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Definition of socrata_views_handler_field_url.  Borrows heavily from views_handler_field_url.
+ * Definition of socrata_views_handler_field_phone.  Borrows heavily from views_handler_field_url.
  */
 
 /**
- * Field handler to provide simple renderer that turns a URL into a clickable link.
+ * Field handler to provide simple renderer that turns a phone number into a clickable link.
  *
  * @ingroup views_field_handlers
  */
-class socrata_views_handler_field_url extends views_handler_field {
+class socrata_views_handler_field_phone extends views_handler_field {
   /**
    * Collect options for field display
    */
@@ -18,7 +18,7 @@ class socrata_views_handler_field_url extends views_handler_field {
     $options = parent::option_definition();
 
     $options['display_as_link'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['link_text_option'] = array('default' => 'socrata_description');
+    $options['link_text_option'] = array('default' => 'phone_number');
     $options['link_text'] = array('default' => '', 'translatable' => TRUE);
 
     return $options;
@@ -34,8 +34,8 @@ class socrata_views_handler_field_url extends views_handler_field {
       '#type' => 'radios',
       '#title' => t('Select what to use as the link text'),
       '#options' => array(
-        'url' => t('URL'),
-        'socrata_description' => t('Description from Socrata, otherwise provided text'),
+        'phone_number' => t('Phone number'),
+        'phone_type' => t('Phone number type from Socrata, otherwise provided text'),
         'link_text' => t('Provided link text'),
       ),
       '#default_value' => $this->options['link_text_option'],
@@ -51,18 +51,18 @@ class socrata_views_handler_field_url extends views_handler_field {
   }
 
   /**
-   * Provide link to the page being visited.
+   * Generate output of phone..
    */
   function render($values) {
     $text = '';
     $value = $this->get_value($values);
-    if (!empty($value) && !empty($value['url'])) {
-      $text = $this->sanitize_value($value['url'], 'xss');
-      if ($this->options['display_as_link']) {
+    if (!empty($value)) {
+      if ($this->options['display_as_link'] && !empty($value['phone_number'])) {
+        $text = $this->sanitize_value($value['phone_number'], 'xss');
         switch ($this->options['link_text_option']) {
-          case 'socrata_description':
-            if (!empty($value['description'])) {
-              $text = $this->sanitize_value($value['description'], 'xss');
+          case 'phone_type':
+            if (!empty($value['phone_type'])) {
+              $text = $this->sanitize_value($value['phone_type'], 'xss');
             }
             elseif (!empty($value['link_text'])) {
               $text = $this->sanitize_value($this->options['link_text'], 'xss');
@@ -77,7 +77,7 @@ class socrata_views_handler_field_url extends views_handler_field {
         }
 
         $this->options['alter']['make_link'] = TRUE;
-        $this->options['alter']['path'] = $value['url'];
+        $this->options['alter']['path'] = "tel://{$value['phone_number']}";
       }
     }
 

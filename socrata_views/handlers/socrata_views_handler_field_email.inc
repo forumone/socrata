@@ -42,12 +42,16 @@ class socrata_views_handler_field_email extends views_handler_field {
    * Provide link for email address
    */
   function render($values) {
+    $text = '';
     $value = $this->get_value($values);
-    $text = ($this->options['display_as_link'] && !empty($this->options['display_text'])) ? $this->sanitize_value($this->options['display_text'], 'xss') : $this->sanitize_value($value, 'xss');
-    if (!empty($this->options['display_as_link'])) {
-      $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = "mailto:{$value}";
+    if (!empty($value)) {
+      $text = ($this->options['display_as_link'] && !empty($this->options['display_text'])) ? $this->sanitize_value($this->options['display_text'], 'xss') : $this->sanitize_value($value, 'xss');
+      if (!empty($this->options['display_as_link'])) {
+        $this->options['alter']['make_link'] = TRUE;
+        $this->options['alter']['path'] = "mailto:{$value}";
+      }
     }
+
     return $text;
   }
 }

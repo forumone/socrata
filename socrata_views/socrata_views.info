@@ -11,6 +11,12 @@ files[] = plugins/socrata_views_plugin_query.inc
 ;; Field handler class files
 files[] = handlers/socrata_views_handler_field_url.inc
 files[] = handlers/socrata_views_handler_field_location.inc
+files[] = handlers/socrata_views_handler_field_email.inc
+files[] = handlers/socrata_views_handler_field_document.inc
+files[] = handlers/socrata_views_handler_field_photo.inc
+files[] = handlers/socrata_views_handler_field_phone.inc
+files[] = handlers/socrata_views_handler_field_html.inc
+files[] = handlers/socrata_views_handler_field_calendar_date.inc
 
 ;; Filter handler class files
 

@@ -67,6 +67,7 @@ function socrata_views_data() {
     $group = $source->description;
 
     // Retrieve table schema
+    $dataset = socrata_dataset_from_endpoint($source->endpoint);
     $resp = socrata_query($source->endpoint, array('$limit' => 1), $source->app_token);
     if ($resp !== FALSE && !empty($resp['fields'])) {
       // Define basic table info
@@ -95,6 +96,19 @@ function socrata_views_data() {
             'help' => t('Field of type %field_type in table %dbname', array('%field_type' => $field_type, '%dbname' => $group)),
             'field' => array(
               'title' => $field_name,
+              'dataset' => $dataset,
+            ),
+            'filter' => array(
+              'dataset' => $dataset,
+            ),
+            'sort' => array(
+              'dataset' => $dataset,
+            ),
+            'argument' => array(
+              'dataset' => $dataset,
+            ),
+            'relationship' => array(
+              'dataset' => $dataset,
             ),
           )
         );
@@ -138,15 +152,15 @@ function _socrata_views_handlers($name, $type) {
     switch ($name) {
       case ':created_at':
       case ':updated_at':
-        $type = 'timestamp';
+        $type = 'date';
         break;
 
       case ':id':
-        $type = 'plaintext';
+        $type = 'text';
         break;
 
       default:
-        $type = 'plaintext';
+        $type = 'text';
     }
   }
 
@@ -155,13 +169,12 @@ function _socrata_views_handlers($name, $type) {
     case 'money':
     case 'number':
     case 'percent':
-    case 'star':
+    case 'stars':
       $handlers['field']['handler'] = 'views_handler_field_numeric';
       break;
 
     case 'checkbox':
-    case 'linkeddataset':
-      //$handlers['field']['handler'] = 'views_handler_field_boolean';
+      $handlers['field']['handler'] = 'views_handler_field_boolean';
       break;
 
     case 'url': // Compound type: description, url
@@ -176,16 +189,34 @@ function _socrata_views_handlers($name, $type) {
       $handlers['field']['handler'] = 'socrata_views_handler_field_email';
       break;
 
-    case 'datetime':
-    case 'datetimewtimezone':
     case 'document': // Compound type: file_id, filename
-    case 'flag':
-    case 'formattedtext':
-    case 'multiplechoice':
-    case 'phone': // Compound type: phone_number, phone_type
+      $handlers['field']['handler'] = 'socrata_views_handler_field_document';
+      break;
+
     case 'photo':
-    case 'plaintext':
-    case 'timestamp':
+      $handlers['field']['handler'] = 'socrata_views_handler_field_photo';
+      break;
+
+    case 'phone': // Compound type: phone_number, phone_type
+      $handlers['field']['handler'] = 'socrata_views_handler_field_phone';
+      break;
+
+    case 'html':
+      $handlers['field']['handler'] = 'socrata_views_handler_field_html';
+      break;
+
+    case 'date':
+      $handlers['field']['handler'] = 'views_handler_field_date';
+      break;
+
+    case 'calendar_date':
+      $handlers['field']['handler'] = 'socrata_views_handler_field_calendar_date';
+      break;
+
+    // TODO
+    case 'drop_down_list':
+    case 'flag':
+    case 'text':
       break;
   }
 
