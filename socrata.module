@@ -72,6 +72,8 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
       CURLOPT_RETURNTRANSFER => TRUE,
       CURLOPT_URL => $soda_url,
       CURLOPT_CUSTOMREQUEST => 'GET',
+      CURLOPT_FOLLOWLOCATION => TRUE,
+      CURLOPT_MAXREDIRS => 5,
     );
     curl_setopt_array($ch, $req_curlopts);
 
