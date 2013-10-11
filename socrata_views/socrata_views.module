@@ -34,25 +34,6 @@ function socrata_views_views_plugins() {
 }
 
 /**
- * Implements hook_menu
- */
-function socrata_views_menu() {
-  $items = array();
-
-  // Main configuration settings page
-  $items['socrata/views/test'] = array(
-    'title' => 'Socrata Views Test',
-    'description' => "Dev test page",
-    'page callback' => '_socrata_views_page_test',
-    'type' => MENU_NORMAL_ITEM,
-    'access arguments' => array('administer socrata'),
-    'file' => 'socrata_views.pages.inc',
-  );
-
-  return $items;
-}
-
-/**
  * Implements hook_views_data
  */
 function socrata_views_data() {
@@ -97,24 +78,29 @@ function socrata_views_data() {
             'field' => array(
               'title' => $field_name,
               'dataset' => $dataset,
+              'soda2_type' => $field_type,
             ),
             'filter' => array(
               'dataset' => $dataset,
+              'soda2_type' => $field_type,
             ),
             'sort' => array(
               'dataset' => $dataset,
+              'soda2_type' => $field_type,
             ),
             'argument' => array(
               'dataset' => $dataset,
+              'soda2_type' => $field_type,
             ),
             'relationship' => array(
               'dataset' => $dataset,
+              'soda2_type' => $field_type,
             ),
           )
         );
       }
 
-      // Add result id field
+      // Add result id field since we have to define at least one initial field
       if (isset($table[':id'])) {
         $table['table']['base']['field'] = ':id';
         $table['table']['base']['defaults'] = array(
@@ -133,21 +119,16 @@ function socrata_views_data() {
  * http://dev.socrata.com/docs/datatypes
  */
 function _socrata_views_handlers($name, $type) {
-  // Default handlers we start off with; should work for any generic text field
+  // Initialize field handlers array
   $handlers = array(
-    'field' => array(
-      'handler' => 'views_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'filter' => array(
-    ),
-    'sort' => array(
-    ),
+    'field' => array(),
+    'filter' => array(),
+    'sort' => array(),
     'argument' => array(),
     'relationship' => array(),
   );
 
-  // Catch the special "meta_data" fields and override their types so they make sense
+  // Catch the special "meta_data" fields and override their types based on field id so they make sense
   if ('meta_data' == $type) {
     switch ($name) {
       case ':created_at':
@@ -171,59 +152,73 @@ function _socrata_views_handlers($name, $type) {
     case 'percent':
     case 'stars':
       $handlers['field']['handler'] = 'views_handler_field_numeric';
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
       break;
 
     case 'checkbox':
       $handlers['field']['handler'] = 'views_handler_field_boolean';
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
       break;
 
     case 'url': // Compound type: description, url
       $handlers['field']['handler'] = 'socrata_views_handler_field_url';
-      $handlers['field']['click sortable'] = FALSE;
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
       break;
 
     case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
       $handlers['field']['handler'] = 'socrata_views_handler_field_location';
-      $handlers['field']['click sortable'] = FALSE;
+      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'email':
       $handlers['field']['handler'] = 'socrata_views_handler_field_email';
-      $handlers['field']['click sortable'] = FALSE;
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
       break;
 
     case 'document': // Compound type: file_id, filename
       $handlers['field']['handler'] = 'socrata_views_handler_field_document';
-      $handlers['field']['click sortable'] = FALSE;
+      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'photo':
       $handlers['field']['handler'] = 'socrata_views_handler_field_photo';
-      $handlers['field']['click sortable'] = FALSE;
+      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'phone': // Compound type: phone_number, phone_type
       $handlers['field']['handler'] = 'socrata_views_handler_field_phone';
-      $handlers['field']['click sortable'] = FALSE;
+      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'html':
       $handlers['field']['handler'] = 'socrata_views_handler_field_html';
-      $handlers['field']['click sortable'] = FALSE;
+      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'date':
       $handlers['field']['handler'] = 'views_handler_field_date';
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
       break;
 
     case 'calendar_date':
       $handlers['field']['handler'] = 'socrata_views_handler_field_calendar_date';
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
       break;
 
     // TODO
     case 'drop_down_list':
     case 'flag':
     case 'text':
+    default:
+      $handlers['field']['handler'] = 'views_handler_field';
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
       break;
   }
 

@@ -77,14 +77,13 @@ class socrata_views_plugin_query extends views_plugin_query {
       $query['params']['$offset'] = $this->offset;
 
       // Suss out sort fields
-      /*
       if (!empty($this->orderby)) {
+        $sort_fields = array();
         foreach ($this->orderby as $orderby) {
-          $query['slist'][] = $orderby['field'];
-          $options[] = 'sortorder-' . (('ASC' == $orderby['direction']) ? 'A' : 'D');
+          $sort_fields[] = "{$orderby['field']} {$orderby['direction']}";
         }
+        $query['params']['$order'] = implode(',', $sort_fields);
       }
-      */
     }
 
     return $query;
@@ -133,6 +132,7 @@ class socrata_views_plugin_query extends views_plugin_query {
    *   The view which is executed.
    */
   function execute(&$view) {
+    //dpm($view->build_info);
     $query = $view->build_info['query'];
     $count_query = $view->build_info['count_query'];
 
@@ -149,7 +149,6 @@ class socrata_views_plugin_query extends views_plugin_query {
     if ($source) {
       $resp = socrata_query($source->endpoint, $query['params'], $source->app_token);
       if ($resp !== FALSE) {
-        //dpm($resp);
         foreach ($resp['data'] as $row) {
           $new_row = new stdClass();
           foreach ($row as $field => $value) {
