@@ -70,5 +70,7 @@ function _socrata_ctools_export_ui_form(&$form, &$form_state) {
  */
 function _socrata_ctools_export_ui_form_submit(&$form, &$form_state) {
   // Clear out Views table definition caches so rebuilds will pick up added/removed/edited sources
-  cache_clear_all(NULL, 'cache_views', TRUE);
+  if (module_exists('views')) {
+    views_invalidate_cache();
+  }
 }
