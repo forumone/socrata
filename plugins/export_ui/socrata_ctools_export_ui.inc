@@ -28,8 +28,8 @@ $plugin = array(
   // Define the names of the functions that provide the add/edit forms.
   'form' => array(
     'settings' => '_socrata_ctools_export_ui_form',
+    'validate' => '_socrata_ctools_export_ui_form_validate',
     'submit' => '_socrata_ctools_export_ui_form_submit',
-    // 'submit' and 'validate' are also valid callbacks.
   ),
 );
 
@@ -63,6 +63,18 @@ function _socrata_ctools_export_ui_form(&$form, &$form_state) {
     '#required' => FALSE,
   );
 
+}
+
+/**
+ * Handle validation of the source add/edit form
+ */
+function _socrata_ctools_export_ui_form_validate(&$form, &$form_state) {
+  $values = $form_state['values'];
+
+  // Validate endpoint URL for dataset
+  if (!valid_url($values['endpoint'], TRUE)) {
+    form_set_error('endpoint', t('The Enpoint URL is not properly formed'));
+  }
 }
 
 /**
