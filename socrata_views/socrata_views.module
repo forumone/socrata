@@ -164,8 +164,7 @@ function _socrata_views_handlers($name, $type) {
 
     case 'url': // Compound type: description, url
       $handlers['field']['handler'] = 'socrata_views_handler_field_url';
-      $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
