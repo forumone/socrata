@@ -57,6 +57,7 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
 
   // Construct URL
   $soda_url = url($endpoint, array('query' => $params, 'absolute' => TRUE));
+  _socrata_dbg($soda_url);
 
   // Create a new cURL resource
   $ch = curl_init();

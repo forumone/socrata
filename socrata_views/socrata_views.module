@@ -69,35 +69,23 @@ function socrata_views_data() {
 
       // Add fields to table
       foreach ($resp['fields'] as $field_name => $field_type) {
-        $handlers = _socrata_views_handlers($field_name, $field_type);
-        $table[$field_name] = array_merge_recursive(
+        $field_options = array(
+          'dataset' => $dataset,
+          'soda2_type' => $field_type,
+        );
+        $handlers = _socrata_views_handlers($field_name, $field_type, $field_options);
+        $field_def = array_merge_recursive(
           $handlers,
           array(
             'title' => $field_name,
             'help' => t('Field of type %field_type in table %dbname', array('%field_type' => $field_type, '%dbname' => $group)),
             'field' => array(
               'title' => $field_name,
-              'dataset' => $dataset,
-              'soda2_type' => $field_type,
-            ),
-            'filter' => array(
-              'dataset' => $dataset,
-              'soda2_type' => $field_type,
-            ),
-            'sort' => array(
-              'dataset' => $dataset,
-              'soda2_type' => $field_type,
-            ),
-            'argument' => array(
-              'dataset' => $dataset,
-              'soda2_type' => $field_type,
-            ),
-            'relationship' => array(
-              'dataset' => $dataset,
-              'soda2_type' => $field_type,
             ),
           )
         );
+
+        $table[$field_name] = $field_def;
       }
 
       // Add result id field since we have to define at least one initial field
@@ -118,15 +106,9 @@ function socrata_views_data() {
  *
  * http://dev.socrata.com/docs/datatypes
  */
-function _socrata_views_handlers($name, $type) {
+function _socrata_views_handlers($name, $type, $options) {
   // Initialize field handlers array
-  $handlers = array(
-    'field' => array(),
-    'filter' => array(),
-    'sort' => array(),
-    'argument' => array(),
-    'relationship' => array(),
-  );
+  $handlers = array();
 
   // Catch the special "meta_data" fields and override their types based on field id so they make sense
   if ('meta_data' == $type) {
@@ -148,12 +130,19 @@ function _socrata_views_handlers($name, $type) {
   // Now override defaults based on field type:
   switch($type) {
     case 'money':
-    case 'number':
     case 'percent':
     case 'stars':
       $handlers['field']['handler'] = 'views_handler_field_numeric';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['filter']['handler'] = 'socrata_views_handler_filter_numeric_quoted';
+      break;
+
+    case 'number':
+      $handlers['field']['handler'] = 'views_handler_field_numeric';
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['filter']['handler'] = 'socrata_views_handler_filter_numeric';
       break;
 
     case 'checkbox':
@@ -164,12 +153,10 @@ function _socrata_views_handlers($name, $type) {
 
     case 'url': // Compound type: description, url
       $handlers['field']['handler'] = 'socrata_views_handler_field_url';
-      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
       $handlers['field']['handler'] = 'socrata_views_handler_field_location';
-      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'email':
@@ -180,22 +167,18 @@ function _socrata_views_handlers($name, $type) {
 
     case 'document': // Compound type: file_id, filename
       $handlers['field']['handler'] = 'socrata_views_handler_field_document';
-      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'photo':
       $handlers['field']['handler'] = 'socrata_views_handler_field_photo';
-      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'phone': // Compound type: phone_number, phone_type
       $handlers['field']['handler'] = 'socrata_views_handler_field_phone';
-      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'html':
       $handlers['field']['handler'] = 'socrata_views_handler_field_html';
-      $handlers['sort']['handler'] = 'socrata_views_handler_sort_noop';
       break;
 
     case 'date':
@@ -219,6 +202,11 @@ function _socrata_views_handlers($name, $type) {
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
       break;
+  }
+
+  // Add field options to each handler group that has been defined
+  foreach ($handlers as $group => &$info) {
+    $info += $options;
   }
 
   return $handlers;

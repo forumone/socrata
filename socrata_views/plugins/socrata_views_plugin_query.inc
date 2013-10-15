@@ -38,8 +38,11 @@ class socrata_views_plugin_query extends views_plugin_query {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
-    // Construct QuickBase query from Views filter grouping
-    /*
+    //_socrata_dbg($this->fields);
+    //_socrata_dbg($this->orderby);
+    //_socrata_dbg($this->where);
+
+    // Construct query from Views filter grouping
     $groups = array();
     foreach ($this->where as $where) {
       $queries = array();
@@ -48,24 +51,22 @@ class socrata_views_plugin_query extends views_plugin_query {
         if (is_array($cond['value']) && !is_string($cond['value'])) {
           $in_queries = array();
           foreach ($cond['value'] as $in_val) {
-            $in_queries[] = '{' . $cond['field'] . ".{$cond['operator']}." . '"' . $in_val . '"}';
+            $in_queries[] = "{$cond['field']} {$cond['operator']} {$in_val}";
           }
           if (!empty($in_queries)) {
-            $op = ('X' == $cond['operator'][0]) ? 'AND' : 'OR';
-            $queries[] = '(' . implode($op, $in_queries) . ')';
+            $queries[] = '(' . implode(' AND ', $in_queries) . ')';
           }
         }
         // Otherwise simple field-value comparison
         else {
-          $queries[] = '{' . $cond['field'] . ".{$cond['operator']}." . '"' . $cond['value'] . '"}';
+          $queries[] = "{$cond['field']} {$cond['operator']} {$cond['value']}";
         }
       }
       if (!empty($queries)) {
-        $groups[] = '(' . implode($where['type'], $queries) . ')';
+        $groups[] = '(' . implode(" {$where['type']} ", $queries) . ')';
       }
     }
-    $query['query'] = implode($this->group_operator, $groups);
-    */
+    $query['params']['$where'] = implode(" {$this->group_operator} ", $groups);
 
     // Store off requested fields
     $query['params']['$select'] = implode(',', $this->fields);
@@ -132,7 +133,7 @@ class socrata_views_plugin_query extends views_plugin_query {
    *   The view which is executed.
    */
   function execute(&$view) {
-    //dpm($view->build_info);
+    _socrata_dbg($view->build_info);
     $query = $view->build_info['query'];
     $count_query = $view->build_info['count_query'];
 

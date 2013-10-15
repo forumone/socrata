@@ -3,6 +3,10 @@ description = Provides queryable datasource for Views
 package = Socrata
 core = 7.x
 
+dependencies[] = socrata
+dependencies[] = views
+dependencies[] = ctools
+
 files[] = socrata_views.module
 
 ;; Plugin class files
@@ -18,11 +22,7 @@ files[] = handlers/socrata_views_handler_field_phone.inc
 files[] = handlers/socrata_views_handler_field_html.inc
 files[] = handlers/socrata_views_handler_field_calendar_date.inc
 
-;; Sort handler class files
-files[] = handlers/socrata_views_handler_sort_noop.inc
-
 ;; Filter handler class files
-
-dependencies[] = socrata
-dependencies[] = views
-dependencies[] = ctools
+files[] = handlers/socrata_views_handler_filter_numeric.inc
+files[] = handlers/socrata_views_handler_filter_numeric_quoted.inc
+;files[] = handlers/socrata_views_handler_filter_text.inc
