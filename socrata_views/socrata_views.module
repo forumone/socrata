@@ -136,6 +136,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
       $handlers['filter']['handler'] = 'socrata_views_handler_filter_numeric_quoted';
+      $handlers['argument']['handler'] = 'socrata_views_handler_argument_numeric_quoted';
       break;
 
     case 'number':
@@ -143,6 +144,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
       $handlers['filter']['handler'] = 'socrata_views_handler_filter_numeric';
+      $handlers['argument']['handler'] = 'socrata_views_handler_argument_numeric';
       break;
 
     case 'checkbox':
@@ -150,6 +152,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
       $handlers['filter']['handler'] = 'socrata_views_handler_filter_checkbox';
+      $handlers['argument']['handler'] = 'socrata_views_handler_argument_checkbox';
       break;
 
     case 'url': // Compound type: description, url
@@ -207,6 +210,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
       $handlers['filter']['handler'] = 'socrata_views_handler_filter_text';
+      $handlers['argument']['handler'] = 'socrata_views_handler_argument_text';
       break;
 
     // Unsupported field types
