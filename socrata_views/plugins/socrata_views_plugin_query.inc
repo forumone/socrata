@@ -38,9 +38,9 @@ class socrata_views_plugin_query extends views_plugin_query {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
-    //_socrata_dbg($this->fields);
-    //_socrata_dbg($this->orderby);
-    //_socrata_dbg($this->where);
+    _socrata_dbg($this->fields);
+    _socrata_dbg($this->orderby);
+    _socrata_dbg($this->where);
 
     // Construct query from Views filter grouping
     $groups = array();
@@ -48,7 +48,7 @@ class socrata_views_plugin_query extends views_plugin_query {
       $queries = array();
       foreach ($where['conditions'] as $cond) {
         // Multiple values for condition, suss out
-        if (is_array($cond['value']) && !is_string($cond['value'])) {
+        if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
           $in_queries = array();
           foreach ($cond['value'] as $in_val) {
             $in_queries[] = $this->_construct_query_comp($cond['field'], $in_val, $cond['operator']);
@@ -95,28 +95,13 @@ class socrata_views_plugin_query extends views_plugin_query {
    */
   function _construct_query_comp($field, $value, $op) {
     $comp = '';
-    $ops_functions = array(
-      'contains',
-      'not contains',
-      'starts_with',
-      'not starts_with',
-    );
-    $ops_noargs = array(
-      'is null',
-      'is not null',
-    );
 
-    // Check to see if the predicate component is to be constructed as a SoQL function call
-    if (in_array($op, $ops_functions)) {
-      $comp = "{$op}({$field},{$value})";
+    // Check to see if the predicate component is a prebuilt formula
+    if ('formula' == $op) {
+      $comp = $field;
     }
 
-    // Check to see if it needs to be constructed without a value
-    elseif (in_array($op, $ops_noargs)) {
-      $comp = "{$field} {$op}";
-    }
-
-    // Otherwise, build a "normal" predicate component
+    // Otherwise, build a "normal" comparison predicate component
     else {
       $comp = "{$field} {$op} {$value}";
     }
@@ -245,6 +230,28 @@ class socrata_views_plugin_query extends views_plugin_query {
       'field' => array_pop(explode('.', $field)),
       'value' => $value,
       'operator' => $operator,
+    );
+  }
+
+  /**
+   * Ripped straight out of views_plugin_query_default
+   */
+  function add_where_expression($group, $snippet, $args = array()) {
+    // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
+    // the default group.
+    if (empty($group)) {
+      $group = 0;
+    }
+
+    // Check for a group.
+    if (!isset($this->where[$group])) {
+      $this->set_where_group('AND', $group);
+    }
+
+    $this->where[$group]['conditions'][] = array(
+      'field' => $snippet,
+      'value' => $args,
+      'operator' => 'formula',
     );
   }
 

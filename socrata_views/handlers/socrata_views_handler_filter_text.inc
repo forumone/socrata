@@ -54,39 +54,39 @@ class socrata_views_handler_filter_text extends views_handler_filter_string {
       'contains' => array(
         'title' => t('Contains'),
         'short' => t('contains'),
-        'method' => 'op_simple',
+        'method' => 'op_comp_function',
         'values' => 1,
       ),
       'not contains' => array(
         'title' => t('Does not contain'),
         'short' => t('!contains'),
-        'method' => 'op_simple',
+        'method' => 'op_comp_function',
         'values' => 1,
       ),
 */
       'starts_with' => array(
         'title' => t('Starts with'),
         'short' => t('starts_with'),
-        'method' => 'op_simple',
+        'method' => 'op_comp_function',
         'values' => 1,
       ),
 /*
       'not starts_with' => array(
         'title' => t('Does not start with'),
         'short' => t('!starts_with'),
-        'method' => 'op_simple',
+        'method' => 'op_comp_function',
         'values' => 1,
       ),
 */
       'is null' => array(
         'title' => t('Is empty (NULL)'),
-        'method' => 'op_no_arg',
+        'method' => 'op_comp_null',
         'short' => t('empty'),
         'values' => 0,
       ),
       'is not null' => array(
         'title' => t('Is not empty (NOT NULL)'),
-        'method' => 'op_no_arg',
+        'method' => 'op_comp_null',
         'short' => t('not empty'),
         'values' => 0,
       ),
@@ -103,20 +103,22 @@ class socrata_views_handler_filter_text extends views_handler_filter_string {
    * and $this->value respectively.
    */
   function query() {
-    $this->ensure_my_table();
-    $field = "$this->table_alias.$this->real_field";
-
     $info = $this->operators();
     if (!empty($info[$this->operator]['method'])) {
-      $this->{$info[$this->operator]['method']}($field);
+      $this->{$info[$this->operator]['method']}($this->real_field);
     }
   }
 
+  // Provide this method so we can wrap the value in single quotes for SoSQL where needed
   function op_simple($field) {
     $this->query->add_where($this->options['group'], $field, "'{$this->value}'", $this->operator);
   }
 
-  function op_no_arg($field) {
-    $this->query->add_where($this->options['group'], $field, NULL, $this->operator);
+  function op_comp_function($field) {
+    $this->query->add_where_expression($this->options['group'], "{$this->operator}({$field}, '{$this->value}')");
+  }
+
+  function op_comp_null($field) {
+    $this->query->add_where_expression($this->options['group'], "{$field} {$this->operator}");
   }
 }
