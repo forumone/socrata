@@ -1,0 +1,122 @@
+<?php
+/**
+ * @file
+ *
+ * Based heavily on views_handler_filter_string so we can take advantage of
+ * its nice administrative UI and look like the usual Views string filter.
+ */
+
+class socrata_views_handler_filter_text extends views_handler_filter_string {
+  /**
+   * This kind of construct makes it relatively easy for a child class
+   * to add or remove functionality by overriding this function and
+   * adding/removing items from this array.
+   */
+  function operators() {
+    $operators = array(
+      '<' => array(
+        'title' => t('Is less than'),
+        'method' => 'op_simple',
+        'short' => t('<'),
+        'values' => 1,
+      ),
+      '<=' => array(
+        'title' => t('Is less than or equal to'),
+        'method' => 'op_simple',
+        'short' => t('<='),
+        'values' => 1,
+      ),
+      '=' => array(
+        'title' => t('Is equal to'),
+        'method' => 'op_simple',
+        'short' => t('='),
+        'values' => 1,
+      ),
+      '!=' => array(
+        'title' => t('Is not equal to'),
+        'method' => 'op_simple',
+        'short' => t('!='),
+        'values' => 1,
+      ),
+      '>=' => array(
+        'title' => t('Is greater than or equal to'),
+        'method' => 'op_simple',
+        'short' => t('>='),
+        'values' => 1,
+      ),
+      '>' => array(
+        'title' => t('Is greater than'),
+        'method' => 'op_simple',
+        'short' => t('>'),
+        'values' => 1,
+      ),
+/*
+      'contains' => array(
+        'title' => t('Contains'),
+        'short' => t('contains'),
+        'method' => 'op_simple',
+        'values' => 1,
+      ),
+      'not contains' => array(
+        'title' => t('Does not contain'),
+        'short' => t('!contains'),
+        'method' => 'op_simple',
+        'values' => 1,
+      ),
+*/
+      'starts_with' => array(
+        'title' => t('Starts with'),
+        'short' => t('starts_with'),
+        'method' => 'op_simple',
+        'values' => 1,
+      ),
+/*
+      'not starts_with' => array(
+        'title' => t('Does not start with'),
+        'short' => t('!starts_with'),
+        'method' => 'op_simple',
+        'values' => 1,
+      ),
+*/
+      'is null' => array(
+        'title' => t('Is empty (NULL)'),
+        'method' => 'op_no_arg',
+        'short' => t('empty'),
+        'values' => 0,
+      ),
+      'is not null' => array(
+        'title' => t('Is not empty (NOT NULL)'),
+        'method' => 'op_no_arg',
+        'short' => t('not empty'),
+        'values' => 0,
+      ),
+    );
+
+    return $operators;
+  }
+
+  /**
+   * Add this filter to the query.
+   *
+   * Due to the nature of fapi, the value and the operator have an unintended
+   * level of indirection. You will find them in $this->operator
+   * and $this->value respectively.
+   */
+  function query() {
+    $this->ensure_my_table();
+    $field = "$this->table_alias.$this->real_field";
+
+    $info = $this->operators();
+    if (!empty($info[$this->operator]['method'])) {
+      $this->{$info[$this->operator]['method']}($field);
+    }
+  }
+
+  function op_simple($field) {
+    $this->query->add_where($this->options['group'], $field, "'{$this->value}'", $this->operator);
+  }
+
+  function op_no_arg($field) {
+    $this->query->add_where($this->options['group'], $field, NULL, $this->operator);
+  }
+}

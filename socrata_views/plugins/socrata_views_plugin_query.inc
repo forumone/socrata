@@ -51,7 +51,7 @@ class socrata_views_plugin_query extends views_plugin_query {
         if (is_array($cond['value']) && !is_string($cond['value'])) {
           $in_queries = array();
           foreach ($cond['value'] as $in_val) {
-            $in_queries[] = "{$cond['field']} {$cond['operator']} {$in_val}";
+            $in_queries[] = $this->_construct_query_comp($cond['field'], $in_val, $cond['operator']);
           }
           if (!empty($in_queries)) {
             $queries[] = '(' . implode(' AND ', $in_queries) . ')';
@@ -59,7 +59,7 @@ class socrata_views_plugin_query extends views_plugin_query {
         }
         // Otherwise simple field-value comparison
         else {
-          $queries[] = "{$cond['field']} {$cond['operator']} {$cond['value']}";
+          $queries[] = $this->_construct_query_comp($cond['field'], $cond['value'], $cond['operator']);
         }
       }
       if (!empty($queries)) {
@@ -88,6 +88,40 @@ class socrata_views_plugin_query extends views_plugin_query {
     }
 
     return $query;
+  }
+
+  /**
+   * Util method for constructing components for predicate
+   */
+  function _construct_query_comp($field, $value, $op) {
+    $comp = '';
+    $ops_functions = array(
+      'contains',
+      'not contains',
+      'starts_with',
+      'not starts_with',
+    );
+    $ops_noargs = array(
+      'is null',
+      'is not null',
+    );
+
+    // Check to see if the predicate component is to be constructed as a SoQL function call
+    if (in_array($op, $ops_functions)) {
+      $comp = "{$op}({$field},{$value})";
+    }
+
+    // Check to see if it needs to be constructed without a value
+    elseif (in_array($op, $ops_noargs)) {
+      $comp = "{$field} {$op}";
+    }
+
+    // Otherwise, build a "normal" predicate component
+    else {
+      $comp = "{$field} {$op} {$value}";
+    }
+
+    return $comp;
   }
 
   /**

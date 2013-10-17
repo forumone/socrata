@@ -193,14 +193,22 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['sort']['handler'] = 'views_handler_sort';
       break;
 
-    // TODO
-    case 'drop_down_list':
     case 'flag':
-    case 'text':
-    default:
       $handlers['field']['handler'] = 'views_handler_field';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
+      break;
+
+    case 'text':
+      $handlers['field']['handler'] = 'views_handler_field';
+      $handlers['field']['click sortable'] = TRUE;
+      $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['filter']['handler'] = 'socrata_views_handler_filter_text';
+      break;
+
+    // Unsupported field types
+    case 'drop_down_list':
+    default:
       break;
   }
 
