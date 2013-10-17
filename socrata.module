@@ -71,59 +71,70 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
     $req_curlopts = array(
       CURLOPT_HEADER => TRUE,
       CURLOPT_RETURNTRANSFER => TRUE,
-      CURLOPT_URL => $soda_url,
-      CURLOPT_CUSTOMREQUEST => 'GET',
       CURLOPT_FOLLOWLOCATION => TRUE,
       CURLOPT_MAXREDIRS => 5,
+      CURLOPT_AUTOREFERER => TRUE,
     );
     curl_setopt_array($ch, $req_curlopts);
 
     // Execute the request and cleanup
     curl_setopt_array($ch, $curlopts);
-    $resp = curl_exec($ch);
-    if (FALSE !== $resp) {
-      // Pull info from response and see if we had an error
-      $info = curl_getinfo($ch);
-      if ($info['http_code'] >= 400) {
-      }
-      else {
-        // Split out response headers into name => value array
-        list($headers, $data) = explode("\r\n\r\n", $resp, 2);
-        $headers = explode("\r\n", $headers);
-        foreach ($headers as $header) {
-          if ('HTTP' == substr($header, 0, 4)) {
-            continue;
+    do {
+      $retval = FALSE;
+      curl_setopt($ch, CURLOPT_URL, $soda_url);
+      $resp = curl_exec($ch);
+      if (FALSE !== $resp) {
+        // Pull info from response and see if we had an error
+        $info = curl_getinfo($ch);
+        if ($info['http_code'] >= 400) {
+          _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, $soda_url);
+          break;
+        }
+        else {
+          // Split out response headers into name => value array
+          list($headers, $data) = explode("\r\n\r\n", $resp, 2);
+          $headers = explode("\r\n", $headers);
+          foreach ($headers as $header) {
+            if ('HTTP' == substr($header, 0, 4)) {
+              continue;
+            }
+            list($name, $value) = explode(':', $header, 2);
+            $name = strtolower(trim($name));
+            if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
+              $retval['headers'][$name] = json_decode($value);
+            }
+            else {
+              $retval['headers'][$name] = trim($value);
+            }
           }
-          list($name, $value) = explode(':', $header, 2);
-          $name = strtolower(trim($name));
-          if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
-            $retval['headers'][$name] = json_decode($value);
+
+          // Test for redirect in the event curl wasn't able to automagically follow due to server config
+          if (!empty($retval['headers']['location'])) {
+            $soda_url = $retval['headers']['location'];
           }
           else {
-            $retval['headers'][$name] = trim($value);
+            // Generate an array mapping fields to types, if provided
+            if (isset($retval['headers']['x-soda2-fields']) && isset($retval['headers']['x-soda2-types'])) {
+              foreach ($retval['headers']['x-soda2-fields'] as $idx => $name) {
+                $retval['fields'][$name] = $retval['headers']['x-soda2-types'][$idx];
+              }
+            }
+
+            // Decode data payload
+            $retval['data'] = json_decode($data, TRUE);
           }
         }
-
-        // Generate an array mapping fields to types, if provided
-        if (isset($retval['headers']['x-soda2-fields']) && isset($retval['headers']['x-soda2-types'])) {
-          foreach ($retval['headers']['x-soda2-fields'] as $idx => $name) {
-            $retval['fields'][$name] = $retval['headers']['x-soda2-types'][$idx];
-          }
-        }
-
-        // Decode data payload
-        $retval['data'] = json_decode($data, TRUE);
       }
-    }
-    else {
-      // TODO Handle curl_exec error
-    }
+      else {
+        _socrata_log('curl_exec failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR, $soda_url);
+      }
+    } while (FALSE !== $resp && !empty($retval['headers']['location']));
 
     // Close and cleanup
     curl_close($ch);
   }
   else {
-    // TODO Handle curl_init error
+    _socrata_log('curl_init failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR);
   }
 
   return $retval;
@@ -155,6 +166,9 @@ function socrata_dataset_from_endpoint($endpoint) {
  * Set the config variable socrata_debug = TRUE to generate log output
  */
 function _socrata_dbg($msg, $vars = array(), $link = NULL) {
+  if (!$vars) {
+    $vars = array();
+  }
   if (variable_get('socrata_debug', FALSE)) {
     watchdog('socrata', (is_array($msg) || is_object($msg)) ? '<pre>' . print_r($msg, TRUE) . '</pre>' : $msg, $vars, WATCHDOG_DEBUG, $link);
     if (function_exists('dpm')) {
@@ -166,7 +180,7 @@ function _socrata_dbg($msg, $vars = array(), $link = NULL) {
 /**
  * Generates a watchdog log entry during execution of module
  */
-function _socrata_log($msg, $vars = array(), $severity = WATCHDOG_INFO, $link = NULL) {
+function _socrata_log($msg, $vars = NULL, $severity = WATCHDOG_INFO, $link = NULL) {
   // Catch passed-in objects or arrays and dump them accordingly
   if (!is_string($msg)) {
     $msg = print_r($msg, TRUE);
