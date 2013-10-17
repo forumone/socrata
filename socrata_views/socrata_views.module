@@ -185,12 +185,14 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['handler'] = 'views_handler_field_date';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['filter']['handler'] = 'socrata_views_handler_filter_date';
       break;
 
     case 'calendar_date':
       $handlers['field']['handler'] = 'socrata_views_handler_field_calendar_date';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['filter']['handler'] = 'socrata_views_handler_filter_date';
       break;
 
     case 'flag':
