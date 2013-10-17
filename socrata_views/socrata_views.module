@@ -149,6 +149,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['handler'] = 'views_handler_field_boolean';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['filter']['handler'] = 'socrata_views_handler_filter_checkbox';
       break;
 
     case 'url': // Compound type: description, url
