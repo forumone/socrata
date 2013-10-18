@@ -47,6 +47,11 @@ function socrata_permission() {
 function socrata_query($endpoint, $params = array(), $app_token = NULL) {
   $retval = FALSE;
 
+  // Make sure we have a valid-looking endpoint
+  if (substr_compare($endpoint, '.json', -5)) {
+    $endpoint .= '.json';
+  }
+
   // Prepare authorization headers
   if (!$params) {
     $params = array();
@@ -54,10 +59,6 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
   if (!empty($app_token)) {
     $params['$$app_token'] = $app_token;
   }
-
-  // Construct URL
-  $soda_url = url($endpoint, array('query' => $params, 'absolute' => TRUE));
-  _socrata_dbg($soda_url);
 
   // Create a new cURL resource
   $ch = curl_init();
@@ -71,9 +72,6 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
     $req_curlopts = array(
       CURLOPT_HEADER => TRUE,
       CURLOPT_RETURNTRANSFER => TRUE,
-      CURLOPT_FOLLOWLOCATION => TRUE,
-      CURLOPT_MAXREDIRS => 5,
-      CURLOPT_AUTOREFERER => TRUE,
     );
     curl_setopt_array($ch, $req_curlopts);
 
@@ -81,6 +79,11 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
     curl_setopt_array($ch, $curlopts);
     do {
       $retval = FALSE;
+
+      // Construct URL
+      $soda_url = url($endpoint, array('query' => $params, 'absolute' => TRUE));
+      _socrata_dbg($soda_url);
+
       curl_setopt($ch, CURLOPT_URL, $soda_url);
       $resp = curl_exec($ch);
       if (FALSE !== $resp) {
@@ -93,24 +96,11 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
         else {
           // Split out response headers into name => value array
           list($headers, $data) = explode("\r\n\r\n", $resp, 2);
-          $headers = explode("\r\n", $headers);
-          foreach ($headers as $header) {
-            if ('HTTP' == substr($header, 0, 4)) {
-              continue;
-            }
-            list($name, $value) = explode(':', $header, 2);
-            $name = strtolower(trim($name));
-            if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
-              $retval['headers'][$name] = json_decode($value);
-            }
-            else {
-              $retval['headers'][$name] = trim($value);
-            }
-          }
+          $retval['headers'] = _socrata_parse_headers($headers);
 
           // Test for redirect in the event curl wasn't able to automagically follow due to server config
           if (!empty($retval['headers']['location'])) {
-            $soda_url = $retval['headers']['location'];
+            $endpoint = $retval['headers']['location'];
           }
           else {
             // Generate an array mapping fields to types, if provided
@@ -188,3 +178,79 @@ function _socrata_log($msg, $vars = NULL, $severity = WATCHDOG_INFO, $link = NUL
   watchdog('socrata', $msg, $vars, $severity, $link);
 }
 
+/**
+ * Util function to resolve redirects
+ */
+function _socrata_resolve_redirects($endpoint) {
+  // Make sure we have a valid-looking endpoint
+  if (substr_compare($endpoint, '.json', -5)) {
+    $endpoint .= '.json';
+  }
+
+  // Create a new cURL resource
+  $ch = curl_init();
+  if ($ch) {
+    // Pull and set custom curl options
+    $curlopts = variable_get('socrata_curl_options', array());
+    drupal_alter('socrata_curl_options', $curlopts);
+    curl_setopt_array($ch, $curlopts);
+
+    // Set required curl options
+    $req_curlopts = array(
+      CURLOPT_HEADER => TRUE,
+      CURLOPT_RETURNTRANSFER => TRUE,
+    );
+    curl_setopt_array($ch, $req_curlopts);
+
+    // Execute the request and cleanup
+    curl_setopt_array($ch, $curlopts);
+    do {
+      $soda_url = url($endpoint, array('query' => array('$limit' => 1), 'absolute' => TRUE));
+      curl_setopt($ch, CURLOPT_URL, $soda_url);
+      $resp = curl_exec($ch);
+      if (FALSE !== $resp) {
+        // Pull info from response and see if we had an error
+        $info = curl_getinfo($ch);
+        if ($info['http_code'] >= 400) {
+          break;
+        }
+        else {
+          // Split out response headers into name => value array
+          list($headers, $data) = explode("\r\n\r\n", $resp, 2);
+          $headers = _socrata_parse_headers($headers);
+
+          // Test for redirect in the event curl wasn't able to automagically follow due to server config
+          if (!empty($headers['location'])) {
+            $endpoint = $headers['location'];
+          }
+        }
+      }
+    } while (FALSE !== $resp && !empty($headers['location']));
+  }
+
+  return $endpoint;
+}
+
+/**
+ * Util function to parse out HTTP response headers
+ */
+function _socrata_parse_headers($headers) {
+  $headers_arr = array();
+
+  $headers = explode("\r\n", $headers);
+  foreach ($headers as $header) {
+    if ('HTTP' == substr($header, 0, 4)) {
+      continue;
+    }
+    list($name, $value) = explode(':', $header, 2);
+    $name = strtolower(trim($name));
+    if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
+      $headers_arr[$name] = json_decode($value);
+    }
+    else {
+      $headers_arr[$name] = trim($value);
+    }
+  }
+
+  return $headers_arr;
+}

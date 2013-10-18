@@ -75,12 +75,6 @@ function _socrata_ctools_export_ui_form_validate(&$form, &$form_state) {
   if (!valid_url($values['endpoint'], TRUE)) {
     form_set_error('endpoint', t('The URL is not properly formed'));
   }
-  else {
-    // Check URL to see if we have the JSON request portion
-    if (substr_compare($values['endpoint'], '.json', -5)) {
-      form_set_error('endpoint', t('The URL must end in %ext in order to return properly-formed data', array('%ext' => '.json')));
-    }
-  }
 }
 
 /**

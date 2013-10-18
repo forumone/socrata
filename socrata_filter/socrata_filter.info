@@ -1,0 +1,8 @@
+name = Socrata Input Filter
+description = Provides an input filter for embedding Socrata datasets in editable content
+package = Socrata
+core = 7.x
+
+files[] = socrata.module
+
+dependencies[] = socrata
