@@ -38,10 +38,6 @@ class socrata_views_plugin_query extends views_plugin_query {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
-    _socrata_dbg($this->fields);
-    _socrata_dbg($this->orderby);
-    _socrata_dbg($this->where);
-
     // Construct query from Views filter grouping
     $groups = array();
     foreach ($this->where as $where) {
@@ -71,7 +67,9 @@ class socrata_views_plugin_query extends views_plugin_query {
     // If this is a full query build vs a counter query, add on options
     if (!$get_count) {
       // Store off requested fields
-      $query['params']['$select'] = implode(',', $this->fields);
+      if (!empty($this->fields)) {
+        $query['params']['$select'] = implode(',', $this->fields);
+      }
 
       // Suss out offset-limit options
       if (!empty($this->limit)) {
