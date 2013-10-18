@@ -57,7 +57,8 @@ class socrata_views_handler_field_location extends views_handler_field {
         $text = $human_address;
       }
       elseif (isset($value['latitude']) && isset($value['longitude'])) {
-        $text = "{$value['latitude']}, {$value['longitude']}";
+        // There is a method to the madness; this is the correct ordering for embedding into a WKT POINT definition
+        $text = "{$value['longitude']}, {$value['latitude']}";
       }
       else {
         $text = t('Map');
