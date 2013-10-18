@@ -14,7 +14,7 @@ class socrata_views_handler_field_location extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['display_as_link'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['display'] = array('default' => 'text');
     $options['link_text'] = array('default' => 'Map', 'translatable' => TRUE);
 
     return $options;
@@ -24,11 +24,17 @@ class socrata_views_handler_field_location extends views_handler_field {
    * Generate output of location.
    */
   function options_form(&$form, &$form_state) {
-    $form['display_as_link'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Display as link'),
-      '#default_value' => $this->options['display_as_link'],
+    $form['display'] = array(
+      '#type' => 'select',
+      '#title' => t('Display mode'),
+      '#options' => array(
+        'text' => t('Text, no link'),
+        'link' => t('Dispay as link'),
+        'wkt' => t('Render as WKT'),
+      ),
+      '#default_value' => $this->options['display'],
     );
+
     $form['link_text'] = array(
       '#type' => 'textfield',
       '#title' => t('Link text'),
@@ -49,7 +55,7 @@ class socrata_views_handler_field_location extends views_handler_field {
         $human_address = $this->sanitize_value(implode(', ', $value['human_address']), 'xss');
       }
 
-      // Suss out display text - TODO make themeable
+      // Suss out default display text - TODO make themeable
       if (!empty($this->options['link_text'])) {
         $text = $this->sanitize_value($this->options['link_text'], 'xss');
       }
@@ -64,7 +70,7 @@ class socrata_views_handler_field_location extends views_handler_field {
         $text = t('Map');
       }
 
-      if ($this->options['display_as_link']) {
+      if ('link' == $this->options['display']) {
         $this->options['alter']['make_link'] = TRUE;
 
         if (!empty($value['human_address'])) {
@@ -73,6 +79,9 @@ class socrata_views_handler_field_location extends views_handler_field {
         elseif (isset($value['latitude']) && isset($value['longitude'])) {
           $this->options['alter']['path'] = "http://maps.google.com/maps?q={$value['latitude']},{$value['longitude']}";
         }
+      }
+      elseif ('wkt' == $this->options['display']) {
+        $text = "POINT ({$value['longitude']}, {$value['latitude']})";
       }
     }
 
