@@ -68,14 +68,18 @@ class socrata_views_plugin_query extends views_plugin_query {
     }
     $query['params']['$where'] = implode(" {$this->group_operator} ", $groups);
 
-    // Store off requested fields
-    $query['params']['$select'] = implode(',', $this->fields);
-
     // If this is a full query build vs a counter query, add on options
     if (!$get_count) {
+      // Store off requested fields
+      $query['params']['$select'] = implode(',', $this->fields);
+
       // Suss out offset-limit options
-      $query['params']['$limit'] = $this->limit;
-      $query['params']['$offset'] = $this->offset;
+      if (!empty($this->limit)) {
+        $query['params']['$limit'] = $this->limit;
+      }
+      if (!empty($this->offset)) {
+        $query['params']['$offset'] = $this->offset;
+      }
 
       // Suss out sort fields
       if (!empty($this->orderby)) {
@@ -85,6 +89,9 @@ class socrata_views_plugin_query extends views_plugin_query {
         }
         $query['params']['$order'] = implode(',', $sort_fields);
       }
+    }
+    else {
+      $query['params']['$select'] = 'count(*)';
     }
 
     return $query;
@@ -160,23 +167,38 @@ class socrata_views_plugin_query extends views_plugin_query {
     $result = array();
     $table = $this->base_table;
 
-    // Let the pager modify the query to add limits.
-    $this->pager->pre_execute($query);
-
     // Load source info
     ctools_include('export');
     $source = ctools_export_crud_load('socrata_sources', $table);
     if ($source) {
-      $resp = socrata_query($source->endpoint, $query['params'], $source->app_token);
-      if ($resp !== FALSE) {
-        foreach ($resp['data'] as $row) {
-          $new_row = new stdClass();
-          foreach ($row as $field => $value) {
-            $new_row->{$field} = $value;
-          }
-          $result[] = $new_row;
-        }
+      // Get total count of items and force initial limit if not set
+      $num_dataset_rows = 0;
+      $resp = socrata_query($source->endpoint, $count_query['params'], $source->app_token);
+      if ($resp !== FALSE && !empty($resp['data'])) {
+        $num_dataset_rows = $resp['data'][0]['count'];
       }
+
+      // Let the pager modify the query to add limits.
+      $this->pager->pre_execute($query);
+
+      // Execute main query, looping if we need to get more than 1000 rows
+      do {
+        $resp = socrata_query($source->endpoint, $query['params'], $source->app_token);
+        if ($resp !== FALSE) {
+          foreach ($resp['data'] as $row) {
+            $new_row = new stdClass();
+            foreach ($row as $field => $value) {
+              $new_row->{$field} = $value;
+            }
+            $result[] = $new_row;
+          }
+
+          // If an "all items" query, bump offset, go again...
+          if (empty($query['params']['$limit'])) {
+            $query['params']['$offset'] = count($result);
+          }
+        }
+      } while (empty($query['params']['$limit']) && !empty($resp['data']));
     }
 
     // Store off values from query in View
@@ -186,12 +208,9 @@ class socrata_views_plugin_query extends views_plugin_query {
 
     // Execute count query for pager if necessary
     if ($this->pager->use_count_query()) {
-      $resp = socrata_query($source->endpoint, $count_query['params'], $source->app_token);
-      if ($resp !== FALSE && !empty($resp['data'])) {
-        $this->pager->total_items = count($resp['data']);
-        $view->total_rows = $this->pager->get_total_items();
-        $this->pager->update_page_info();
-      }
+      $this->pager->total_items = $num_dataset_rows;
+      $view->total_rows = $this->pager->get_total_items();
+      $this->pager->update_page_info();
     }
 
     // Wrap up query
