@@ -90,7 +90,7 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
         // Pull info from response and see if we had an error
         $info = curl_getinfo($ch);
         if ($info['http_code'] >= 400) {
-          _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, $soda_url);
+          _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, l('Socrata Request', $soda_url, array('absolute' => TRUE)));
           break;
         }
         else {
@@ -116,7 +116,7 @@ function socrata_query($endpoint, $params = array(), $app_token = NULL) {
         }
       }
       else {
-        _socrata_log('curl_exec failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR, $soda_url);
+        _socrata_log('curl_exec failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR, l('Socrata Request', $soda_url, array('absolute' => TRUE)));
       }
     } while (FALSE !== $resp && !empty($retval['headers']['location']));
 
