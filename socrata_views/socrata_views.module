@@ -128,7 +128,7 @@ function _socrata_views_handlers($name, $type, $options) {
   }
 
   // Now override defaults based on field type:
-  switch($type) {
+  switch ($type) {
     case 'money':
     case 'percent':
     case 'stars':
