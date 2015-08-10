@@ -14,18 +14,6 @@ class socrata_views_handler_filter_text extends views_handler_filter_string {
    */
   function operators() {
     $operators = array(
-      '<' => array(
-        'title' => t('Is less than'),
-        'method' => 'op_simple',
-        'short' => t('<'),
-        'values' => 1,
-      ),
-      '<=' => array(
-        'title' => t('Is less than or equal to'),
-        'method' => 'op_simple',
-        'short' => t('<='),
-        'values' => 1,
-      ),
       '=' => array(
         'title' => t('Is equal to'),
         'method' => 'op_simple',
@@ -36,18 +24,6 @@ class socrata_views_handler_filter_text extends views_handler_filter_string {
         'title' => t('Is not equal to'),
         'method' => 'op_simple',
         'short' => t('!='),
-        'values' => 1,
-      ),
-      '>=' => array(
-        'title' => t('Is greater than or equal to'),
-        'method' => 'op_simple',
-        'short' => t('>='),
-        'values' => 1,
-      ),
-      '>' => array(
-        'title' => t('Is greater than'),
-        'method' => 'op_simple',
-        'short' => t('>'),
         'values' => 1,
       ),
 /*
