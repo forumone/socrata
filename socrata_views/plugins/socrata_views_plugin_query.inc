@@ -12,7 +12,9 @@ class socrata_views_plugin_query extends views_plugin_query {
   //var $qb = NULL;
   var $where = array();
   var $orderby = array();
-  var $group_operator = NULL;
+  var $group_operator = 'AND';
+  var $groupby = array();
+  var $has_aggregate = FALSE;
 
   /**
    * Constructor; Create the basic query object and fill with default values.
@@ -23,11 +25,60 @@ class socrata_views_plugin_query extends views_plugin_query {
 
   /**
    * Get aggregation info for group by queries.
-   *
-   * If NULL, aggregation is not allowed.
    */
   function get_aggregation_info() {
-    return NULL;
+    return array(
+      'group' => array(
+        'title' => t('Group results together'),
+        'is aggregate' => FALSE,
+      ),
+      'count' => array(
+        'title' => t('Count'),
+        'method' => 'socrata_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'sum' => array(
+        'title' => t('Sum'),
+        'method' => 'socrata_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'avg' => array(
+        'title' => t('Average'),
+        'method' => 'socrata_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'min' => array(
+        'title' => t('Minimum'),
+        'method' => 'socrata_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'max' => array(
+        'title' => t('Maximum'),
+        'method' => 'socrata_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+    );
   }
 
   /**
@@ -64,13 +115,32 @@ class socrata_views_plugin_query extends views_plugin_query {
     }
     $query['params']['$where'] = implode(" {$this->group_operator} ", $groups);
 
+      // Store off requested fields
+      $this->has_aggregate = $this->view->display_handler->get_option('group_by');
+
+      if (!empty($this->fields)) {
+        $fields_list = $non_aggregates = array();
+        foreach ($this->fields as $field => $field_info) {
+          // If an aggregate function is specified, wrap it around the field
+          if (isset($field_info['function'])) {
+            $fields_list[] = $field_info['function'] . '(' . $field . ')';
+          } else {
+            $fields_list[] = $field;
+            $non_aggregates[] = $field;
+          }
+        }
+      }
+      if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
+        $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
+        $query['params']['$group'] = implode(',', $groupby);
+      } else {
+        $fields_list = $non_aggregates;
+        $query['params']['$group'] = NULL;
+      }
+      $query['params']['$select'] = implode(',', $fields_list);
+
     // If this is a full query build vs a counter query, add on options
     if (!$get_count) {
-      // Store off requested fields
-      if (!empty($this->fields)) {
-        $query['params']['$select'] = implode(',', $this->fields);
-      }
-
       // Suss out offset-limit options
       if (!empty($this->limit)) {
         $query['params']['$limit'] = $this->limit;
@@ -89,7 +159,9 @@ class socrata_views_plugin_query extends views_plugin_query {
       }
     }
     else {
-      $query['params']['$select'] = 'count(*)';
+      if (!$this->has_aggregate) {
+        $query['params']['$select'] = 'count(*)';
+      }
     }
 
     return $query;
@@ -172,7 +244,7 @@ class socrata_views_plugin_query extends views_plugin_query {
       // Get total count of items and force initial limit if not set
       $num_dataset_rows = 0;
       $resp = socrata_query($source->endpoint, $count_query['params'], $source->app_token);
-      if ($resp !== FALSE && !empty($resp['data'])) {
+      if ($resp !== FALSE && !empty($resp['data']) && isset($resp['data'][0]['count'])) {
         $num_dataset_rows = $resp['data'][0]['count'];
       }
 
@@ -183,9 +255,28 @@ class socrata_views_plugin_query extends views_plugin_query {
       do {
         $resp = socrata_query($source->endpoint, $query['params'], $source->app_token);
         if ($resp !== FALSE) {
+          // Have to map Scorata result field labels back onto what Views knows them as
+          $original_field_names = $view->query->fields;
+          $field_name_map = array();
+          foreach ($original_field_names as $field => $attributes) {
+            if ($attributes['alias']) {
+              $field_alias = $attributes['alias'];
+            } else {
+              $field_alias = $field;
+            }
+            $field_name_map[$field_alias] = $field;
+          }
+
           foreach ($resp['data'] as $row) {
             $new_row = new stdClass();
-            foreach ($row as $field => $value) {
+            // Map the results with the correct field alias in field order
+            foreach ($field_name_map as $alias => $field) {
+              // If Socrata returns a row with empty data, put in empty string
+              if (isset($row[$alias])) {
+                $value = $row[$alias];
+              } else {
+                $value = '';
+              }
               $new_row->{$field} = $value;
             }
             $result[] = $new_row;
@@ -223,8 +314,17 @@ class socrata_views_plugin_query extends views_plugin_query {
   /**
    * Add field to the query
    */
-  function add_field($table, $field, $required = FALSE) {
-    $this->fields[$field] = $field;
+  function add_field($table, $field, $alias = '', $params = array()) {
+    if (isset($params['function'])) {
+      $alias = $params['function'] . '_' . $field;
+    }
+    // Create a field info array.
+    $field_info = array(
+      'field' => $field,
+      'table' => $table,
+      'alias' => $alias,
+    ) + $params;
+    $this->fields[$field] = $field_info;
     return $field;
   }
 
@@ -243,8 +343,9 @@ class socrata_views_plugin_query extends views_plugin_query {
       $this->set_where_group('AND', $group);
     }
 
+    $exploded_field = explode('.', $field);
     $this->where[$group]['conditions'][] = array(
-      'field' => array_pop(explode('.', $field)),
+      'field' => array_pop($exploded_field),
       'value' => $value,
       'operator' => $operator,
     );
@@ -296,6 +397,18 @@ class socrata_views_plugin_query extends views_plugin_query {
   }
 
   /**
+   * Add a simple GROUP BY clause to the query. The caller is responsible
+   * for ensuring that the fields are fully qualified and the table is properly
+   * added.
+   */
+  function add_groupby($clause) {
+    // Only add it if it's not already in there.
+    if (!in_array($clause, $this->groupby)) {
+      $this->groupby[] = $clause;
+    }
+  }
+
+  /**
    * Remove all fields that may have been added; primarily used for summary
    * mode where we're changing the query because we didn't get data we needed.
    */
@@ -310,4 +423,16 @@ class socrata_views_plugin_query extends views_plugin_query {
     return $table;
   }
 
+}
+
+/**
+ * Based on views_query_default_aggregation_method_simple()
+ *
+ * @param [type] $group_type
+ * @param [type] $field
+ *
+ * @return [type]
+ */
+function socrata_query_default_aggregation_method_simple($group_type, $field) {
+  return strtoupper($group_type) . '(' . $field . ')';
 }
