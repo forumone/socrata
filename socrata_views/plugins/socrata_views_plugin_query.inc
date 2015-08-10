@@ -89,7 +89,18 @@ class socrata_views_plugin_query extends views_plugin_query {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
-    // Construct query from Views filter grouping
+    // @todo: for SoQL clauses ( http://dev.socrata.com/docs/queries.html ),
+    // provide some sort of translation function on SocrataSelectQuery to
+    // negotiate SQL vs SoQL output, and where appropriate below call that
+    // method instead of both calling the SelectQuery method and appending
+    // values to $query->params.
+
+    // Build the query.
+    $query = db_select($this->base_table)->extend('SocrataSelectQuery');
+    $query->addTag('socrata');
+    $query->addTag('socrata_' . $this->view->name);
+
+    // Construct where clause from Views filter grouping
     $groups = array();
     foreach ($this->where as $where) {
       $queries = array();
@@ -111,9 +122,10 @@ class socrata_views_plugin_query extends views_plugin_query {
       }
       if (!empty($queries)) {
         $groups[] = '(' . implode(" {$where['type']} ", $queries) . ')';
+        $query->where(implode(" {$this->group_operator} ", $groups));
       }
     }
-    $query['params']['$where'] = implode(" {$this->group_operator} ", $groups);
+    $query->params['$where'] = implode(" {$this->group_operator} ", $groups);
 
       // Store off requested fields
       $this->has_aggregate = $this->view->display_handler->get_option('group_by');
@@ -132,21 +144,24 @@ class socrata_views_plugin_query extends views_plugin_query {
       }
       if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
         $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
-        $query['params']['$group'] = implode(',', $groupby);
+        $query->params['$group'] = implode(',', $groupby);
       } else {
         $fields_list = $non_aggregates;
-        $query['params']['$group'] = NULL;
+        $query->params['$group'] = NULL;
       }
-      $query['params']['$select'] = implode(',', $fields_list);
+      $query->params['$select'] = implode(',', $fields_list);
+    $query->fields($this->base_table, $fields_list);
 
     // If this is a full query build vs a counter query, add on options
     if (!$get_count) {
       // Suss out offset-limit options
       if (!empty($this->limit)) {
-        $query['params']['$limit'] = $this->limit;
+        $query->params['$limit'] = $this->limit;
+        $query->range(0, $this->limit);
       }
       if (!empty($this->offset)) {
-        $query['params']['$offset'] = $this->offset;
+        $query->params['$offset'] = $this->offset;
+        $query->range($this->offset, $this->limit);
       }
 
       // Suss out sort fields
@@ -154,13 +169,15 @@ class socrata_views_plugin_query extends views_plugin_query {
         $sort_fields = array();
         foreach ($this->orderby as $orderby) {
           $sort_fields[] = "{$orderby['field']} {$orderby['direction']}";
+          $query->orderBy($orderby['field'], $orderby['direction']);
         }
-        $query['params']['$order'] = implode(',', $sort_fields);
+        $query->params['$order'] = implode(',', $sort_fields);
       }
     }
     else {
       if (!$this->has_aggregate) {
-        $query['params']['$select'] = 'count(*)';
+        $query->params['$select'] = 'count(*)';
+        $query->addExpression('count(*)');
       }
     }
 
@@ -238,12 +255,11 @@ class socrata_views_plugin_query extends views_plugin_query {
     $table = $this->base_table;
 
     // Load source info
-    ctools_include('export');
-    $source = ctools_export_crud_load('socrata_sources', $table);
+    $source = $query->getSource();
     if ($source) {
       // Get total count of items and force initial limit if not set
       $num_dataset_rows = 0;
-      $resp = socrata_query($source->endpoint, $count_query['params'], $source->app_token);
+      $resp = $count_query->execute();
       if ($resp !== FALSE && !empty($resp['data']) && isset($resp['data'][0]['count'])) {
         $num_dataset_rows = $resp['data'][0]['count'];
       }
@@ -253,7 +269,7 @@ class socrata_views_plugin_query extends views_plugin_query {
 
       // Execute main query, looping if we need to get more than 1000 rows
       do {
-        $resp = socrata_query($source->endpoint, $query['params'], $source->app_token);
+        $resp = $query->execute();
         if ($resp !== FALSE) {
           // Have to map Scorata result field labels back onto what Views knows them as
           $original_field_names = $view->query->fields;
@@ -283,11 +299,11 @@ class socrata_views_plugin_query extends views_plugin_query {
           }
 
           // If an "all items" query, bump offset, go again...
-          if (empty($query['params']['$limit'])) {
-            $query['params']['$offset'] = count($result);
+          if (empty($query->params['$limit'])) {
+            $query->params['$offset'] = count($result);
           }
         }
-      } while (empty($query['params']['$limit']) && !empty($resp['data']));
+      } while (empty($query->params['$limit']) && !empty($resp['data']));
     }
 
     // Store off values from query in View

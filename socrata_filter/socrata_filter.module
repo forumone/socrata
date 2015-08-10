@@ -64,6 +64,7 @@ function template_preprocess_socrata_filter(&$vars) {
   }
 
   // Load our source
+  // @todo: switch to getSource
   ctools_include('export');
   $source = ctools_export_crud_load('socrata_sources', $vars['source']);
   if ($source) {

@@ -40,6 +40,7 @@ function socrata_views_data() {
   $tables = array();
 
   // Load our available sources
+  // @todo: switch to getSource (or a new getSources wrapper)
   ctools_include('export');
   $sources = ctools_export_crud_load_all('socrata_sources');
 
@@ -49,7 +50,17 @@ function socrata_views_data() {
 
     // Retrieve table schema
     $dataset = socrata_dataset_from_endpoint($source->endpoint);
-    $resp = socrata_query($source->endpoint, array('$limit' => 1), $source->app_token);
+
+    $query = db_select($source_name)->extend('SocrataSelectQuery');
+    $query->addTag('socrata');
+    //@todo: fix and add tag:
+    //$query->addTag('socrata_data_' . [4x4 w/ dashes converted to underscores]);
+    // Limit to 1 row
+    $query->params['$limit'] = 1; // SoQL params
+    $query->range(0, 1); // SelectQuery
+
+    $resp = $query->execute();
+
     if ($resp !== FALSE && !empty($resp['fields'])) {
       // Define basic table info
       $tables[$source_name] = array();
