@@ -70,12 +70,13 @@ function template_preprocess_socrata_filter(&$vars) {
   if ($source) {
     // Construct dataset-specific template variables
     $vars['source'] = (array) $source;
-    $vars['dataset'] = socrata_dataset_from_endpoint($source->endpoint);
+    $components = socrata_components_from_endpoint($source->endpoint);
+    $vars['dataset'] = $components['dataset_id'];
 
     // Now try to construct the embed URL using the fully-resolved endpoint
     $endpoint = _socrata_resolve_redirects($source->endpoint);
-    $endpoint_parts = parse_url($endpoint);
-    $vars['embed_url'] = "https://{$endpoint_parts['host']}/w/{$vars['dataset']}";
+    $components = socrata_components_from_endpoint($endpoint);
+    $vars['embed_url'] = "https://{$components['host']}/w/{$vars['dataset']}";
   }
 }
 

@@ -60,6 +60,22 @@ class SocrataSelectQuery extends SelectQueryExtender {
     return $url;
   }
 
+  /**
+   * Return download Socrata URL.
+   *
+   * @param $format string
+   *
+   * @return string
+   */
+  public function getDownloadUrl($format = 'csv') {
+    $source = isset($this->source) ? $this->source : $this->getSource();
+    $components = socrata_components_from_endpoint($source->endpoint);
+
+    // Note that this is the old Socrata API style URL
+    return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}/rows.{$format}?accessType=DOWNLOAD";
+  }
+
+
   public function execute() {
     $retval = FALSE;
 

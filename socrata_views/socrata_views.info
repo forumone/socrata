@@ -11,6 +11,8 @@ files[] = socrata_views.module
 
 ;; Plugin class files
 files[] = plugins/socrata_views_plugin_query.inc
+files[] = plugins/socrata_views_plugin_display_export.inc
+files[] = plugins/socrata_views_plugin_style_export.inc
 
 ;; Field handler class files
 files[] = handlers/socrata_views_handler_field_url.inc

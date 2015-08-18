@@ -37,22 +37,24 @@ function socrata_permission() {
 }
 
 /**
- * Util function to split out the dataset identifier from an endpoint URL
+ * Util function to split out the dataset components from an endpoint URL
  */
-function socrata_dataset_from_endpoint($endpoint) {
-  $dataset = '';
-  $path = parse_url($endpoint, PHP_URL_PATH);
+function socrata_components_from_endpoint($endpoint) {
+  $components = parse_url($endpoint);
+  $dataset_id = '';
+  $path = $components['path'];
   if ($path) {
     $parts = explode('/', $path);
     if (!empty($parts)) {
       $tmp = explode('.', array_pop($parts));
       if (!empty($tmp)) {
-        $dataset = $tmp[0];
+        $dataset_id = $tmp[0];
       }
     }
   }
+  $components['dataset_id'] = $dataset_id;
 
-  return $dataset;
+  return $components;
 }
 
 /**
