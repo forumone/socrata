@@ -406,6 +406,11 @@ class socrata_views_plugin_query extends views_plugin_query {
       $as = $this->add_field($table, $field, $as, $params);
     }
 
+    // If using an aggregate function, wrap the field in the function.
+    if ($params && isset($params['function'])) {
+      $as = $params['function'] . '(' . $as . ')';
+    }
+
     $this->orderby[] = array(
       'field' => $as,
       'direction' => strtoupper($order)
