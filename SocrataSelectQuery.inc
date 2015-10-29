@@ -75,8 +75,30 @@ class SocrataSelectQuery extends SelectQueryExtender {
     return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}/rows.{$format}?accessType=DOWNLOAD";
   }
 
+  /**
+   * Return Socrata metadata URL.
+   *
+   * @param string $format
+   *
+   * @return string
+   */
+  public function getMetaDataUrl() {
+    $source = isset($this->source) ? $this->source : $this->getSource();
+    $components = socrata_components_from_endpoint($source->endpoint);
 
-  public function execute() {
+    return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}.json";
+  }
+
+  /**
+   * Execute the query. In our case, this is actually the cURL request.
+   *
+   * @param string $type
+   *   cURL request type, if not the default. The only acceptable value is
+   *   currently 'metadata', but we might want others in the future?
+   *
+   * @return array
+   */
+  public function execute($type = NULL) {
     $retval = FALSE;
 
     $source = $this->getSource();
@@ -114,9 +136,18 @@ class SocrataSelectQuery extends SelectQueryExtender {
       do {
         $retval = FALSE;
 
-        // Construct URL
-        $soda_url = $this->getCurlUrl();
-        //$soda_url = url($endpoint, array('query' => $params, 'absolute' => TRUE));
+        // Construct the URL, based on the $type parameter.
+        if ($type == 'metadata') {
+          // Note that 'metadata' here represents an entirely separate API and
+          // endpoint, and is different from the special fields of type
+          // 'meta_data' (mentioned below) that are returned from the normal
+          // dataset API/endpoint, but when using an old version of the API.
+          // @todo Add version number for "old".
+          $soda_url = $this->getMetaDataURL();
+        }
+        else {
+          $soda_url = $this->getCurlUrl();
+        }
         _socrata_dbg($soda_url);
 
         curl_setopt($ch, CURLOPT_URL, $soda_url);
@@ -139,6 +170,9 @@ class SocrataSelectQuery extends SelectQueryExtender {
             }
             else {
               // Generate an array mapping fields to types, if provided
+              // Note that the old API returns some fields of type 'meta_data'
+              // (e.g. ':id', ':created_at', ':updated_at').
+              // @todo Add version number for "old".
               if (isset($retval['headers']['x-soda2-fields']) && isset($retval['headers']['x-soda2-types'])) {
                 foreach ($retval['headers']['x-soda2-fields'] as $idx => $name) {
                   $retval['fields'][$name] = $retval['headers']['x-soda2-types'][$idx];
