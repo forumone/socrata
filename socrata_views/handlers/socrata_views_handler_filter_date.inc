@@ -145,7 +145,8 @@ class socrata_views_handler_filter_date extends socrata_views_handler_filter_num
     }
     // This is safe because we are manually scrubbing the value.
     // It is necessary to do it this way because $value is a formula when using an offset.
-    $value = date('c', $value);
+    // Format as ISO8601 Time with no timezone offset per http://dev.socrata.com/docs/datatypes/floating_timestamp.html.
+    $value = date('Y-m-d\TH:i:s', $value);
     $this->query->add_where($this->options['group'], $field, "'{$value}'", $this->operator);
   }
 }
