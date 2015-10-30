@@ -236,6 +236,7 @@ function _socrata_views_handlers($name, $type, $options) {
       break;
 
     case 'number':
+    case 'double':
       $handlers['field']['handler'] = 'views_handler_field_numeric';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['handler'] = 'views_handler_sort';
