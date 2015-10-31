@@ -1,7 +1,6 @@
 <?php
 /**
  * @file
- *
  * Decorator class for a Socrata dataset query
  */
 
@@ -27,8 +26,11 @@ class SocrataSelectQuery extends SelectQueryExtender {
   /**
    * Return full Socrata URL with endpoint and parameters.
    *
-   * @param $encode
-   *   Boolean determining whether we should URL-encode the returned URL.
+   * @param bool $encode
+   *   Determins whether we should URL-encode the returned URL.
+   *
+   * @return string
+   *   Formatted URL
    */
   protected function getCurlUrl($encode = TRUE) {
     $url = '';
@@ -51,7 +53,7 @@ class SocrataSelectQuery extends SelectQueryExtender {
           $params_query[] = $key . '=' . $value;
         }
       }
-      $endpoint_with_params .= implode('&',$params_query);
+      $endpoint_with_params .= implode('&', $params_query);
       $url = url($endpoint_with_params);
     }
     else {
@@ -71,7 +73,7 @@ class SocrataSelectQuery extends SelectQueryExtender {
     $source = isset($this->source) ? $this->source : $this->getSource();
     $components = socrata_components_from_endpoint($source->endpoint);
 
-    // Note that this is the old Socrata API style URL
+    // Note that this is the old Socrata API style URL.
     return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}/rows.{$format}?accessType=DOWNLOAD";
   }
 
@@ -79,8 +81,10 @@ class SocrataSelectQuery extends SelectQueryExtender {
    * Return Socrata metadata URL.
    *
    * @param string $format
+   *   The data format
    *
    * @return string
+   *   The download URL
    */
   public function getMetaDataUrl() {
     $source = isset($this->source) ? $this->source : $this->getSource();
@@ -92,7 +96,7 @@ class SocrataSelectQuery extends SelectQueryExtender {
   /**
    * Execute the query. In our case, this is actually the cURL request.
    *
-   * @param string $type
+   * @param $type string
    *   cURL request type, if not the default. The only acceptable value is
    *   currently 'metadata', but we might want others in the future?
    *
@@ -105,33 +109,33 @@ class SocrataSelectQuery extends SelectQueryExtender {
     $endpoint = $source->endpoint;
     $app_token = $source->app_token;
 
-    // Make sure we have a valid-looking endpoint
+    // Make sure we have a valid-looking endpoint.
     if (substr_compare($endpoint, '.json', -5)) {
       $endpoint .= '.json';
     }
 
-    // Prepare authorization headers
+    // Prepare authorization headers.
     $params = $this->params;
     if (!empty($app_token)) {
       $params['$$app_token'] = $app_token;
     }
 
-    // Create a new cURL resource
+    // Create a new cURL resource.
     $ch = curl_init();
     if ($ch) {
-      // Pull and set custom curl options
+      // Pull and set custom curl options.
       $curlopts = variable_get('socrata_curl_options', array());
       drupal_alter('socrata_curl_options', $curlopts);
       curl_setopt_array($ch, $curlopts);
 
-      // Set required curl options
+      // Set required curl options.
       $req_curlopts = array(
-          CURLOPT_HEADER => TRUE,
-          CURLOPT_RETURNTRANSFER => TRUE,
+        CURLOPT_HEADER => TRUE,
+        CURLOPT_RETURNTRANSFER => TRUE,
       );
       curl_setopt_array($ch, $req_curlopts);
 
-      // Execute the request and cleanup
+      // Execute the request and cleanup.
       curl_setopt_array($ch, $curlopts);
       do {
         $retval = FALSE;
@@ -153,18 +157,19 @@ class SocrataSelectQuery extends SelectQueryExtender {
         curl_setopt($ch, CURLOPT_URL, $soda_url);
         $resp = curl_exec($ch);
         if (FALSE !== $resp) {
-          // Pull info from response and see if we had an error
+          // Pull info from response and see if we had an error.
           $info = curl_getinfo($ch);
           if ($info['http_code'] >= 400) {
             _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, l(t('Socrata Request'), $soda_url, array('absolute' => TRUE)));
             break;
           }
           else {
-            // Split out response headers into name => value array
+            // Split out response headers into name => value array.
             list($headers, $data) = explode("\r\n\r\n", $resp, 2);
             $retval['headers'] = _socrata_parse_headers($headers);
 
-            // Test for redirect in the event curl wasn't able to automagically follow due to server config
+            // Test for redirect in the event curl wasn't able to automagically
+            // follow due to server config.
             if (!empty($retval['headers']['location'])) {
               $endpoint = $retval['headers']['location'];
             }
@@ -179,7 +184,7 @@ class SocrataSelectQuery extends SelectQueryExtender {
                 }
               }
 
-              // Decode data payload
+              // Decode data payload.
               $retval['data'] = json_decode($data, TRUE);
             }
           }
@@ -189,7 +194,7 @@ class SocrataSelectQuery extends SelectQueryExtender {
         }
       } while (FALSE !== $resp && !empty($retval['headers']['location']));
 
-      // Close and cleanup
+      // Close and cleanup.
       curl_close($ch);
     }
     else {
@@ -199,6 +204,12 @@ class SocrataSelectQuery extends SelectQueryExtender {
     return $retval;
   }
 
+  /**
+   * Magic method to return a string for the object.
+   *
+   * @return string
+   *   The Socrata query.
+   */
   public function __toString() {
     $query = '';
 

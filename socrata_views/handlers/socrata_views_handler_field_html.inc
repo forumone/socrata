@@ -19,6 +19,9 @@ class socrata_views_handler_field_html extends views_handler_field {
     return $options;
   }
 
+  /**
+   * Option form.
+   */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
   }

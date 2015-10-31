@@ -13,9 +13,6 @@ class socrata_views_plugin_style_export extends views_plugin_style {
 
   /**
    * Set options fields and default values.
-   *
-   * @return
-   * An array of options information.
    */
   function option_definition() {
     $options = parent::option_definition();
@@ -33,13 +30,6 @@ class socrata_views_plugin_style_export extends views_plugin_style {
 
   /**
    * Options form mini callback.
-   *
-   * @param $form
-   * Form array to add additional fields to.
-   * @param $form_state
-   * State of the form.
-   * @return
-   * None.
    */
   function options_form(&$form, &$form_state) {
     $form['attach_text'] = array(

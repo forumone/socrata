@@ -6,13 +6,14 @@
  */
 
 /**
- * Field handler to provide simple renderer that turns a photo field into a clickable link.
+ * Field handler to provide simple renderer that turns a photo field
+ * into a clickable link.
  *
  * @ingroup views_field_handlers
  */
 class socrata_views_handler_field_photo extends views_handler_field {
   /**
-   * Collect options for field display
+   * Collect options for field display.
    */
   function option_definition() {
     $options = parent::option_definition();
@@ -23,6 +24,9 @@ class socrata_views_handler_field_photo extends views_handler_field {
     return $options;
   }
 
+  /**
+   * Option form.
+   */
   function options_form(&$form, &$form_state) {
     $form['display_as_link'] = array(
       '#type' => 'checkbox',

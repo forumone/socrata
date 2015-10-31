@@ -1,7 +1,6 @@
 <?php
 /**
  * @file
- *
  * Based heavily on views_handler_filter_string so we can take advantage of
  * its nice administrative UI and look like the usual Views string filter.
  */
@@ -85,7 +84,7 @@ class socrata_views_handler_filter_text extends views_handler_filter_string {
     }
   }
 
-  // Provide this method so we can wrap the value in single quotes for SoSQL where needed
+  // Provide this method so we can wrap the value in single quotes for SoSQL where needed.
   function op_simple($field) {
     $this->query->add_where($this->options['group'], $field, "'{$this->value}'", $this->operator);
   }

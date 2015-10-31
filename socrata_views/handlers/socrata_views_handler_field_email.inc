@@ -2,7 +2,8 @@
 
 /**
  * @file
- * Definition of socrata_views_handler_field_email.  Borrows heavily from socrata_views_handler_field_url.
+ * Definition of socrata_views_handler_field_email.
+ * Borrows heavily from socrata_views_handler_field_url.
  */
 
 /**
@@ -12,7 +13,7 @@
  */
 class socrata_views_handler_field_email extends views_handler_field {
   /**
-   * Collect options for field display
+   * Collect options for field display.
    */
   function option_definition() {
     $options = parent::option_definition();
@@ -23,6 +24,9 @@ class socrata_views_handler_field_email extends views_handler_field {
     return $options;
   }
 
+  /**
+   * Option form.
+   */
   function options_form(&$form, &$form_state) {
     $form['display_as_link'] = array(
       '#type' => 'checkbox',
@@ -39,7 +43,7 @@ class socrata_views_handler_field_email extends views_handler_field {
   }
 
   /**
-   * Provide link for email address
+   * Provide link for email address.
    */
   function render($values) {
     $text = '';

@@ -1,8 +1,8 @@
 <?php
 /**
  * @file
- *
- * Provides an argument handler for numeric values, based loosely on wbquery_argument_text from wbapi module
+ * Provides an argument handler for numeric values,
+ * based loosely on wbquery_argument_text from wbapi module.
  */
 
 class socrata_views_handler_argument extends views_handler_argument {
@@ -17,24 +17,28 @@ class socrata_views_handler_argument extends views_handler_argument {
       'ignore' => array(
         'title' => t('Display all values'),
         'method' => 'default_ignore',
-        'breadcrumb' => TRUE, // generate a breadcrumb to here
+        // Generate a breadcrumb to here.
+        'breadcrumb' => TRUE,
       ),
       'not found' => array(
         'title' => t('Hide view / Page not found (404)'),
         'method' => 'default_not_found',
-        'hard fail' => TRUE, // This is a hard fail condition
+        // This is a hard fail condition.
+        'hard fail' => TRUE,
       ),
       'empty' => array(
         'title' => t('Display empty text'),
         'method' => 'default_empty',
-        'breadcrumb' => TRUE, // generate a breadcrumb to here
+        // Generate a breadcrumb to here.
+        'breadcrumb' => TRUE,
       ),
       'default' => array(
         'title' => t('Provide default argument'),
         'method' => 'default_default',
         'form method' => 'default_argument_form',
         'has default argument' => TRUE,
-        'default only' => TRUE, // this can only be used for missing argument, not validation failure
+        // This can only be used for missing argument, not validation failure.
+        'default only' => TRUE,
       ),
     );
 
@@ -48,6 +52,11 @@ class socrata_views_handler_argument extends views_handler_argument {
     }
   }
 
+  /**
+   * Set up the query for this argument.
+   *
+   * The argument sent may be found at $this->argument.
+   */
   function query($group_by = FALSE) {
     $this->query->add_where(0, $this->real_field, $this->argument, '=');
   }

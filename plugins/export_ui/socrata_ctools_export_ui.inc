@@ -1,7 +1,6 @@
 <?php
 /**
  * @file
- *
  * Contains the exportable UI for the Socrata module's sources
  */
 
@@ -9,8 +8,10 @@
  * Define this Export UI plugin.
  */
 $plugin = array(
-  'schema' => 'socrata_sources',  // As defined in hook_schema().
-  'access' => 'administer socrata',  // Define a permission users must have to access these pages.
+  // As defined in hook_schema().
+  'schema' => 'socrata_sources',
+  // Define a permission users must have to access these pages.
+  'access' => 'administer socrata',
 
   // Define the menu item.
   'menu' => array(
@@ -34,7 +35,7 @@ $plugin = array(
 );
 
 /**
- * Define the source add/edit form
+ * Define the source add/edit form.
  */
 function _socrata_ctools_export_ui_form(&$form, &$form_state) {
   $source = $form_state['item'];
@@ -66,22 +67,23 @@ function _socrata_ctools_export_ui_form(&$form, &$form_state) {
 }
 
 /**
- * Handle validation of the source add/edit form
+ * Handle validation of the source add/edit form.
  */
 function _socrata_ctools_export_ui_form_validate(&$form, &$form_state) {
   $values = $form_state['values'];
 
-  // Validate endpoint URL for dataset
+  // Validate endpoint URL for dataset.
   if (!valid_url($values['endpoint'], TRUE)) {
     form_set_error('endpoint', t('The URL is not properly formed'));
   }
 }
 
 /**
- * Handle submission of the source add/edit form
+ * Handle submission of the source add/edit form.
  */
 function _socrata_ctools_export_ui_form_submit(&$form, &$form_state) {
-  // Clear out Views table definition caches so rebuilds will pick up added/removed/edited sources
+  // Clear out Views table definition caches so rebuilds will pick up
+  // added/removed/edited sources.
   if (module_exists('views')) {
     views_invalidate_cache();
   }

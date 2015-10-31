@@ -1,13 +1,14 @@
 <?php
 /**
  * @file
- *
  * Based heavily on views_handler_filter_numeric so we can take advantage of
  * its nice administrative UI and look like the usual Views numeric filter.
  */
 
 class socrata_views_handler_filter_numeric extends views_handler_filter_numeric {
-  // Cut down list of operators for SoSQL compliance
+  /**
+   * Cut down list of operators for SoSQL compliance.
+   */
   function operators() {
     $operators = array(
       '<' => array(

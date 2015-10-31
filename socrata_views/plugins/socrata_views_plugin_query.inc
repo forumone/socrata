@@ -1,15 +1,11 @@
 <?php
 /**
  * @file
- *
  * A Views query plugin for executing queries against a Socrata dataset
  */
 
 class socrata_views_plugin_query extends views_plugin_query {
-  /**
-   * Properties
-   */
-  //var $qb = NULL;
+  // Properties
   var $where = array();
   var $orderby = array();
   var $group_operator = 'AND';
@@ -85,7 +81,7 @@ class socrata_views_plugin_query extends views_plugin_query {
    * Generate a query and a countquery from all of the information supplied
    * to the object.
    *
-   * @param $get_count
+   * @param bool $get_count
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
@@ -100,12 +96,12 @@ class socrata_views_plugin_query extends views_plugin_query {
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->name);
 
-    // Construct where clause from Views filter grouping
+    // Construct where clause from Views filter grouping.
     $groups = array();
     foreach ($this->where as $where) {
       $queries = array();
       foreach ($where['conditions'] as $cond) {
-        // Multiple values for condition, suss out
+        // Multiple values for condition, suss out.
         if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
           $in_queries = array();
           foreach ($cond['value'] as $in_val) {
@@ -115,7 +111,7 @@ class socrata_views_plugin_query extends views_plugin_query {
             $queries[] = '(' . implode(' AND ', $in_queries) . ')';
           }
         }
-        // Otherwise simple field-value comparison
+        // Otherwise simple field-value comparison.
         else {
           $queries[] = $this->_construct_query_comp($cond['field'], $cond['value'], $cond['operator']);
         }
@@ -127,34 +123,36 @@ class socrata_views_plugin_query extends views_plugin_query {
     }
     $query->params['$where'] = implode(" {$this->group_operator} ", $groups);
 
-      // Store off requested fields
-      $this->has_aggregate = $this->view->display_handler->get_option('group_by');
+    // Store off requested fields.
+    $this->has_aggregate = $this->view->display_handler->get_option('group_by');
 
-      if (!empty($this->fields)) {
-        $fields_list = $non_aggregates = array();
-        foreach ($this->fields as $field => $field_info) {
-          // If an aggregate function is specified, wrap it around the field
-          if (isset($field_info['function'])) {
-            $fields_list[] = $field_info['function'] . '(' . $field . ')';
-          } else {
-            $fields_list[] = $field;
-            $non_aggregates[] = $field;
-          }
+    if (!empty($this->fields)) {
+      $fields_list = $non_aggregates = array();
+      foreach ($this->fields as $field => $field_info) {
+        // If an aggregate function is specified, wrap it around the field.
+        if (isset($field_info['function'])) {
+          $fields_list[] = $field_info['function'] . '(' . $field . ')';
+        }
+        else {
+          $fields_list[] = $field;
+          $non_aggregates[] = $field;
         }
       }
-      if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
-        $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
-        $query->params['$group'] = implode(',', $groupby);
-      } else {
-        $fields_list = $non_aggregates;
-        $query->params['$group'] = NULL;
-      }
-      $query->params['$select'] = implode(',', $fields_list);
+    }
+    if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
+      $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
+      $query->params['$group'] = implode(',', $groupby);
+    }
+    else {
+      $fields_list = $non_aggregates;
+      $query->params['$group'] = NULL;
+    }
+    $query->params['$select'] = implode(',', $fields_list);
     $query->fields($this->base_table, $fields_list);
 
-    // If this is a full query build vs a counter query, add on options
+    // If this is a full query build vs a counter query, add on options.
     if (!$get_count) {
-      // Suss out offset-limit options
+      // Suss out offset-limit options.
       if (!empty($this->limit)) {
         $query->params['$limit'] = $this->limit;
         $query->range(0, $this->limit);
@@ -164,7 +162,7 @@ class socrata_views_plugin_query extends views_plugin_query {
         $query->range($this->offset, $this->limit);
       }
 
-      // Suss out sort fields
+      // Suss out sort fields.
       if (!empty($this->orderby)) {
         $sort_fields = array();
         foreach ($this->orderby as $orderby) {
@@ -185,17 +183,17 @@ class socrata_views_plugin_query extends views_plugin_query {
   }
 
   /**
-   * Util method for constructing components for predicate
+   * Util method for constructing components for predicate.
    */
   function _construct_query_comp($field, $value, $op) {
     $comp = '';
 
-    // Check to see if the predicate component is a prebuilt formula
+    // Check to see if the predicate component is a prebuilt formula.
     if ('formula' == $op) {
       $comp = $field;
     }
 
-    // Otherwise, build a "normal" comparison predicate component
+    // Otherwise, build a "normal" comparison predicate component.
     else {
       $comp = "{$field} {$op} {$value}";
     }
@@ -254,10 +252,10 @@ class socrata_views_plugin_query extends views_plugin_query {
     $result = array();
     $table = $this->base_table;
 
-    // Load source info
+    // Load source info.
     $source = $query->getSource();
     if ($source) {
-      // Get total count of items and force initial limit if not set
+      // Get total count of items and force initial limit if not set.
       $num_dataset_rows = 0;
       $resp = $count_query->execute();
       if ($resp !== FALSE && !empty($resp['data']) && isset($resp['data'][0]['count'])) {
@@ -267,17 +265,18 @@ class socrata_views_plugin_query extends views_plugin_query {
       // Let the pager modify the query to add limits.
       $this->pager->pre_execute($query);
 
-      // Execute main query, looping if we need to get more than 1000 rows
+      // Execute main query, looping if we need to get more than 1000 rows.
       do {
         $resp = $query->execute();
         if ($resp !== FALSE) {
-          // Have to map Scorata result field labels back onto what Views knows them as
+          // Have to map Scorata result field labels back onto what Views knows them as.
           $original_field_names = $view->query->fields;
           $field_name_map = array();
           foreach ($original_field_names as $field => $attributes) {
             if ($attributes['alias']) {
               $field_alias = $attributes['alias'];
-            } else {
+            }
+            else {
               $field_alias = $field;
             }
             $field_name_map[$field_alias] = $field;
@@ -285,12 +284,13 @@ class socrata_views_plugin_query extends views_plugin_query {
 
           foreach ($resp['data'] as $row) {
             $new_row = new stdClass();
-            // Map the results with the correct field alias in field order
+            // Map the results with the correct field alias in field order.
             foreach ($field_name_map as $alias => $field) {
-              // If Socrata returns a row with empty data, put in empty string
+              // If Socrata returns a row with empty data, put in empty string.
               if (isset($row[$alias])) {
                 $value = $row[$alias];
-              } else {
+              }
+              else {
                 $value = '';
               }
               $new_row->{$field} = $value;
@@ -298,7 +298,7 @@ class socrata_views_plugin_query extends views_plugin_query {
             $result[] = $new_row;
           }
 
-          // If an "all items" query, bump offset, go again...
+          // If an "all items" query, bump offset, go again.
           if (empty($query->params['$limit'])) {
             $query->params['$offset'] = count($result);
           }
@@ -306,21 +306,20 @@ class socrata_views_plugin_query extends views_plugin_query {
       } while (empty($query->params['$limit']) && !empty($resp['data']));
     }
 
-    // Store off values from query in View
+    // Store off values from query in View.
     $view->result = $result;
     $view->total_rows = count($result);
     $this->pager->post_execute($view->result);
 
-    // Execute count query for pager if necessary
+    // Execute count query for pager if necessary.
     if ($this->pager->use_count_query()) {
       $this->pager->total_items = $num_dataset_rows;
       $view->total_rows = $this->pager->get_total_items();
       $this->pager->update_page_info();
     }
 
-    // Wrap up query
+    // Wrap up query.
     $view->execute_time = microtime(TRUE) - $start;
-    //_socrata_dbg($view);
   }
 
   /***************************************************************************
@@ -345,7 +344,7 @@ class socrata_views_plugin_query extends views_plugin_query {
   }
 
   /**
-   * Copied from views_plugin_query_default, called by filter handlers
+   * Copied from views_plugin_query_default, called by filter handlers.
    */
   function add_where($group, $field, $value = NULL, $operator = NULL) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
@@ -368,7 +367,7 @@ class socrata_views_plugin_query extends views_plugin_query {
   }
 
   /**
-   * Ripped straight out of views_plugin_query_default
+   * Ripped straight out of views_plugin_query_default.
    */
   function add_where_expression($group, $snippet, $args = array()) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
@@ -390,7 +389,8 @@ class socrata_views_plugin_query extends views_plugin_query {
   }
 
   /**
-   * Copied from views_plugin_query_default, modified for our simplified case, called by sort handlers
+   * Copied from views_plugin_query_default, 
+   * modified for our simplified case, called by sort handlers.
    */
   function add_orderby($table, $field, $order = 'ASC', $alias = '', $params = array()) {
     // Only fill out this aliasing if there is a table;
@@ -413,7 +413,7 @@ class socrata_views_plugin_query extends views_plugin_query {
 
     $this->orderby[] = array(
       'field' => $as,
-      'direction' => strtoupper($order)
+      'direction' => strtoupper($order),
     );
   }
 
@@ -438,7 +438,7 @@ class socrata_views_plugin_query extends views_plugin_query {
   }
 
   /**
-   * Dummy placeholder method to satisfy Views core handlers
+   * Dummy placeholder method to satisfy Views core handlers.
    */
   function ensure_table($table) {
     return $table;
@@ -447,12 +447,12 @@ class socrata_views_plugin_query extends views_plugin_query {
 }
 
 /**
- * Based on views_query_default_aggregation_method_simple()
+ * Based on views_query_default_aggregation_method_simple().
  *
- * @param [type] $group_type
- * @param [type] $field
+ * @param string $group_type
+ * @param string $field
  *
- * @return [type]
+ * @return string
  */
 function socrata_query_default_aggregation_method_simple($group_type, $field) {
   return strtoupper($group_type) . '(' . $field . ')';

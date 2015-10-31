@@ -6,11 +6,14 @@
  */
 
 /**
- * Field handler to provide renderer capable of displaying Socrata point items
+ * Field handler to provide renderer capable of displaying Socrata point items.
  *
  * @ingroup views_field_handlers
  */
 class socrata_views_handler_field_point extends views_handler_field {
+  /**
+   * Collect options for field display
+   */
   function option_definition() {
     $options = parent::option_definition();
 
@@ -21,7 +24,7 @@ class socrata_views_handler_field_point extends views_handler_field {
   }
 
   /**
-   * Generate output of point.
+   * Option form.
    */
   function options_form(&$form, &$form_state) {
     $form['display'] = array(
@@ -45,19 +48,24 @@ class socrata_views_handler_field_point extends views_handler_field {
     parent::options_form($form, $form_state);
   }
 
+  /**
+   * Generate output of point.
+   */
   function render($values) {
     $text = '';
     $value = $this->get_value($values);
     if (!empty($value)) {
-      // Get the lat/long in the order as specified at http://dev.socrata.com/docs/datatypes/point.html
-      $longitude = $value['coordinates'][0];
-      $latitude = $value['coordinates'][1];
+      // Get the lat/long in the order as specified
+      // at http://dev.socrata.com/docs/datatypes/point.html.
+      $longitude = $this->sanitize_value($value['coordinates'][0], 'xss');
+      $latitude = $this->sanitize_value($value['coordinates'][1], 'xss');
       // Suss out default display text - TODO make themeable
       if (!empty($this->options['link_text'])) {
         $text = $this->sanitize_value($this->options['link_text'], 'xss');
       }
       elseif ($longitude && $latitude) {
-        // There is a method to the madness; this is the correct ordering for embedding into a WKT POINT definition
+        // There is a method to the madness;this is the correct ordering
+        // for embedding into a WKT POINT definition.
         $text = "{$longitude}, {$latitude}";
       }
       else {
@@ -72,7 +80,7 @@ class socrata_views_handler_field_point extends views_handler_field {
         }
       }
       elseif ('wkt' == $this->options['display']) {
-        $text = "POINT ({$longitude}, {$latitude})";
+        $text = "POINT ({$longitude} {$latitude})";
       }
     }
 

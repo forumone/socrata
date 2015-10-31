@@ -2,7 +2,9 @@
 
 /**
  * @file
- * Definition of socrata_views_handler_filter_date.  Strongly based on views_handler_filter_date and it's leverage of the base numeric filter
+ * Definition of socrata_views_handler_filter_date.
+ * Strongly based on views_handler_filter_date
+ * and its leverage of the base numeric filter.
  */
 
 /**
@@ -14,14 +16,14 @@ class socrata_views_handler_filter_date extends socrata_views_handler_filter_num
   function option_definition() {
     $options = parent::option_definition();
 
-    // value is already set up properly, we're just adding our new field to it.
+    // Value is already set up properly, we're just adding our new field to it.
     $options['value']['contains']['type']['default'] = 'date';
 
     return $options;
   }
 
   /**
-   * Add a type selector to the value form
+   * Add a type selector to the value form.
    */
   function value_form(&$form, &$form_state) {
     if (empty($form_state['exposed'])) {
@@ -133,7 +135,7 @@ class socrata_views_handler_filter_date extends socrata_views_handler_filter_num
       return FALSE;
     }
 
-    // restore what got overwritten by the parent.
+    // Restore what got overwritten by the parent.
     $this->value['type'] = $type;
     return $rc;
   }
@@ -141,7 +143,8 @@ class socrata_views_handler_filter_date extends socrata_views_handler_filter_num
   function op_simple($field) {
     $value = intval(strtotime($this->value['value'], 0));
     if (!empty($this->value['type']) && $this->value['type'] == 'offset') {
-      $value = time() + $value; // keep sign
+      // Keep sign.
+      $value = time() + $value;
     }
     // This is safe because we are manually scrubbing the value.
     // It is necessary to do it this way because $value is a formula when using an offset.

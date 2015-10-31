@@ -1,13 +1,14 @@
 <?php
 /**
  * @file
- *
  * Provides a filter handler to handle the "checkbox" field type in Socrata datasets.
  * Based heavily on Views core views_handler_filter_boolean_operator
  */
 
 class socrata_views_handler_filter_checkbox extends views_handler_filter_boolean_operator {
-  // Override this method to provide the necessary SoQL predicates
+  /**
+   * Override parent method to provide the necessary SoQL predicates.
+   */
   function query() {
     $field = $this->real_field;
 

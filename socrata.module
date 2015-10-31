@@ -1,12 +1,11 @@
 <?php
 /**
  * @file
- *
  * Main code for Socrata module
  */
 
 /**
- * Implements hook_ctools_plugin_api
+ * Implements hook_ctools_plugin_api().
  */
 function socrata_ctools_plugin_api($module, $api) {
   if ($module == 'socrata' && $api == 'socrata') {
@@ -15,17 +14,17 @@ function socrata_ctools_plugin_api($module, $api) {
 }
 
 /**
- * Implements hook_ctools_plugin_directory
+ * Implements hook_ctools_plugin_directory().
  */
 function socrata_ctools_plugin_directory($module, $type) {
-  // Load the export_ui plugin
-  if ($type =='export_ui') {
+  // Load the export_ui plugin.
+  if ($type == 'export_ui') {
     return 'plugins/export_ui';
   }
 }
 
 /**
- * Implements hook_permission
+ * Implements hook_permission().
  */
 function socrata_permission() {
   return array(
@@ -37,7 +36,7 @@ function socrata_permission() {
 }
 
 /**
- * Util function to split out the dataset components from an endpoint URL
+ * Util function to split out the dataset components from an endpoint URL.
  */
 function socrata_components_from_endpoint($endpoint) {
   $components = parse_url($endpoint);
@@ -58,8 +57,9 @@ function socrata_components_from_endpoint($endpoint) {
 }
 
 /**
- * Generates a watchdog log entry during debugging and tried to call dpm from
- * the devel module; when debugging is disabled, nothing happens.
+ * Create watchdog entry during debugging and try to call dpm from devel module.
+ *
+ * When debugging is disabled, nothing happens.
  *
  * Set the config variable socrata_debug = TRUE to generate log output
  */
@@ -70,16 +70,17 @@ function _socrata_dbg($msg, $vars = array(), $link = NULL) {
   if (variable_get('socrata_debug', FALSE)) {
     watchdog('socrata', (is_array($msg) || is_object($msg)) ? '<pre>' . print_r($msg, TRUE) . '</pre>' : $msg, $vars, WATCHDOG_DEBUG, $link);
     if (function_exists('dpm')) {
+      // @ignore production_devel sniffer_functions_discouragedfunctions_discouraged sniffer_semantics_functioncall_notliteralstring sniffer_files_linelength_toolong
       dpm((is_array($msg) || is_object($msg)) ? $msg : t($msg, $vars));
     }
   }
 }
 
 /**
- * Generates a watchdog log entry during execution of module
+ * Generates a watchdog log entry during execution of module.
  */
 function _socrata_log($msg, $vars = NULL, $severity = WATCHDOG_INFO, $link = NULL) {
-  // Catch passed-in objects or arrays and dump them accordingly
+  // Catch passed-in objects or arrays and dump them accordingly.
   if (!is_string($msg)) {
     $msg = print_r($msg, TRUE);
   }
@@ -87,47 +88,48 @@ function _socrata_log($msg, $vars = NULL, $severity = WATCHDOG_INFO, $link = NUL
 }
 
 /**
- * Util function to resolve redirects
+ * Util function to resolve redirects.
  */
 function _socrata_resolve_redirects($endpoint) {
-  // Make sure we have a valid-looking endpoint
+  // Make sure we have a valid-looking endpoint.
   if (substr_compare($endpoint, '.json', -5)) {
     $endpoint .= '.json';
   }
 
-  // Create a new cURL resource
+  // Create a new cURL resource.
   $ch = curl_init();
   if ($ch) {
-    // Pull and set custom curl options
+    // Pull and set custom curl options.
     $curlopts = variable_get('socrata_curl_options', array());
     drupal_alter('socrata_curl_options', $curlopts);
     curl_setopt_array($ch, $curlopts);
 
-    // Set required curl options
+    // Set required curl options.
     $req_curlopts = array(
       CURLOPT_HEADER => TRUE,
       CURLOPT_RETURNTRANSFER => TRUE,
     );
     curl_setopt_array($ch, $req_curlopts);
 
-    // Execute the request and cleanup
+    // Execute the request and cleanup.
     curl_setopt_array($ch, $curlopts);
     do {
       $soda_url = url($endpoint, array('query' => array('$limit' => 1), 'absolute' => TRUE));
       curl_setopt($ch, CURLOPT_URL, $soda_url);
       $resp = curl_exec($ch);
       if (FALSE !== $resp) {
-        // Pull info from response and see if we had an error
+        // Pull info from response and see if we had an error.
         $info = curl_getinfo($ch);
         if ($info['http_code'] >= 400) {
           break;
         }
         else {
-          // Split out response headers into name => value array
+          // Split out response headers into name => value array.
           list($headers, $data) = explode("\r\n\r\n", $resp, 2);
           $headers = _socrata_parse_headers($headers);
 
-          // Test for redirect in the event curl wasn't able to automagically follow due to server config
+          // Test for redirect in the event curl wasn't able
+          // to automagically follow due to server config.
           if (!empty($headers['location'])) {
             $endpoint = $headers['location'];
           }
@@ -140,7 +142,7 @@ function _socrata_resolve_redirects($endpoint) {
 }
 
 /**
- * Util function to parse out HTTP response headers
+ * Util function to parse out HTTP response headers.
  */
 function _socrata_parse_headers($headers) {
   $headers_arr = array();

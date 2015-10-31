@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the bulk export display plugin.
@@ -30,7 +29,12 @@ class socrata_views_plugin_display_export extends views_plugin_display_feed {
    * Return the sections that can be defaultable.
    */
   function defaultable_sections($section = NULL) {
-    if (in_array($section, array('items_per_page', 'offset', 'use_pager', 'pager_element',))) {
+    if (in_array($section, array(
+      'items_per_page',
+      'offset',
+      'use_pager',
+      'pager_element',
+    ))) {
       return FALSE;
     }
 
@@ -104,7 +108,7 @@ class socrata_views_plugin_display_export extends views_plugin_display_feed {
    * Save the options from the options form.
    */
   function options_submit(&$form, &$form_state) {
-    // It is very important to call the parent function here:
+    // It is very important to call the parent function here.
     parent::options_submit($form, $form_state);
   }
 
@@ -112,7 +116,7 @@ class socrata_views_plugin_display_export extends views_plugin_display_feed {
    * Show the link without the path.
    */
   function preview() {
-    // Force the view to build
+    // Force the view to build.
     $build = $this->view->build();
     $text = check_plain($this->view->display['socrata_data_export_1']->display_options['style_options']['attach_text']);
     return l($text, '');

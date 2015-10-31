@@ -2,17 +2,19 @@
 
 /**
  * @file
- * Definition of socrata_views_handler_field_phone.  Borrows heavily from views_handler_field_url.
+ * Definition of socrata_views_handler_field_phone.
+ * Borrows heavily from views_handler_field_url.
  */
 
 /**
- * Field handler to provide simple renderer that turns a phone number into a clickable link.
+ * Field handler to provide simple renderer that turns a phone number
+ * into a clickable link.
  *
  * @ingroup views_field_handlers
  */
 class socrata_views_handler_field_phone extends views_handler_field {
   /**
-   * Collect options for field display
+   * Collect options for field display.
    */
   function option_definition() {
     $options = parent::option_definition();
@@ -24,6 +26,9 @@ class socrata_views_handler_field_phone extends views_handler_field {
     return $options;
   }
 
+  /**
+   * Option form.
+   */
   function options_form(&$form, &$form_state) {
     $form['display_as_link'] = array(
       '#type' => 'checkbox',
@@ -51,7 +56,7 @@ class socrata_views_handler_field_phone extends views_handler_field {
   }
 
   /**
-   * Generate output of phone..
+   * Generate output of phone.
    */
   function render($values) {
     $text = '';
@@ -77,7 +82,8 @@ class socrata_views_handler_field_phone extends views_handler_field {
         }
 
         $this->options['alter']['make_link'] = TRUE;
-        $this->options['alter']['path'] = "tel://{$value['phone_number']}";
+        $phone_number = $this->sanitize_value($value['phone_number'], 'xss');
+        $this->options['alter']['path'] = "tel://{$phone_number}";
       }
     }
 

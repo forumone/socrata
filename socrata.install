@@ -1,32 +1,17 @@
 <?php
 /**
  * @file
- *
  * Install hooks for Socrata module
  */
 
 /**
- * Implements hook_install
- */
-function socrata_install() {
-
-}
-
-/**
- * Implements hook_uninstall
- */
-function socrata_uninstall() {
-
-}
-
-/**
- * Implements hook_schema
+ * Implements hook_schema().
  */
 function socrata_schema() {
   $schema = array();
 
   $schema['socrata_sources'] = array(
-    'description' => t('Table storing Socrata API endpoint information'),
+    'description' => 'Table storing Socrata API endpoint information',
     'export' => array(
       'key' => 'name',
       'key name' => 'Name',
