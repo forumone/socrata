@@ -138,12 +138,12 @@ function _socrata_filter_tips($filter, $format, $long) {
     return t(
       'Embed Socrata views using @embed. Values for width and height are optional, if left off the default values configured on the %filter input filter will be used',
       array(
-        '@embed' => '[socrata dataset=<source_name> width=<width> height=<height>]',
+        '@embed' => '[socrata source=<source_name> width=<width> height=<height>]',
         '%filter' => 'Embed Socrata dataset views',
         )
     );
   }
   else {
-    return t('Embed Socrata views using @embed', array('@embed' => '[socrata dataset=<source_name> width=<width> height=<height>]'));
+    return t('Embed Socrata views using @embed', array('@embed' => '[socrata source=<source_name> width=<width> height=<height>]'));
   }
 }
