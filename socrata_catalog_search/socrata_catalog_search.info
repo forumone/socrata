@@ -1,0 +1,13 @@
+name = Socrata Catalog Search Views
+description = Provides queryable datasource for Views
+package = Socrata
+core = 7.x
+
+dependencies[] = socrata_views
+dependencies[] = views
+dependencies[] = ctools
+
+files[] = SocrataCatalogSearchSelectQuery.inc
+
+;; Plugin class files
+files[] = plugins/socrata_catalog_search_plugin_query.inc

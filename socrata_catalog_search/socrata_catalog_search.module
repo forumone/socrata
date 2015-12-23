@@ -1,0 +1,34 @@
+<?php
+/**
+ * @file
+ *
+ * Main module code for socrata_catalog_search.
+ */
+
+/**
+ * Implements hook_views_api
+ */
+function socrata_catalog_search_views_api() {
+  return array(
+    'api' => 3.0,
+  );
+}
+
+/**
+ * Implements hook_views_plugins().
+ */
+function socrata_catalog_search_views_plugins() {
+  $plugins = array(
+    'module' => 'socrata_catalog_search',
+    'query' => array(
+      'socrata_catalog_search_query' => array(
+        'title' => t('Socrata Catalog Search Query'),
+        'help' => t('Query will be run using the Socrata Catalog Search API.'),
+        'handler' => 'socrata_catalog_search_plugin_query',
+        'parent' => 'views_plugin_query',
+      ),
+    ),
+  );
+
+  return $plugins;
+}
