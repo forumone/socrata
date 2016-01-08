@@ -30,7 +30,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       ),
       'count' => array(
         'title' => t('Count'),
-        'method' => 'socrata_query_default_aggregation_method_simple',
+        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
         'handler' => array(
           'argument' => 'views_handler_argument_group_by_numeric',
           'field' => 'views_handler_field_numeric',
@@ -40,7 +40,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       ),
       'sum' => array(
         'title' => t('Sum'),
-        'method' => 'socrata_query_default_aggregation_method_simple',
+        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
         'handler' => array(
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
@@ -49,7 +49,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       ),
       'avg' => array(
         'title' => t('Average'),
-        'method' => 'socrata_query_default_aggregation_method_simple',
+        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
         'handler' => array(
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
@@ -58,7 +58,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       ),
       'min' => array(
         'title' => t('Minimum'),
-        'method' => 'socrata_query_default_aggregation_method_simple',
+        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
         'handler' => array(
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
@@ -67,7 +67,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       ),
       'max' => array(
         'title' => t('Maximum'),
-        'method' => 'socrata_query_default_aggregation_method_simple',
+        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
         'handler' => array(
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
@@ -98,30 +98,26 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
 
     // Construct where clause from Views filter grouping.
     $groups = array();
+    dpm($this->where);
     foreach ($this->where as $where) {
       $queries = array();
       foreach ($where['conditions'] as $cond) {
+        dpm($cond);
         // Multiple values for condition, suss out.
         if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
-          $in_queries = array();
-          foreach ($cond['value'] as $in_val) {
-            $in_queries[] = $this->_construct_query_comp($cond['field'], $in_val, $cond['operator']);
-          }
-          if (!empty($in_queries)) {
-            $queries[] = '(' . implode(' AND ', $in_queries) . ')';
-          }
+          $values = implode(',', $cond['value']);
         }
         // Otherwise simple field-value comparison.
         else {
-          $queries[] = $this->_construct_query_comp($cond['field'], $cond['value'], $cond['operator']);
+          $values = $cond['value'];
         }
+        $query->params[$cond['field']] = $values;
       }
       if (!empty($queries)) {
-        $groups[] = '(' . implode(" {q['type']} ", $queries) . ')';
-        $query->where(implode(" {$this->group_operator} ", $groups));
+        $groups[] = implode("{q['type']}", $queries);
+        $query->where(implode("{$this->group_operator}", $groups));
       }
     }
-    $query->params['q'] = implode(" {$this->group_operator} ", $groups);
 
     // Store off requested fields.
     $this->has_aggregate = $this->view->display_handler->get_option('group_by');
@@ -195,7 +191,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
 
     // Otherwise, build a "normal" comparison predicate component.
     else {
-      $comp = "{$field} {$op} {$value}";
+      $comp = "{$field}{$op}{$value}";
     }
 
     return $comp;
@@ -282,8 +278,8 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
             $field_name_map[$field_alias] = $field;
           }*/
 
-        dpm($view->field);
-        dpm($resp['data']['results']);
+        // dpm($view->field);
+        // dpm($resp['data']['results']);
         // dpm($original_field_names);
 
           foreach ($resp['data']['results'] as $row) {
@@ -312,9 +308,10 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
             $new_row->id = $row['resource']['id'];
             $new_row->name = $row['resource']['name'];
             $new_row->description = $row['resource']['description'];
+            $new_row->updatedAt = $row['resource']['updatedAt'];
             $new_row->type = $row['resource']['type'];
-            $new_row->categories = $row['classification']['categories'];
-            $new_row->tags = $row['classification']['tags'];
+            $new_row->categories = implode(',', $row['classification']['categories']);
+            $new_row->tags = implode(',', $row['classification']['tags']);
             $new_row->domain = $row['metadata']['domain'];
             $new_row->permalink = $row['permalink'];
             $new_row->link = $row['link'];
@@ -361,7 +358,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       'field' => $field,
       'table' => $table,
       'alias' => $alias,
-      'blarg' => '$blarg',
     ) + $params;
     $this->fields[$field] = $field_info;
     return $field;
@@ -478,6 +474,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
  *
  * @return string
  */
-function socrata_query_default_aggregation_method_simple($group_type, $field) {
+function socrata_catalog_search_query_default_aggregation_method_simple($group_type, $field) {
   return strtoupper($group_type) . '(' . $field . ')';
 }
