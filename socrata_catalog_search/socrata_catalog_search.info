@@ -17,3 +17,4 @@ files[] = handlers/socrata_catalog_search_handler_field_list.inc
 
 ;; Filter handler class files
 files[] = handlers/socrata_catalog_search_handler_filter_categories.inc
+files[] = handlers/socrata_catalog_search_handler_filter_tags.inc

@@ -92,6 +92,16 @@ function socrata_catalog_search_views_data() {
     'tags' => array(
       'title' => t('Tags'),
       'help' => t('Endpoint Tags'),
+      'field' => array(
+        'handler' => 'socrata_catalog_search_handler_field_list',
+        'click sortable' => TRUE,
+       ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'socrata_catalog_search_handler_filter_tags',
+      ),
     ),
     'domain' => array(
       'title' => t('Domain'),
@@ -125,7 +135,7 @@ function socrata_catalog_search_views_data() {
   );
 
   foreach ($tables['socrata_catalog_search'] as $field => $value) {
-    if (in_array($field, array('table', 'updatedAt', 'categories'))) {
+    if (in_array($field, array('table', 'updatedAt', 'categories', 'tags'))) {
       continue;
     }
     $tables['socrata_catalog_search'][$field] = array_merge($value, $field_boiler_plate);
