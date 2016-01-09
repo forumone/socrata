@@ -2,17 +2,10 @@
 
 /**
  * @file
- * Definition of views_handler_filter_many_to_one.
+ * Definition of socrata_catalog_search_handler_filter_categories.
  */
 
 /**
- * Complex filter to handle filtering for many to one relationships,
- * such as terms (many terms per node) or roles (many roles per user).
- *
- * The construct method needs to be overridden to provide a list of options;
- * alternately, the value_form and admin_summary methods need to be overriden
- * to provide something that isn't just a select list.
- *
  * @ingroup views_filter_handlers
  */
 class socrata_catalog_search_handler_filter_categories extends views_handler_filter_in_operator {
@@ -23,6 +16,7 @@ class socrata_catalog_search_handler_filter_categories extends views_handler_fil
       'finance' => t("finance"),
       'health' => t("health"),
       'housing & development' => t("housing & development"),
+      'infrastructure' => t("infrastructure"),
       'politics' => t("politics"),
       'public safety' => t("public safety"),
       'transportation' => t("transportation"),
