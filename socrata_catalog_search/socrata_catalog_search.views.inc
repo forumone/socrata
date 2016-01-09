@@ -79,7 +79,7 @@ function socrata_catalog_search_views_data() {
       'title' => t('Categories'),
       'help' => t('Endpoint Categories'),
       'field' => array(
-        'handler' => 'views_handler_field_prerender_list',
+        'handler' => 'socrata_catalog_search_handler_field_list',
         'click sortable' => TRUE,
        ),
       'sort' => array(
