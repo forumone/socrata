@@ -98,11 +98,9 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
 
     // Construct where clause from Views filter grouping.
     $groups = array();
-    dpm($this->where);
     foreach ($this->where as $where) {
       $queries = array();
       foreach ($where['conditions'] as $cond) {
-        dpm($cond);
         // Multiple values for condition, suss out.
         if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
           $values = implode(',', $cond['value']);
@@ -278,9 +276,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
             $field_name_map[$field_alias] = $field;
           }*/
 
-        // dpm($view->field);
-        // dpm($resp['data']['results']);
-        // dpm($original_field_names);
 
           foreach ($resp['data']['results'] as $row) {
             $new_row = new stdClass();
@@ -301,8 +296,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
             $value = $row;
             foreach ($paths as $ndx) {
               $value = $value[$ndx];
-            }
-            dpm($value);*/
+            }*/
 
             // Hard-coded mapping
             $new_row->id = $row['resource']['id'];
