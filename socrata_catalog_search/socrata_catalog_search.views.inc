@@ -57,14 +57,11 @@ function socrata_catalog_search_views_data() {
       'title' => t('Last Updated'),
       'help' => t('Endpoint Last Updated Timestamp'),
       'field' => array(
-        'handler' => 'views_handler_field_date',
+        'handler' => 'socrata_catalog_search_handler_field_date',
         'click sortable' => TRUE,
       ),
       'sort' => array(
         'handler' => 'views_handler_sort_date',
-      ),
-      'filter' => array(
-        'handler' => 'views_handler_filter_date',
       ),
     ),
     'name' => array(

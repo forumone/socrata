@@ -13,6 +13,7 @@ files[] = SocrataCatalogSearchSelectQuery.inc
 files[] = plugins/socrata_catalog_search_plugin_query.inc
 
 ;; Field handler class files
+files[] = handlers/socrata_catalog_search_handler_field_date.inc
 files[] = handlers/socrata_catalog_search_handler_field_list.inc
 
 ;; Filter handler class files
