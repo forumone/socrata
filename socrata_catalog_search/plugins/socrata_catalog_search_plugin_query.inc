@@ -23,58 +23,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
    * Get aggregation info for group by queries.
    */
   function get_aggregation_info() {
-    return array(
-      'group' => array(
-        'title' => t('Group results together'),
-        'is aggregate' => FALSE,
-      ),
-      'count' => array(
-        'title' => t('Count'),
-        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
-        'handler' => array(
-          'argument' => 'views_handler_argument_group_by_numeric',
-          'field' => 'views_handler_field_numeric',
-          'filter' => 'views_handler_filter_group_by_numeric',
-          'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'sum' => array(
-        'title' => t('Sum'),
-        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
-        'handler' => array(
-          'argument' => 'views_handler_argument_group_by_numeric',
-          'filter' => 'views_handler_filter_group_by_numeric',
-          'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'avg' => array(
-        'title' => t('Average'),
-        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
-        'handler' => array(
-          'argument' => 'views_handler_argument_group_by_numeric',
-          'filter' => 'views_handler_filter_group_by_numeric',
-          'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'min' => array(
-        'title' => t('Minimum'),
-        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
-        'handler' => array(
-          'argument' => 'views_handler_argument_group_by_numeric',
-          'filter' => 'views_handler_filter_group_by_numeric',
-          'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'max' => array(
-        'title' => t('Maximum'),
-        'method' => 'socrata_catalog_search_query_default_aggregation_method_simple',
-        'handler' => array(
-          'argument' => 'views_handler_argument_group_by_numeric',
-          'filter' => 'views_handler_filter_group_by_numeric',
-          'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-    );
+    return array();
   }
 
   /**
