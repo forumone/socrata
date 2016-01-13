@@ -23,3 +23,4 @@ files[] = handlers/socrata_catalog_search_handler_filter_fulltext.inc
 
 ;; Argument handler class files
 files[] = handlers/socrata_catalog_search_handler_argument_fulltext.inc
+files[] = handlers/socrata_catalog_search_handler_argument_list.inc
