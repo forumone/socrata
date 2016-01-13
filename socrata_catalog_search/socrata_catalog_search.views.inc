@@ -11,28 +11,6 @@
 function socrata_catalog_search_views_data() {
   $tables = array();
 
-  /*$source_name = 'catalog_search';
-  $source = new stdClass();
-  $source->description = 'Catalog Search API';
-  $source->endpoint = 'http://api.us.socrata.com/api/catalog/v1';
-
-  $group = $source->description;
-
-  // Retrieve table schema
-  $components = socrata_components_from_endpoint($source->endpoint);
-  $dataset = $components['dataset_id'];
-
-  $query = db_select($source_name)->extend('SocrataCatalogSearchSelectQuery');
-  $query->addTag('socrata');
-  //@todo: fix and add tag:
-  //$query->addTag('socrata_data_' . [4x4 w/ dashes converted to underscores]);
-  // Limit to 1 row
-  $query->params['limit'] = 1; // Catalog params
-  $query->range(0, 1); // SelectQuery
-
-  $resp = $query->execute();
-  dpm($resp);*/
-
   $tables['socrata_catalog_search'] = array(
     // Meta data.
     'table' => array(
@@ -122,12 +100,6 @@ function socrata_catalog_search_views_data() {
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
     ),
   );
 
