@@ -138,5 +138,11 @@ function socrata_catalog_search_views_data() {
     $tables['socrata_catalog_search'][$field] = array_merge($value, $field_boiler_plate);
   }
 
+  // Add full text search filter.
+  $tables['socrata_catalog_search']['socrata_catalog_search_fulltext']['group'] = t('Socrata Catalog Search');
+  $tables['socrata_catalog_search']['socrata_catalog_search_fulltext']['title'] = t('Fulltext search');
+  $tables['socrata_catalog_search']['socrata_catalog_search_fulltext']['help'] = t('Search all Endpoint fields.');
+  $tables['socrata_catalog_search']['socrata_catalog_search_fulltext']['filter']['handler'] = 'socrata_catalog_search_handler_filter_fulltext';
+  // $tables['socrata_catalog_search']['socrata_catalog_search_fulltext']['argument']['handler'] = 'SearchApiViewsHandlerArgumentFulltext';
   return $tables;
 }
