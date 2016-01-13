@@ -12,8 +12,8 @@ class socrata_catalog_search_handler_filter_fulltext extends views_handler_filte
   function operators() {
     $operators = array(
       '=' => array(
-        'title' => t('Is equal to'),
-        'short' => t('='),
+        'title' => t('Contains any word'),
+        'short' => t('has word'),
         'method' => 'op_equal',
         'values' => 1,
       ),
@@ -35,6 +35,8 @@ class socrata_catalog_search_handler_filter_fulltext extends views_handler_filte
 
   function value_form(&$form, &$form_state) {
     parent::value_form($form, $form_state);
+
+    // Add help text.
     $form['value']['#description'] = t('You may enter multiple values separated by a comma as "OR" query parameters.');
   }
 }
