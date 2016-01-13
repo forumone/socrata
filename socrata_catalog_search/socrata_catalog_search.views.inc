@@ -98,9 +98,9 @@ function socrata_catalog_search_views_data() {
       'filter' => array(
         'handler' => 'socrata_catalog_search_handler_filter_fulltext',
       ),
-      /*'argument' => array(
+      'argument' => array(
         'handler' => 'socrata_catalog_search_handler_argument_fulltext',
-      ),*/
+      ),
     ),
   );
 
