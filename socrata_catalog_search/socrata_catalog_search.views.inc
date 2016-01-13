@@ -122,7 +122,7 @@ function socrata_catalog_search_views_data() {
   );
 
   foreach ($tables['socrata_catalog_search'] as $field => $value) {
-    if (in_array($field, array('table', 'updatedAt', 'categories', 'tags'))) {
+    if (in_array($field, array('table', 'updatedAt', 'categories', 'tags', 'fulltext'))) {
       continue;
     }
     $tables['socrata_catalog_search'][$field] = array_merge($value, $field_boiler_plate);
