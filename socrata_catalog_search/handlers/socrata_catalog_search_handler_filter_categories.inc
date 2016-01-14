@@ -42,9 +42,9 @@ class socrata_catalog_search_handler_filter_categories extends views_handler_fil
   function operators() {
     $operators = array(
       '=' => array(
-        'title' => t('Is one of'),
-        'short' => t('in'),
-        'short_single' => t('='),
+        'title' => t('Is all of'),
+        'short' => t('is all of'),
+        'short_single' => t('is all of'),
         'method' => 'op_simple',
         'values' => 1,
       ),
