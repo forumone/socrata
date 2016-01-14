@@ -87,6 +87,19 @@ function socrata_catalog_search_views_data() {
     'domain' => array(
       'title' => t('Domain'),
       'help' => t('Endpoint Domain'),
+      'field' => array(
+        'handler' => 'views_handler_field',
+        'click sortable' => TRUE,
+       ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'socrata_catalog_search_handler_filter_domain',
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_string',
+      ),
     ),
     'permalink' => array(
       'title' => t('Permalink'),
@@ -122,7 +135,7 @@ function socrata_catalog_search_views_data() {
   );
 
   foreach ($tables['socrata_catalog_search'] as $field => $value) {
-    if (in_array($field, array('table', 'updatedAt', 'categories', 'tags', 'fulltext'))) {
+    if (in_array($field, array('table', 'updatedAt', 'categories', 'tags', 'domain', 'fulltext'))) {
       continue;
     }
     $tables['socrata_catalog_search'][$field] = array_merge($value, $field_boiler_plate);
