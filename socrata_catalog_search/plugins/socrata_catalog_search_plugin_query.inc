@@ -109,10 +109,11 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       if (!empty($this->orderby)) {
         $sort_fields = array();
         foreach ($this->orderby as $orderby) {
-          $sort_fields[] = "{$orderby['field']} {$orderby['direction']}";
+          // $sort_fields[] = "{$orderby['field']} {$orderby['direction']}";
           $query->orderBy($orderby['field'], $orderby['direction']);
+          $query->orderBy[$orderby['field']] = $orderby['direction'];
         }
-        $query->params['$order'] = implode(',', $sort_fields);
+        // $query->params['$order'] = implode(',', $sort_fields);
       }
     }
     else {
@@ -211,6 +212,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       // Execute main query, looping if we need to get more than 1000 rows.
       do {
         $resp = $query->execute();
+        // sdpm($resp);
         if ($resp !== FALSE) {
           foreach ($resp['data']['results'] as $row) {
             $new_row = new stdClass();
@@ -235,6 +237,37 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
           }
         }
       } while (empty($query->params['limit']) && !empty($resp['data']));
+
+      // Sort the result in Drupal because the API doesn't support it.
+      if (isset($query->orderBy) && $result) {
+        // Prepare the orderBy fields to be sorted in reverse order.
+        $order_by_fields = array_reverse($query->orderBy);
+        // arsort($order_by_fields);
+        // sdpm($order_by_fields);
+
+        // sdpm($result);
+        foreach ($order_by_fields as $order_by_field => $order) {
+          foreach ($result as $key => $row) {
+            // Create a new sort key with the id field appended to prevent duplicates overwriting a key.
+            $new_key = $row->$order_by_field . '-' . $row->id;
+
+            // Add the row back to the results with the new key.
+            $result[$new_key] = $row;
+
+            // Delete the old key:row.
+            unset($result[$key]);
+          }
+
+          // Sort the results based on the order
+          if ($order == 'DESC') {
+            krsort($result);
+          } else {
+            ksort($result);
+          }
+          // sdpm($result);
+        }
+        // Resort the results based on the new keys.
+      }
     }
 
     // Store off values from query in View.
