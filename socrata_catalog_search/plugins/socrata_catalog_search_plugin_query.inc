@@ -67,9 +67,9 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
     }
 
     // Store off requested fields.
-    $this->has_aggregate = $this->view->display_handler->get_option('group_by');
+    // $this->has_aggregate = $this->view->display_handler->get_option('group_by');
 
-    if (!empty($this->fields)) {
+    /*if (!empty($this->fields)) {
       $fields_list = $non_aggregates = array();
       foreach ($this->fields as $field => $field_info) {
         // If an aggregate function is specified, wrap it around the field.
@@ -81,7 +81,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
           $non_aggregates[] = $field;
         }
       }
-    }
+    }*/
     /*if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
       $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
       $query->params['$group'] = implode(',', $groupby);
@@ -91,7 +91,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       $query->params['$group'] = NULL;
     }*/
     // $query->params['$select'] = implode(',', $fields_list);
-    $query->fields($this->base_table, $fields_list);
+    // $query->fields($this->base_table, $fields_list);
 
     // If this is a full query build vs a counter query, add on options.
     if (!$get_count) {
@@ -128,7 +128,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
   /**
    * Util method for constructing components for predicate.
    */
-  function _construct_query_comp($field, $value, $op) {
+  /*function _construct_query_comp($field, $value, $op) {
     $comp = '';
 
     // Check to see if the predicate component is a prebuilt formula.
@@ -142,7 +142,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
     }
 
     return $comp;
-  }
+  }*/
 
   /**
    * Let modules modify the query just prior to finalizing it.
@@ -212,40 +212,8 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       do {
         $resp = $query->execute();
         if ($resp !== FALSE) {
-          // Have to map Scorata result field labels back onto what Views knows them as.
-          /*$original_field_names = $view->query->fields;
-          $field_name_map = array();
-          foreach ($original_field_names as $field => $attributes) {
-            if ($attributes['alias']) {
-              $field_alias = $attributes['alias'];
-            }
-            else {
-              $field_alias = $field;
-            }
-            $field_name_map[$field_alias] = $field;
-          }*/
-
-
           foreach ($resp['data']['results'] as $row) {
             $new_row = new stdClass();
-            // Map the results with the correct field alias in field order.
-            /*foreach ($field_name_map as $alias => $field) {
-              // If Socrata returns a row with empty data, put in empty string.
-              if (isset($row[$alias])) {
-                $value = $row[$alias];
-              }
-              else {
-                $value = '';
-              }
-              $new_row->{$field} = $value;
-            }*/
-
-            /*$mapping = 'resource:id';
-            $paths = explode(":", $mapping);
-            $value = $row;
-            foreach ($paths as $ndx) {
-              $value = $value[$ndx];
-            }*/
 
             // Hard-coded mapping
             $new_row->id = $row['resource']['id'];
@@ -263,7 +231,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
 
           // If an "all items" query, bump offset, go again.
           if (empty($query->params['limit'])) {
-            $query->params['$offset'] = count($result);
+            $query->params['offset'] = count($result);
           }
         }
       } while (empty($query->params['limit']) && !empty($resp['data']));
@@ -407,16 +375,4 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
     return $table;
   }
 
-}
-
-/**
- * Based on views_query_default_aggregation_method_simple().
- *
- * @param string $group_type
- * @param string $field
- *
- * @return string
- */
-function socrata_catalog_search_query_default_aggregation_method_simple($group_type, $field) {
-  return strtoupper($group_type) . '(' . $field . ')';
 }
