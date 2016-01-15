@@ -212,22 +212,23 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       // Execute main query, looping if we need to get more than 1000 rows.
       do {
         $resp = $query->execute();
-        // sdpm($resp);
         if ($resp !== FALSE) {
           foreach ($resp['data']['results'] as $row) {
-            $new_row = new stdClass();
+            // Put each row into an array instead of an object
+            // in case we need to sort on one or more fields.
+            $new_row = array();
 
             // Hard-coded mapping
-            $new_row->id = $row['resource']['id'];
-            $new_row->name = $row['resource']['name'];
-            $new_row->description = $row['resource']['description'];
-            $new_row->updatedAt = $row['resource']['updatedAt'];
-            $new_row->type = $row['resource']['type'];
-            $new_row->categories = implode(',', $row['classification']['categories']);
-            $new_row->tags = implode(',', $row['classification']['tags']);
-            $new_row->domain = $row['metadata']['domain'];
-            $new_row->permalink = $row['permalink'];
-            $new_row->link = $row['link'];
+            $new_row['id'] = $row['resource']['id'];
+            $new_row['name'] = $row['resource']['name'];
+            $new_row['description'] = $row['resource']['description'];
+            $new_row['updatedAt'] = $row['resource']['updatedAt'];
+            $new_row['type'] = $row['resource']['type'];
+            $new_row['categories'] = implode(',', $row['classification']['categories']);
+            $new_row['tags'] = implode(',', $row['classification']['tags']);
+            $new_row['domain'] = $row['metadata']['domain'];
+            $new_row['permalink'] = $row['permalink'];
+            $new_row['link'] = $row['link'];
             $result[] = $new_row;
           }
 
@@ -239,34 +240,34 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       } while (empty($query->params['limit']) && !empty($resp['data']));
 
       // Sort the result in Drupal because the API doesn't support it.
+      // Adapted from https://secure.php.net/manual/en/function.array-multisort.php#100534.
       if (isset($query->orderBy) && $result) {
-        // Prepare the orderBy fields to be sorted in reverse order.
-        $order_by_fields = array_reverse($query->orderBy);
-        // arsort($order_by_fields);
-        // sdpm($order_by_fields);
+        $order_by_fields = $query->orderBy;
 
-        // sdpm($result);
+        // Build the arguments from the order by fields.
+        $args = array();
         foreach ($order_by_fields as $order_by_field => $order) {
+          $tmp = array();
           foreach ($result as $key => $row) {
-            // Create a new sort key with the id field appended to prevent duplicates overwriting a key.
-            $new_key = $row->$order_by_field . '-' . $row->id;
-
-            // Add the row back to the results with the new key.
-            $result[$new_key] = $row;
-
-            // Delete the old key:row.
-            unset($result[$key]);
+            $tmp[$key] = $row[$order_by_field];
           }
-
-          // Sort the results based on the order
+          $args[] = $tmp;
           if ($order == 'DESC') {
-            krsort($result);
+            $args[] = SORT_DESC;
           } else {
-            ksort($result);
+            $args[] = SORT_ASC;
           }
-          // sdpm($result);
         }
-        // Resort the results based on the new keys.
+        // Add the data to the args.
+        $args[] = &$result;
+
+        call_user_func_array('array_multisort', $args);
+        $result = array_pop($args);
+      }
+
+      // Convert the row arrays to objects for use by Views.
+      foreach ($result as $key => $row) {
+        $result[$key] = (object) $row;
       }
     }
 
