@@ -8,8 +8,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
   // Properties
   var $where = array();
   var $orderby = array();
-  var $group_operator = 'AND';
-  var $groupby = array();
   var $has_aggregate = FALSE;
 
   /**
@@ -34,19 +32,12 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
-    // @todo: for SoQL clauses ( http://dev.socrata.com/docs/queries.html ),
-    // provide some sort of translation function on SocrataSelectQuery to
-    // negotiate SQL vs SoQL output, and where appropriate below call that
-    // method instead of both calling the SelectQuery method and appending
-    // values to $query->params.
-
     // Build the query.
     $query = db_select($this->base_table)->extend('SocrataCatalogSearchSelectQuery');
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->name);
 
     // Construct where clause from Views filter grouping.
-    $groups = array();
     foreach ($this->where as $where) {
       $queries = array();
       foreach ($where['conditions'] as $cond) {
@@ -59,10 +50,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
           $values = $cond['value'];
         }
         $query->params[$cond['field']] = $values;
-      }
-      if (!empty($queries)) {
-        $groups[] = implode("{q['type']}", $queries);
-        $query->where(implode("{$this->group_operator}", $groups));
       }
     }
 
@@ -331,18 +318,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       'field' => $as,
       'direction' => strtoupper($order),
     );
-  }
-
-  /**
-   * Add a simple GROUP BY clause to the query. The caller is responsible
-   * for ensuring that the fields are fully qualified and the table is properly
-   * added.
-   */
-  function add_groupby($clause) {
-    // Only add it if it's not already in there.
-    if (!in_array($clause, $this->groupby)) {
-      $this->groupby[] = $clause;
-    }
   }
 
   /**
