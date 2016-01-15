@@ -74,10 +74,12 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       }
     }
     else {
-      if (!$this->has_aggregate) {
+      // @todo: Remove this section because it doesn't actually do anything
+      // although we do still need a count query.
+      /*if (!$this->has_aggregate) {
         $query->params['$select'] = 'count(*)';
         $query->addExpression('count(*)');
-      }
+      }*/
     }
 
     return $query;
@@ -147,7 +149,7 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       // Let the pager modify the query to add limits.
       $this->pager->pre_execute($query);
 
-      // Execute main query, looping if we need to get more than 1000 rows.
+      // Execute main query, looping if we need to get more than 100 rows.
       do {
         $resp = $query->execute();
         if ($resp !== FALSE) {
