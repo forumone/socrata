@@ -66,33 +66,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       }
     }
 
-    // Store off requested fields.
-    // $this->has_aggregate = $this->view->display_handler->get_option('group_by');
-
-    /*if (!empty($this->fields)) {
-      $fields_list = $non_aggregates = array();
-      foreach ($this->fields as $field => $field_info) {
-        // If an aggregate function is specified, wrap it around the field.
-        if (isset($field_info['function'])) {
-          $fields_list[] = $field_info['function'] . '(' . $field . ')';
-        }
-        else {
-          $fields_list[] = $field;
-          $non_aggregates[] = $field;
-        }
-      }
-    }*/
-    /*if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
-      $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
-      $query->params['$group'] = implode(',', $groupby);
-    }
-    else {
-      $fields_list = $non_aggregates;
-      $query->params['$group'] = NULL;
-    }*/
-    // $query->params['$select'] = implode(',', $fields_list);
-    // $query->fields($this->base_table, $fields_list);
-
     // If this is a full query build vs a counter query, add on options.
     if (!$get_count) {
       // Suss out offset-limit options.
@@ -109,11 +82,8 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       if (!empty($this->orderby)) {
         $sort_fields = array();
         foreach ($this->orderby as $orderby) {
-          // $sort_fields[] = "{$orderby['field']} {$orderby['direction']}";
-          $query->orderBy($orderby['field'], $orderby['direction']);
           $query->orderBy[$orderby['field']] = $orderby['direction'];
         }
-        // $query->params['$order'] = implode(',', $sort_fields);
       }
     }
     else {
@@ -125,25 +95,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
 
     return $query;
   }
-
-  /**
-   * Util method for constructing components for predicate.
-   */
-  /*function _construct_query_comp($field, $value, $op) {
-    $comp = '';
-
-    // Check to see if the predicate component is a prebuilt formula.
-    if ('formula' == $op) {
-      $comp = $field;
-    }
-
-    // Otherwise, build a "normal" comparison predicate component.
-    else {
-      $comp = "{$field}{$op}{$value}";
-    }
-
-    return $comp;
-  }*/
 
   /**
    * Let modules modify the query just prior to finalizing it.
@@ -408,5 +359,4 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
   function ensure_table($table) {
     return $table;
   }
-
 }
