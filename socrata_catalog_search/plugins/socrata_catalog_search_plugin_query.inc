@@ -202,8 +202,8 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
       // Get total count of items and force initial limit if not set.
       $num_dataset_rows = 0;
       $resp = $count_query->execute();
-      if ($resp !== FALSE && !empty($resp['data']) && isset($resp['data'][0]['count'])) {
-        $num_dataset_rows = $resp['data'][0]['count'];
+      if ($resp !== FALSE && !empty($resp['data']) && isset($resp['data']['resultSetSize'])) {
+        $num_dataset_rows = $resp['data']['resultSetSize'];
       }
 
       // Let the pager modify the query to add limits.
