@@ -39,7 +39,7 @@ function socrata_catalog_search_views_data() {
         'click sortable' => TRUE,
       ),
       'sort' => array(
-        'handler' => 'views_handler_sort_date',
+        'handler' => 'socrata_catalog_search_handler_sort',
       ),
     ),
     'name' => array(
@@ -58,7 +58,7 @@ function socrata_catalog_search_views_data() {
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'views_handler_sort',
+        'handler' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
         'handler' => 'socrata_catalog_search_handler_filter_categories',
@@ -75,7 +75,7 @@ function socrata_catalog_search_views_data() {
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'views_handler_sort',
+        'handler' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
         'handler' => 'socrata_catalog_search_handler_filter_tags',
@@ -92,7 +92,7 @@ function socrata_catalog_search_views_data() {
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'views_handler_sort',
+        'handler' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
         'handler' => 'socrata_catalog_search_handler_filter_domain',
@@ -130,7 +130,7 @@ function socrata_catalog_search_views_data() {
       'click sortable' => TRUE,
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'handler' => 'socrata_catalog_search_handler_sort',
     ),
   );
 
