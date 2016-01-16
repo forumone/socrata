@@ -2,25 +2,32 @@
 
 /**
  * @file
- * Definition of socrata_catalog_search_handler_filter_categories.
+ * Definition of socrata_catalog_search_handler_filter_lists.
  */
 
 /**
  * @ingroup views_filter_handlers
  */
-class socrata_catalog_search_handler_filter_categories extends views_handler_filter_in_operator {
+class socrata_catalog_search_handler_filter_lists extends views_handler_filter_in_operator {
   function get_value_options() {
-    // @todo Make this a look up from http://api.us.socrata.com/api/catalog/v1/categories.
-    $options = array(
-      'education' => t("education"),
-      'finance' => t("finance"),
-      'health' => t("health"),
-      'housing & development' => t("housing & development"),
-      'infrastructure' => t("infrastructure"),
-      'politics' => t("politics"),
-      'public safety' => t("public safety"),
-      'transportation' => t("transportation"),
-    );
+    $options = array();
+    $query = db_select($this->view->base_table)->extend('SocrataCatalogSearchSelectQuery');
+    $query->suffix = $this->real_field;
+    $resp = $query->execute();
+    if ($resp && isset($resp['data']['results'])) {
+      $results = $resp['data']['results'];
+      foreach ($results as $result) {
+        // @todo Decide if showing counts is worthwhile.
+        // Would need to override admin_summary() too.
+        /*if (isset($result['count'])) {
+          $suffix = '&nbsp;' . t('(@count)', array('@count' => $result['count']));
+        } else {*/
+          $suffix =  '';
+        // }
+        $value = array_shift($result);
+        $options[$value] = $value . $suffix;
+      }
+    }
     $this->value_options = $options;
   }
 
