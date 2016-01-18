@@ -17,7 +17,7 @@ files[] = handlers/socrata_catalog_search_handler_field_date.inc
 files[] = handlers/socrata_catalog_search_handler_field_list.inc
 
 ;; Filter handler class files
-files[] = handlers/socrata_catalog_search_handler_filter_lists.inc
+files[] = handlers/socrata_catalog_search_handler_filter_list.inc
 files[] = handlers/socrata_catalog_search_handler_filter_domain.inc
 files[] = handlers/socrata_catalog_search_handler_filter_fulltext.inc
 

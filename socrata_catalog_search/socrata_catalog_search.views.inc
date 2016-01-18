@@ -61,7 +61,7 @@ function socrata_catalog_search_views_data() {
         'handler' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_lists',
+        'handler' => 'socrata_catalog_search_handler_filter_list',
       ),
       'argument' => array(
         'handler' => 'views_handler_argument_string',
@@ -78,7 +78,7 @@ function socrata_catalog_search_views_data() {
         'handler' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_lists',
+        'handler' => 'socrata_catalog_search_handler_filter_list',
       ),
       'argument' => array(
         'handler' => 'views_handler_argument_string',

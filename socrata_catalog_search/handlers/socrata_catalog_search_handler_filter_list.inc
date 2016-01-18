@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Definition of socrata_catalog_search_handler_filter_lists.
+ * Definition of socrata_catalog_search_handler_filter_list.
  */
 
 /**
  * @ingroup views_filter_handlers
  */
-class socrata_catalog_search_handler_filter_lists extends views_handler_filter_in_operator {
+class socrata_catalog_search_handler_filter_list extends views_handler_filter_in_operator {
   function get_value_options() {
     $options = array();
     $query = db_select($this->view->base_table)->extend('SocrataCatalogSearchSelectQuery');
