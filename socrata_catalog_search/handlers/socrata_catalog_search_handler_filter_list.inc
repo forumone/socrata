@@ -10,25 +10,34 @@
  */
 class socrata_catalog_search_handler_filter_list extends views_handler_filter_in_operator {
   function get_value_options() {
-    $options = array();
-    $query = db_select($this->view->base_table)->extend('SocrataCatalogSearchSelectQuery');
-    $query->suffix = $this->real_field;
-    $resp = $query->execute();
-    if ($resp && isset($resp['data']['results'])) {
-      $results = $resp['data']['results'];
-      foreach ($results as $result) {
-        // @todo Decide if showing counts is worthwhile.
-        // Would need to override admin_summary() too.
-        /*if (isset($result['count'])) {
-          $suffix = '&nbsp;' . t('(@count)', array('@count' => $result['count']));
-        } else {*/
-          $suffix =  '';
-        // }
-        $value = array_shift($result);
-        $options[$value] = $value . $suffix;
+    $field = $this->real_field;
+    $lists = &drupal_static(__FUNCTION__);
+    if (!isset($lists[$field])) {
+      $options = array();
+      $query = db_select($this->view->base_table)->extend('SocrataCatalogSearchSelectQuery');
+      $query->suffix = $field;
+      $resp = $query->execute();
+      if ($resp && isset($resp['data']['results'])) {
+        $results = $resp['data']['results'];
+        foreach ($results as $result) {
+          // @todo Decide if showing counts is worthwhile.
+          // Would need to override admin_summary() too.
+          /*if (isset($result['count'])) {
+            $suffix = '&nbsp;' . t('(@count)', array('@count' => $result['count']));
+          } else {*/
+            $suffix =  '';
+          // }
+          $value = array_shift($result);
+          $options[$value] = $value . $suffix;
+        }
+        asort($options);
       }
+
+      $lists[$field] = $options;
     }
-    $this->value_options = $options;
+
+    $this->value_options = $lists[$field];
+    return $lists;
   }
 
   function option_definition() {
