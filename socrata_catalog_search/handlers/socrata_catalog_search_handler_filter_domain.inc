@@ -32,4 +32,12 @@ class socrata_catalog_search_handler_filter_domain extends views_handler_filter_
       $this->{$info[$this->operator]['method']}($field);
     }
   }
+
+  function value_form(&$form, &$form_state) {
+    parent::value_form($form, $form_state);
+    sdpm($form);
+
+    // Add help text.
+    $form['value']['#description'] = t('You may enter multiple values separated by a comma as "OR" query parameters.');
+  }
 }
