@@ -4,7 +4,7 @@
  * A Views query plugin for executing queries against a Socrata dataset
  */
 
-class socrata_catalog_search_plugin_query extends views_plugin_query {
+class socrata_catalog_search_plugin_query extends socrata_views_plugin_query {
   // Properties
   var $where = array();
   var $orderby = array();
@@ -83,35 +83,6 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
     }
 
     return $query;
-  }
-
-  /**
-   * Let modules modify the query just prior to finalizing it.
-   */
-  function alter(&$view) {
-    foreach (module_implements('views_query_alter') as $module) {
-      $function = $module . '_views_query_alter';
-      $function($view, $this);
-    }
-  }
-
-  /**
-   * Builds the necessary info to execute the query.
-   *
-   * @param view $view
-   *   The view which is executed.
-   */
-  function build(&$view) {
-    // Store the view in the object to be able to use it later.
-    $this->view = $view;
-
-    $view->init_pager();
-
-    // Let the pager modify the query to add limits.
-    $this->pager->query();
-
-    $view->build_info['query'] = $this->query();
-    $view->build_info['count_query'] = $this->query(TRUE);
   }
 
   /**
@@ -227,113 +198,12 @@ class socrata_catalog_search_plugin_query extends views_plugin_query {
     $view->execute_time = microtime(TRUE) - $start;
   }
 
-  /***************************************************************************
-   * REQUIRED methods for a Views query plugin leveraging base handlers
-   **************************************************************************/
-
   /**
-   * Add field to the query
+   * Add a simple GROUP BY clause to the query. The caller is responsible
+   * for ensuring that the fields are fully qualified and the table is properly
+   * added.
    */
-  function add_field($table, $field, $alias = '', $params = array()) {
-    if (isset($params['function'])) {
-      $alias = $params['function'] . '_' . $field;
-    }
-    // Create a field info array.
-    $field_info = array(
-      'field' => $field,
-      'table' => $table,
-      'alias' => $alias,
-    ) + $params;
-    $this->fields[$field] = $field_info;
-    return $field;
-  }
-
-  /**
-   * Copied from views_plugin_query_default, called by filter handlers.
-   */
-  function add_where($group, $field, $value = NULL, $operator = NULL) {
-    // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
-    // the default group.
-    if (empty($group)) {
-      $group = 0;
-    }
-
-    // Check for a group.
-    if (!isset($this->where[$group])) {
-      $this->set_where_group('AND', $group);
-    }
-
-    $exploded_field = explode('.', $field);
-    $this->where[$group]['conditions'][] = array(
-      'field' => array_pop($exploded_field),
-      'value' => $value,
-      'operator' => $operator,
-    );
-  }
-
-  /**
-   * Ripped straight out of views_plugin_query_default.
-   */
-  function add_where_expression($group, $snippet, $args = array()) {
-    // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
-    // the default group.
-    if (empty($group)) {
-      $group = 0;
-    }
-
-    // Check for a group.
-    if (!isset($this->where[$group])) {
-      $this->set_where_group('AND', $group);
-    }
-
-    $this->where[$group]['conditions'][] = array(
-      'field' => $snippet,
-      'value' => $args,
-      'operator' => 'formula',
-    );
-  }
-
-  /**
-   * Copied from views_plugin_query_default, 
-   * modified for our simplified case, called by sort handlers.
-   */
-  function add_orderby($table, $field, $order = 'ASC', $alias = '', $params = array()) {
-    // Only fill out this aliasing if there is a table;
-    // otherwise we assume it is a formula.
-    if (!$alias && $table) {
-      $as = $field;
-    }
-    else {
-      $as = $alias;
-    }
-
-    if ($field) {
-      $as = $this->add_field($table, $field, $as, $params);
-    }
-
-    // If using an aggregate function, wrap the field in the function.
-    if ($params && isset($params['function'])) {
-      $as = $params['function'] . '(' . $as . ')';
-    }
-
-    $this->orderby[] = array(
-      'field' => $as,
-      'direction' => strtoupper($order),
-    );
-  }
-
-  /**
-   * Remove all fields that may have been added; primarily used for summary
-   * mode where we're changing the query because we didn't get data we needed.
-   */
-  function clear_fields() {
-    $this->fields = array();
-  }
-
-  /**
-   * Dummy placeholder method to satisfy Views core handlers.
-   */
-  function ensure_table($table) {
-    return $table;
+  function add_groupby($clause) {
+    $this->groupby = array();
   }
 }
