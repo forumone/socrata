@@ -73,7 +73,7 @@ function _socrata_ctools_export_ui_form_validate(&$form, &$form_state) {
   $values = $form_state['values'];
 
   // Validate endpoint URL for dataset.
-  if (!valid_url($values['endpoint'], TRUE)) {
+  if (!valid_url(trim($values['endpoint']), TRUE)) {
     form_set_error('endpoint', t('The URL is not properly formed'));
   }
 }
@@ -82,6 +82,12 @@ function _socrata_ctools_export_ui_form_validate(&$form, &$form_state) {
  * Handle submission of the source add/edit form.
  */
 function _socrata_ctools_export_ui_form_submit(&$form, &$form_state) {
+  // Trim out whitespace on all fields.
+  $form_state['values']['name'] = trim($form_state['values']['name']);
+  $form_state['values']['description'] = trim($form_state['values']['description']);
+  $form_state['values']['endpoint'] = trim($form_state['values']['endpoint']);
+  $form_state['values']['app_token'] = trim($form_state['values']['app_token']);
+
   // Clear out Views table definition caches so rebuilds will pick up
   // added/removed/edited sources.
   if (module_exists('views')) {
