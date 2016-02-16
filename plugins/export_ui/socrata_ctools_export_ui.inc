@@ -72,9 +72,17 @@ function _socrata_ctools_export_ui_form(&$form, &$form_state) {
 function _socrata_ctools_export_ui_form_validate(&$form, &$form_state) {
   $values = $form_state['values'];
 
-  // Validate endpoint URL for dataset.
+  // Ensure we have a valid URL for the endpoint.
   if (!valid_url(trim($values['endpoint']), TRUE)) {
     form_set_error('endpoint', t('The URL is not properly formed'));
+  }
+
+  // Ensure we get valid metadata for the endpoint.
+  $query = db_select($values['name'])->extend('SocrataSelectQuery');
+  $query->setSource($values['endpoint'], $values['app_token']);
+  $resp = $query->execute('metadata');
+  if (!$resp) {
+    form_set_error('endpoint', t('The endpoint URL does not appear to be valid. Try pasting the URL into your browser to be sure you see results.'));
   }
 }
 

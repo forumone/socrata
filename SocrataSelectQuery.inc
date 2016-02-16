@@ -10,6 +10,18 @@ class SocrataSelectQuery extends SelectQueryExtender {
    * Socrata Query Language parameters.
    */
   public $params = array();
+  protected $source;
+
+  /**
+   * Get the Socrata source object.
+   */
+  public function setSource($endpoint, $app_token) {
+    $source = new stdClass();
+    $source->endpoint = $endpoint;
+    $source->app_token = $app_token;
+    $this->source = $source;
+    return $source;
+  }
 
   /**
    * Get the Socrata source object.
@@ -80,9 +92,6 @@ class SocrataSelectQuery extends SelectQueryExtender {
   /**
    * Return Socrata metadata URL.
    *
-   * @param string $format
-   *   The data format
-   *
    * @return string
    *   The download URL
    */
@@ -105,7 +114,7 @@ class SocrataSelectQuery extends SelectQueryExtender {
   public function execute($type = NULL) {
     $retval = FALSE;
 
-    $source = $this->getSource();
+    $source = isset($this->source) ? $this->source : $this->getSource();
     $endpoint = $source->endpoint;
     $app_token = $source->app_token;
 
