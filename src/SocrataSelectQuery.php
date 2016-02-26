@@ -1,4 +1,6 @@
 <?php
+namespace Drupal\socrata;
+
 /**
  * @file
  * Decorator class for a Socrata dataset query

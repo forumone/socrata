@@ -1,9 +1,5 @@
 <?php
-
-/**
- * @file
- * Definition of socrata_catalog_search_handler_field_list.
- */
+namespace Drupal\socrata;
 
 /**
  * Field handler to provide a list of categories.

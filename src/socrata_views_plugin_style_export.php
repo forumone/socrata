@@ -1,8 +1,5 @@
 <?php
-/**
- * @file
- * Plugin include file for export style plugin.
- */
+namespace Drupal\socrata;
 
 /**
  * Generalized style plugin for export plugins.

@@ -67,8 +67,8 @@ function _socrata_dbg($msg, $vars = array(), $link = NULL) {
   if (!$vars) {
     $vars = array();
   }
-  if (variable_get('socrata_debug', FALSE)) {
-    watchdog('socrata', (is_array($msg) || is_object($msg)) ? '<pre>' . print_r($msg, TRUE) . '</pre>' : $msg, $vars, WATCHDOG_DEBUG, $link);
+  if (\Drupal::config('socrata.settings')->get('socrata_debug')) {
+    \Drupal::logger('socrata')->debug((is_array($msg) || is_object($msg)) ? '<pre>' . print_r($msg, TRUE) . '</pre>' : $msg, []);
     if (function_exists('dpm')) {
       // @ignore production_devel sniffer_functions_discouragedfunctions_discouraged sniffer_semantics_functioncall_notliteralstring sniffer_files_linelength_toolong
       dpm((is_array($msg) || is_object($msg)) ? $msg : t($msg, $vars));
@@ -84,7 +84,7 @@ function _socrata_log($msg, $vars = NULL, $severity = WATCHDOG_INFO, $link = NUL
   if (!is_string($msg)) {
     $msg = print_r($msg, TRUE);
   }
-  watchdog('socrata', $msg, $vars, $severity, $link);
+  \Drupal::logger('socrata')->notice($msg, []);
 }
 
 /**
@@ -100,8 +100,12 @@ function _socrata_resolve_redirects($endpoint) {
   $ch = curl_init();
   if ($ch) {
     // Pull and set custom curl options.
-    $curlopts = variable_get('socrata_curl_options', array());
-    drupal_alter('socrata_curl_options', $curlopts);
+    // @FIXME
+// Could not extract the default value because it is either indeterminate, or
+// not scalar. You'll need to provide a default value in
+// config/install/socrata.settings.yml and config/schema/socrata.schema.yml.
+$curlopts = \Drupal::config('socrata.settings')->get('socrata_curl_options');
+    \Drupal::moduleHandler()->alter('socrata_curl_options', $curlopts);
     curl_setopt_array($ch, $curlopts);
 
     // Set required curl options.
@@ -114,7 +118,10 @@ function _socrata_resolve_redirects($endpoint) {
     // Execute the request and cleanup.
     curl_setopt_array($ch, $curlopts);
     do {
-      $soda_url = url($endpoint, array('query' => array('$limit' => 1), 'absolute' => TRUE));
+      // @FIXME
+// url() expects a route name or an external URI.
+// $soda_url = url($endpoint, array('query' => array('$limit' => 1), 'absolute' => TRUE));
+
       curl_setopt($ch, CURLOPT_URL, $soda_url);
       $resp = curl_exec($ch);
       if (FALSE !== $resp) {

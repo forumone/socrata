@@ -1,10 +1,5 @@
 <?php
-/**
- * @file
- * Contains the bulk export display plugin.
- *
- * This allows views to be rendered in parts by batch API.
- */
+namespace Drupal\socrata;
 
 /**
  * The plugin that batches its rendering.

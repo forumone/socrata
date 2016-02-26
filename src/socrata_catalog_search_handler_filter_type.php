@@ -1,9 +1,5 @@
 <?php
-
-/**
- * @file
- * Definition of socrata_catalog_search_handler_filter_type.
- */
+namespace Drupal\socrata;
 
 /**
  * @ingroup views_filter_handlers

@@ -1,0 +1,6 @@
+name: Socrata
+description: 'Provides basic integration points for Socrata SODA API service'
+package: Socrata
+core: 8.x
+dependencies: {  }
+type: module

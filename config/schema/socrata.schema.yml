@@ -1,0 +1,6 @@
+socrata.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    socrata_debug:
+      type: boolean
