@@ -1,1 +1,2 @@
 socrata_debug: false
+socrata_curl_options: {  }

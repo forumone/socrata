@@ -105,7 +105,9 @@ function _socrata_resolve_redirects($endpoint) {
 // not scalar. You'll need to provide a default value in
 // config/install/socrata.settings.yml and config/schema/socrata.schema.yml.
 $curlopts = \Drupal::config('socrata.settings')->get('socrata_curl_options');
-    \Drupal::moduleHandler()->alter('socrata_curl_options', $curlopts);
+
+// Need to look at hook_socrata_curl_options_alter in D7 module.
+//    \Drupal::moduleHandler()->alter('socrata_curl_options', $curlopts);
     curl_setopt_array($ch, $curlopts);
 
     // Set required curl options.
