@@ -1,0 +1,4 @@
+administer socrata:
+  title: 'administer socrata'
+  description: 'Perform administration tasks for Socrata integration'
+  restrict access: TRUE
