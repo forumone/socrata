@@ -1,5 +1,7 @@
 <?php
 namespace Drupal\socrata;
+use Drupal\Core\Url;
+use Drupal\Core\Link;
 
 /**
  * The plugin that batches its rendering.
@@ -114,9 +116,8 @@ class socrata_views_plugin_display_export extends views_plugin_display_feed {
     // Force the view to build.
     $build = $this->view->build();
     $text = check_plain($this->view->display['socrata_data_export_1']->display_options['style_options']['attach_text']);
-    // @FIXME
-// l() expects a Url object, created from a route name or external URI.
-// return l($text, '');
 
+    // @todo: Hmm, what path do we really want here?
+    return Link::createFromRoute($text, '<front>')->toRenderable();
   }
 }

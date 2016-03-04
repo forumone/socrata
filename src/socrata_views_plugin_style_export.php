@@ -1,5 +1,7 @@
 <?php
 namespace Drupal\socrata;
+use Drupal\Core\Url;
+use Drupal\Core\Link;
 
 /**
  * Generalized style plugin for export plugins.
@@ -49,13 +51,10 @@ class socrata_views_plugin_style_export extends views_plugin_style {
       $download_format = $this->definition['export feed type'];
       $socrata_select_query = $this->view->build_info['query'];
       $url = $socrata_select_query->getDownloadUrl($download_format);
-      // @FIXME
-// l() expects a Url object, created from a route name or external URI.
-// $this->view->feed_icon = l(
-//         $this->options['attach_text'],
-//         $url
-//       );
 
+      // @todo: Needs testing.
+      $link = Link::fromTextAndUrl($this->options['attach_text'], $url)->toRenderable();
+      $this->view->feed_icon = render($link);
     }
   }
 

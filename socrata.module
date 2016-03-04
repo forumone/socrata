@@ -4,6 +4,8 @@
  * Main code for Socrata module
  */
 
+use Drupal\Core\Url;
+
 /**
  * Implements hook_ctools_plugin_api().
  */
@@ -120,9 +122,7 @@ $curlopts = \Drupal::config('socrata.settings')->get('socrata_curl_options');
     // Execute the request and cleanup.
     curl_setopt_array($ch, $curlopts);
     do {
-      // @FIXME
-// url() expects a route name or an external URI.
-// $soda_url = url($endpoint, array('query' => array('$limit' => 1), 'absolute' => TRUE));
+      $url = Url::fromUri($endpoint, array('query' => array('$limit' => 1), 'absolute' => TRUE))->toString();
 
       curl_setopt($ch, CURLOPT_URL, $soda_url);
       $resp = curl_exec($ch);
