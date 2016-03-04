@@ -1,5 +1,7 @@
 <?php
 namespace Drupal\socrata;
+use Drupal\Core\Url;
+use Drupal\Core\Link;
 
 /**
  * @file
@@ -78,16 +80,10 @@ class SocrataSelectQuery extends SelectQueryExtender {
         }
       }
       $endpoint_with_params .= implode('&', $params_query);
-      // @FIXME
-// url() expects a route name or an external URI.
-// $url = url($endpoint_with_params);
-
+      $url = Url::fromUri($endpoint_with_params, array('absolute' => TRUE))->toString();
     }
     else {
-      // @FIXME
-// url() expects a route name or an external URI.
-// $url = url($endpoint, array('query' => $params, 'absolute' => TRUE));
-
+      $url = Url::fromUri($endpoint, array('query' => $params, 'absolute' => TRUE))->toString();
     }
     return $url;
   }
@@ -191,9 +187,10 @@ $curlopts = \Drupal::config('socrata.settings')->get('socrata_curl_options');
           // Pull info from response and see if we had an error.
           $info = curl_getinfo($ch);
           if ($info['http_code'] >= 400) {
-            // @FIXME
-// l() expects a Url object, created from a route name or external URI.
-// _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, l(t('Socrata Request'), $soda_url, array('absolute' => TRUE)));
+            // @todo: Needs testing.
+            $url = Url::fromUri($soda_url, array('absolute' => TRUE));
+            $link = Link::fromTextAndUrl('Socrata Request', $url)->toRenderable();
+            _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, $link);
 
             break;
           }
@@ -224,9 +221,10 @@ $curlopts = \Drupal::config('socrata.settings')->get('socrata_curl_options');
           }
         }
         else {
-          // @FIXME
-// l() expects a Url object, created from a route name or external URI.
-// _socrata_log('curl_exec failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR, l(t('Socrata Request'), $soda_url, array('absolute' => TRUE)));
+          // @todo: Needs testing.
+          $url = Url::fromUri($soda_url, array('absolute' => TRUE));
+          $link = Link::fromTextAndUrl('Socrata Request', $url)->toRenderable();
+          _socrata_log('curl_exec failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR, $link);
 
         }
       } while (FALSE !== $resp && !empty($retval['headers']['location']));
