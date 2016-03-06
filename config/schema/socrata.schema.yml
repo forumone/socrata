@@ -4,3 +4,13 @@ socrata.settings:
   mapping:
     socrata_debug:
       type: boolean
+socrata.endpoint.*:
+  type: config_entity
+  label: 'Endpoint config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+        type: label
+        label: 'Label'

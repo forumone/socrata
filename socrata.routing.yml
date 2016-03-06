@@ -1,0 +1,31 @@
+socrata.endpoint.collection:
+  path: '/admin/structure/socrata'
+  defaults:
+    _entity_list: 'endpoint'
+    _title: 'Socrata'
+  requirements:
+    _permission: 'administer socrata'
+
+socrata.endpoint.add:
+  path: '/admin/structure/socrata/add'
+  defaults:
+    _entity_form: 'endpoint.add'
+    _title: 'Add Socrata endpoint'
+  requirements:
+    _permission: 'administer socrata'
+
+socrata.endpoint.edit:
+  path: '/admin/structure/socrata/{endpoint}'
+  defaults:
+    _entity_form: 'endpoint.edit'
+    _title: 'Edit Socrata endpoint'
+  requirements:
+    _permission: 'administer socrata'
+
+socrata.endpoint.delete:
+  path: '/admin/structure/socrata/{endpoint}/delete'
+  defaults:
+    _entity_form: 'endpoint.delete'
+    _title: 'Delete Socrata endpoint'
+  requirements:
+    _permission: 'administer socrata'
