@@ -12,18 +12,18 @@ function socrata_schema() {
 
   $schema['socrata_sources'] = array(
     'description' => 'Table storing Socrata API endpoint information',
-    'export' => array(
-      'key' => 'name',
-      'key name' => 'Name',
-      'primary key' => 'sid',
-      'identifier' => 'source',
-      'api' => array(
-        'owner' => 'socrata',
-        'api' => 'socrata',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
+//    'export' => array(
+//      'key' => 'name',
+//      'key name' => 'Name',
+//      'primary key' => 'sid',
+//      'identifier' => 'source',
+//      'api' => array(
+//        'owner' => 'socrata',
+//        'api' => 'socrata',
+//        'minimum_version' => 1,
+//        'current_version' => 1,
+//      ),
+//    ),
     'fields' => array(
       'name' => array(
         'type' => 'varchar',
@@ -54,9 +54,9 @@ function socrata_schema() {
       ),
     ),
     'primary key' => array('sid'),
-    'unique keys' => array(
-      'name' => array('name'),
-    ),
+//    'unique keys' => array(
+//      'name' => array('name'),
+//    ),
   );
 
   return $schema;
