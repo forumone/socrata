@@ -23,7 +23,7 @@ use Drupal\socrata\EndpointInterface;
  *       "delete" = "Drupal\socrata\Form\EndpointDeleteForm",
  *     }
  *   },
- *   config_prefix = "socrata",
+ *   config_prefix = "endpoint",
  *   admin_permission = "administer socrata",
  *   entity_keys = {
  *     "id" = "id",
@@ -31,7 +31,7 @@ use Drupal\socrata\EndpointInterface;
  *   },
  *   links = {
  *     "edit-form" = "/admin/structure/socrata/{endpoint}",
- *     "delete-form" = "/admin/structure/socrata/{endpoint}/delete",
+ *     "delete-form" = "/admin/structure/socrata/{endpoint}/delete"
  *   }
  * )
  */
