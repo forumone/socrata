@@ -23,7 +23,7 @@ use Drupal\socrata\EndpointInterface;
  *       "delete" = "Drupal\socrata\Form\EndpointDeleteForm",
  *     }
  *   },
- *   config_prefix = "socrata",
+ *   config_prefix = "endpoint",
  *   admin_permission = "administer socrata",
  *   entity_keys = {
  *     "id" = "id",
@@ -31,7 +31,7 @@ use Drupal\socrata\EndpointInterface;
  *   },
  *   links = {
  *     "edit-form" = "/admin/structure/socrata/{endpoint}",
- *     "delete-form" = "/admin/structure/socrata/{endpoint}/delete",
+ *     "delete-form" = "/admin/structure/socrata/{endpoint}/delete"
  *   }
  * )
  */
@@ -51,6 +51,33 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    */
   public $label;
 
-  // Your specific configuration property get/set methods go here,
-  // implementing the interface.
+
+  /**
+   * The Endpoint URL.
+   *
+   * @var string
+   */
+  public $url;
+
+  /**
+   * The Endpoint Application token.
+   *
+   * @var string
+   */
+  public $app_token;
+
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUrl() {
+    return $this->url;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAppToken() {
+    return $this->app_token;
+  }
 }

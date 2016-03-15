@@ -4,7 +4,7 @@
  * Contains \Drupal\socrata\Form\EndpointDeleteForm.
  */
 
-namespace Drupal\endpoint\Form;
+namespace Drupal\socrata\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
 use Drupal\Core\Url;

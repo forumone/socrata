@@ -13,4 +13,10 @@ socrata.endpoint.*:
       label: 'ID'
     label:
         type: label
-        label: 'Label'
+        label: 'Name'
+    url:
+        type: string
+        label: 'URL'
+    app_token:
+        type: string
+        label: 'Application token'

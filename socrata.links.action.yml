@@ -1,5 +1,5 @@
-socrata.endpoint.add_form:
-  route_name: 'socrata.endpoint.add'
+entity.endpoint.add_form:
+  route_name: 'entity.endpoint.add_form'
   title: 'Add Socrata endpoint'
   appears_on:
-    - socrata.endpoint.collection
+    - entity.endpoint.collection
