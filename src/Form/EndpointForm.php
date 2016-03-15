@@ -39,14 +39,6 @@ class EndpointForm extends EntityForm {
 
     $endpoint = $this->entity;
 
-    $form['label'] = array(
-      '#type' => 'textfield',
-      '#title' => $this->t('Label'),
-      '#maxlength' => 255,
-      '#default_value' => $endpoint->label(),
-      '#description' => $this->t("Label for the endpoint."),
-      '#required' => TRUE,
-    );
     $form['id'] = array(
       '#type' => 'machine_name',
       '#default_value' => $endpoint->id(),
@@ -55,8 +47,30 @@ class EndpointForm extends EntityForm {
       ),
       '#disabled' => !$endpoint->isNew(),
     );
-
-    // You will need additional form elements for your custom properties.
+    $form['label'] = array(
+      '#type' => 'textfield',
+      '#title' => $this->t('Name'),
+      '#maxlength' => 255,
+      '#default_value' => $endpoint->label(),
+      '#description' => $this->t("Name of the endpoint."),
+      '#required' => TRUE,
+    );
+    $form['url'] = array(
+      '#type' => 'textfield',
+      '#title' => $this->t('URL'),
+      '#maxlength' => 255,
+      '#default_value' => $endpoint->getUrl(),
+      '#description' => $this->t("URL of the endpoint."),
+      '#required' => TRUE,
+    );
+    $form['app_token'] = array(
+      '#type' => 'textfield',
+      '#title' => $this->t('Application token'),
+      '#maxlength' => 255,
+      '#default_value' => $endpoint->getAppToken(),
+      '#description' => $this->t("Application token."),
+      '#required' => TRUE,
+    );
 
     return $form;
   }
@@ -66,6 +80,11 @@ class EndpointForm extends EntityForm {
    */
   public function save(array $form, FormStateInterface $form_state) {
     $endpoint = $this->entity;
+
+    // Prevent leading and trailing spaces.
+    $endpoint->set('label', trim($endpoint->label()));
+    $endpoint->set('url', $form_state->getValue('url'));
+    $endpoint->set('app_token', $form_state->getValue('app_token'));
     $status = $endpoint->save();
 
     if ($status) {

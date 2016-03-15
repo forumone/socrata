@@ -51,6 +51,33 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    */
   public $label;
 
-  // Your specific configuration property get/set methods go here,
-  // implementing the interface.
+
+  /**
+   * The Endpoint URL.
+   *
+   * @var string
+   */
+  public $url;
+
+  /**
+   * The Endpoint Application token.
+   *
+   * @var string
+   */
+  public $app_token;
+
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUrl() {
+    return $this->url;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAppToken() {
+    return $this->app_token;
+  }
 }
