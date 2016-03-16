@@ -69,7 +69,7 @@ class EndpointForm extends EntityForm {
       '#maxlength' => 255,
       '#default_value' => $endpoint->getAppToken(),
       '#description' => $this->t("Application token."),
-      '#required' => TRUE,
+      '#required' => FALSE,
     );
 
     return $form;
