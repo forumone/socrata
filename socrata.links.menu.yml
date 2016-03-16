@@ -1,0 +1,5 @@
+entity.endpoint.collection:
+  title: Socrata
+  parent: system.admin_structure
+  description: 'Manage Socrata endpoints.'
+  route_name: entity.endpoint.collection
