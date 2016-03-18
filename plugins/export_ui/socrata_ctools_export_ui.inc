@@ -51,7 +51,7 @@ function _socrata_ctools_export_ui_form(&$form, &$form_state) {
   $form['endpoint'] = array(
     '#type' => 'textfield',
     '#title' => t('Endpoint URL'),
-    '#description' => t('The endpoint URL for the dataset'),
+    '#description' => t('The endpoint URL for the dataset. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json'),
     '#default_value' => $source->endpoint,
     '#required' => TRUE,
   );
@@ -74,15 +74,22 @@ function _socrata_ctools_export_ui_form_validate(&$form, &$form_state) {
 
   // Ensure we have a valid URL for the endpoint.
   if (!valid_url(trim($values['endpoint']), TRUE)) {
-    form_set_error('endpoint', t('The URL is not properly formed'));
+    form_set_error('endpoint', t('The endpoint URL is not properly formed'));
   }
 
-  // Ensure we get valid metadata for the endpoint.
+  // Ensure we have a SODA2 URL for the endpoint.
+  // @todo: Is there a better way to check this?
+  if (strpos($values['endpoint'], 'resource/') === false) {
+    form_set_error('endpoint', t('The endpoint URL does not point to a valid SODA2 resource. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json'));
+  }
+
+  // Ensure we get a valid response from the endpoint.
   $query = db_select($values['name'])->extend('SocrataSelectQuery');
+  $query->params['$limit'] = 1;
   $query->setSource($values['endpoint'], $values['app_token']);
-  $resp = $query->execute('metadata');
+  $resp = $query->execute();
   if (!$resp) {
-    form_set_error('endpoint', t('The endpoint URL does not appear to be valid. Try pasting the URL into your browser to be sure you see results.'));
+    form_set_error('endpoint', t('A request to the endpoint URL did not return a valid response. Try pasting the URL into your browser to be sure you see results.'));
   }
 }
 
