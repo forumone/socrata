@@ -10,6 +10,7 @@ use Drupal\Component\Utility\Xss;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\socrata\Entity\Endpoint;
 
 /**
  * Provides a filter to insert Socrata endpoint.
@@ -40,12 +41,29 @@ class FilterSocrata extends FilterBase {
           $attrs = explode(' ', trim($matches[1]));
           foreach ($attrs as $attr) {
             list($name, $val) = explode('=', trim($attr), 2);
-            $vars['#' . Xss::filter($name)] = Xss::filter($val);
+            $vars[Xss::filter($name)] = Xss::filter($val);
           }
-          $vars['#theme'] = 'socrata_filter';
-          $vars['#embed_url'] = 'https://data.seattle.gov/w/i5jq-ms7b';
+
+          // Check if the source was set.
+          if (!isset($vars['source'])) {
+            return $retval;
+          }
+
+          $id = $vars['source'];
+          $endpoint = Endpoint::load($id);
+          if (!is_object($endpoint)) {
+            return $retval;
+          }
+
+          $render_array['#theme'] = 'socrata_filter';
+          $render_array['#embed_url'] = $endpoint->getEmbedURL();
+          $render_array['#source'] = $vars['source'];
+          $render_array['#width'] = $this->getWidth($vars);
+          $render_array['#height'] = $this->getHeight($vars);;
+
+          $retval = render($render_array);
         }
-        return render($vars);
+        return $retval;
       },
       $text
     );
@@ -89,6 +107,36 @@ class FilterSocrata extends FilterBase {
     else {
       return $this->t('Embed Socrata views using @embed', ['@embed' => '[socrata source=<source_name> width=<width> height=<height>]']);
     }
+  }
+
+  /**
+   * Returns the set width or the default.
+   *
+   * @param array $vars
+   *
+   * @return int
+   */
+  protected function getWidth($vars) {
+    if (isset($vars['width']) && is_numeric($vars['width'])) {
+      return $vars['width'];
+    }
+
+    return $this->settings['socrata_filter_width'];
+  }
+
+  /**
+   * Returns the set height or the default.
+   *
+   * @param array $vars
+   *
+   * @return int
+   */
+  protected function getHeight($vars) {
+    if (isset($vars['height']) && is_numeric($vars['height'])) {
+      return $vars['height'];
+    }
+
+    return $this->settings['socrata_filter_height'];
   }
 
 }
