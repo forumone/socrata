@@ -22,38 +22,3 @@ function socrata_filter_theme($existing, $type, $theme, $path) {
 
   return $items;
 }
-
-/**
- * Preprocess hook for socrata_filter
- */
-function template_preprocess_socrata_filter(&$vars) {
-  // dpm($vars);
-  /*$settings = isset($vars['filter']) ? $vars['filter']->settings : array(
-    'width' => 525,
-    'height' => 400,
-  );
-
-  // Make sure we have some valid values to pass on, using default Socrata "small" embed sizes in the event something goes horribly wrong
-  if (empty($vars['width'])) {
-    $vars['width'] = !empty($settings['width']) ? $settings['width'] : 525;
-  }
-  if (empty($vars['height'])) {
-    $vars['height'] = !empty($settings['height']) ? $settings['height'] : 400;
-  }*/
-
-  // Load our source
-  // @todo: switch to getSource
-  /*ctools_include('export');
-  $source = ctools_export_crud_load('socrata_sources', $vars['source']);
-  if ($source) {
-    // Construct dataset-specific template variables
-    $vars['source'] = (array) $source;
-    $components = socrata_components_from_endpoint($source->endpoint);
-    $vars['dataset'] = $components['dataset_id'];
-
-    // Now try to construct the embed URL using the fully-resolved endpoint
-    $endpoint = _socrata_resolve_redirects($source->endpoint);
-    $components = socrata_components_from_endpoint($endpoint);
-    $vars['embed_url'] = "https://{$components['host']}/w/{$vars['dataset']}";
-  }*/
-}

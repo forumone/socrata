@@ -32,7 +32,6 @@ class FilterSocrata extends FilterBase {
    * {@inheritdoc}
    */
   public function process($text, $langcode) {
-     // dpm($this->settings);
     $new_text = preg_replace_callback(
       '/\[socrata((?:\s).*)]/i',
       function ($matches) {
