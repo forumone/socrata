@@ -80,4 +80,38 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
   public function getAppToken() {
     return $this->app_token;
   }
+
+  /**
+   * Returns an embed URL.
+   *
+   * @return string
+   */
+  public function getEmbedURL() {
+    $components = $this->getComponents();
+    return "https://{$components['host']}/w/{$components['dataset_id']}";
+  }
+
+  /**
+   * Parse out the components of endpoint URL.
+   *
+   * @return string
+   */
+  public function getComponents() {
+    $components = parse_url($this->url);
+    $dataset_id = '';
+    $path = $components['path'];
+    if ($path) {
+      $parts = explode('/', $path);
+      if (!empty($parts)) {
+        $tmp = explode('.', array_pop($parts));
+        if (!empty($tmp)) {
+          $dataset_id = $tmp[0];
+        }
+      }
+    }
+    $components['dataset_id'] = $dataset_id;
+
+    return $components;
+  }
+
 }
