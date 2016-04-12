@@ -92,6 +92,32 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
   }
 
   /**
+   * Return download Socrata URL.
+   *
+   * @param $format string
+   *
+   * @return string
+   */
+  public function getDownloadUrl($format = 'csv') {
+    $components = $this->getComponents();
+
+    // Note that this is the old Socrata API style URL.
+    return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}/rows.{$format}?accessType=DOWNLOAD";
+  }
+
+  /**
+   * Return Socrata metadata URL.
+   *
+   * @return string
+   *   The download URL
+   */
+  public function getMetaDataUrl() {
+    $components = $this->getComponents();
+
+    return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}.json";
+  }
+
+  /**
    * Parse out the components of endpoint URL.
    *
    * @return string
