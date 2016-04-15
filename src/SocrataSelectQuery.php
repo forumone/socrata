@@ -94,7 +94,7 @@ class SocrataSelectQuery extends SelectExtender {
           $soda_url = $this->endpoint->getMetaDataURL();
         }
         else {
-          $soda_url = $this->endpoint->getCurlUrl($params);
+          $soda_url = $this->endpoint->getCurlUrl($this->params);
         }
         _socrata_dbg($soda_url);
 
