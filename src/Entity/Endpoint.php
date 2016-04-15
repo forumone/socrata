@@ -7,6 +7,7 @@
 namespace Drupal\socrata\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Url;
 use Drupal\socrata\EndpointInterface;
 
 /**
@@ -79,6 +80,40 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    */
   public function getAppToken() {
     return $this->app_token;
+  }
+
+  /**
+   * Return full Socrata URL with endpoint and parameters.
+   *
+   * @param bool $encode
+   *   Determins whether we should URL-encode the returned URL.
+   *
+   * @return string
+   *   Formatted URL
+   */
+  public function getCurlUrl($params, $encode = TRUE) {
+    // We might not want to encode the URL in cases where we just want it to be
+    // output for humans to read, most notably in the query displayed in the
+    // views preview.
+    // In this case, assemble our URL with the query parameters directly,
+    // rather than passing them in as query arguments to the URL function, where
+    // they'll be URL-encoded.
+    if (!$encode) {
+      $url_with_params = $this->getUrl();
+      if (!empty($params)) {
+        $url_with_params .= '?';
+        $params_query = [];
+        foreach ($params as $key => $value) {
+          $params_query[] = $key . '=' . $value;
+        }
+      }
+      $url_with_params .= implode('&', $params_query);
+      $url = Url::fromUri($url_with_params, ['absolute' => TRUE])->toString();
+    }
+    else {
+      $url = Url::fromUri($this->getUrl(), ['query' => $params, 'absolute' => TRUE])->toString();
+    }
+    return $url;
   }
 
   /**

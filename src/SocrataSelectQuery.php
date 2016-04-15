@@ -39,46 +39,6 @@ class SocrataSelectQuery extends SelectExtender {
   }
 
   /**
-   * Return full Socrata URL with endpoint and parameters.
-   * This method is in this class instead of the endpoint class because the URL query
-   * is peculiar to the SODA 2 API and we'll want to override it for other Socrata
-   * APIs.
-   *
-   * @param bool $encode
-   *   Determins whether we should URL-encode the returned URL.
-   *
-   * @return string
-   *   Formatted URL
-   */
-  protected function getCurlUrl($encode = TRUE) {
-    $url = $this->endpoint->url;
-    $params = $this->params;
-
-    // We might not want to encode the URL in cases where we just want it to be
-    // output for humans to read, most notably in the query displayed in the
-    // views preview.
-    // In this case, assemble our URL with the query parameters directly,
-    // rather than passing them in as query arguments to the URL function, where
-    // they'll be URL-encoded.
-    if (!$encode) {
-      $url_with_params = $url;
-      if (!empty($params)) {
-        $url_with_params .= '?';
-        $params_query = array();
-        foreach ($params as $key => $value) {
-          $params_query[] = $key . '=' . $value;
-        }
-      }
-      $url_with_params .= implode('&', $params_query);
-      $url = Url::fromUri($url_with_params, array('absolute' => TRUE))->toString();
-    }
-    else {
-      $url = Url::fromUri($url, array('query' => $params, 'absolute' => TRUE))->toString();
-    }
-    return $url;
-  }
-
-  /**
    * Execute the query. In our case, this is actually the cURL request.
    *
    * @param $type string
@@ -134,7 +94,7 @@ class SocrataSelectQuery extends SelectExtender {
           $soda_url = $this->endpoint->getMetaDataURL();
         }
         else {
-          $soda_url = $this->getCurlUrl();
+          $soda_url = $this->endpoint->getCurlUrl($params);
         }
         _socrata_dbg($soda_url);
 
@@ -204,7 +164,7 @@ class SocrataSelectQuery extends SelectExtender {
    */
   public function __toString() {
     if ($this->endpoint) {
-      $soda_url = $this->getCurlUrl(FALSE);
+      $soda_url = $this->endpoint->getCurlUrl($this->params, FALSE);
       $this->query->comment('Socrata URL: "' . $soda_url . '" Corresponding SQL query: ');
     }
 
