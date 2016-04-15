@@ -14,6 +14,7 @@ class socrata_catalog_search_handler_filter_list extends views_handler_filter_in
     $lists = &drupal_static(__FUNCTION__);
     if (!isset($lists[$field])) {
       $options = array();
+      // @FIXME use a different query with overridden setEndpoint().
       $query = db_select($this->view->base_table)->extend('SocrataCatalogSearchSelectQuery');
       $query->suffix = $field;
       $resp = $query->execute();
