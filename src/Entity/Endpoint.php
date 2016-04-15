@@ -91,7 +91,12 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * @return string
    *   Formatted URL
    */
-  public function getCurlUrl($params, $encode = TRUE) {
+  public function getCurlUrl($params = [], $encode = TRUE) {
+    // Add app token if available.
+    if ($this->getAppToken()) {
+      $params['$$app_token'] = $this->getAppToken();
+    }
+
     // We might not want to encode the URL in cases where we just want it to be
     // output for humans to read, most notably in the query displayed in the
     // views preview.

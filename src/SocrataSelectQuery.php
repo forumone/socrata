@@ -50,20 +50,6 @@ class SocrataSelectQuery extends SelectExtender {
   public function execute($type = NULL) {
     $retval = FALSE;
 
-    $url = $this->endpoint->url;
-    $app_token = $this->endpoint->app_token;
-
-    // Make sure we have a valid-looking endpoint.
-    if (substr_compare($url, '.json', -5)) {
-      $url .= '.json';
-    }
-
-    // Prepare authorization headers.
-    $params = $this->params;
-    if (!empty($app_token)) {
-      $params['$$app_token'] = $app_token;
-    }
-
     // Create a new cURL resource.
     $ch = curl_init();
     if ($ch) {
