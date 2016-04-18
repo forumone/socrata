@@ -83,7 +83,7 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
   }
 
   /**
-   * Return full Socrata URL with endpoint and parameters.
+   * Return Socrata SODA URL with endpoint and parameters.
    *
    * @param bool $encode
    *   Determins whether we should URL-encode the returned URL.
@@ -91,7 +91,7 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * @return string
    *   Formatted URL
    */
-  public function getCurlUrl($params = [], $encode = TRUE) {
+  public function getSodaURL($params = [], $encode = TRUE) {
     // Add app token if available.
     if ($this->getAppToken()) {
       $params['$$app_token'] = $this->getAppToken();

@@ -80,7 +80,7 @@ class SocrataSelectQuery extends SelectExtender {
           $soda_url = $this->endpoint->getMetaDataURL();
         }
         else {
-          $soda_url = $this->endpoint->getCurlUrl($this->params);
+          $soda_url = $this->endpoint->getSodaURL($this->params);
         }
         _socrata_dbg($soda_url);
 
@@ -150,7 +150,7 @@ class SocrataSelectQuery extends SelectExtender {
    */
   public function __toString() {
     if ($this->endpoint) {
-      $soda_url = $this->endpoint->getCurlUrl($this->params, FALSE);
+      $soda_url = $this->endpoint->getSodaURL($this->params, FALSE);
       $this->query->comment('Socrata URL: "' . $soda_url . '" Corresponding SQL query: ');
     }
 
