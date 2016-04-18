@@ -150,7 +150,7 @@ class SocrataSelectQuery extends SelectExtender {
    */
   public function __toString() {
     if ($this->endpoint) {
-      $soda_url = $this->endpoint->getSodaURL($this->params, FALSE);
+      $soda_url = $this->endpoint->getUnencodedSodaURL($this->params);
       $this->query->comment('Socrata URL: "' . $soda_url . '" Corresponding SQL query: ');
     }
 
