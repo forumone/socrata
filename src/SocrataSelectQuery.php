@@ -77,21 +77,21 @@ class SocrataSelectQuery extends SelectExtender {
           // 'meta_data' (mentioned below) that are returned from the normal
           // dataset API/endpoint, but when using an old version of the API.
           // @todo Add version number for "old".
-          $soda_url = $this->endpoint->getMetaDataURL();
+          $curl_url = $this->endpoint->getMetaDataURL();
         }
         else {
-          $soda_url = $this->endpoint->getSodaURL($this->params);
+          $curl_url = $this->endpoint->getSodaURL($this->params);
         }
-        _socrata_dbg($soda_url);
+        _socrata_dbg($curl_url);
 
-        curl_setopt($ch, CURLOPT_URL, $soda_url);
+        curl_setopt($ch, CURLOPT_URL, $curl_url);
         $resp = curl_exec($ch);
         if (FALSE !== $resp) {
           // Pull info from response and see if we had an error.
           $info = curl_getinfo($ch);
           if ($info['http_code'] >= 400) {
             // @todo: Needs testing & probably should be pushed into a debug class.
-            $url = Url::fromUri($soda_url, array('absolute' => TRUE));
+            $url = Url::fromUri($curl_url, array('absolute' => TRUE));
             $link = Link::fromTextAndUrl('Socrata Request', $url)->toRenderable();
             _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, $link);
 
@@ -125,7 +125,7 @@ class SocrataSelectQuery extends SelectExtender {
         }
         else {
           // @todo: Needs testing & probably should be pushed into a debug class.
-          $url = Url::fromUri($soda_url, array('absolute' => TRUE));
+          $url = Url::fromUri($curl_url, array('absolute' => TRUE));
           $link = Link::fromTextAndUrl('Socrata Request', $url)->toRenderable();
           _socrata_log('curl_exec failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR, $link);
 
