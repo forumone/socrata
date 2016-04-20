@@ -80,6 +80,7 @@ class SocrataSelectQuery extends SelectExtender {
           $curl_url = $this->endpoint->getMetaDataURL();
         }
         else {
+          // Can build the SODA URL now that all the parameters have been set.
           $curl_url = $this->endpoint->getSodaURL($this->params);
         }
         _socrata_dbg($curl_url);
