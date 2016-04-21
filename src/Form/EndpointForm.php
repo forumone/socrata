@@ -87,9 +87,9 @@ class EndpointForm extends EntityForm {
     $app_token = $form_state->getValue('app_token');
 
     // Ensure we have a SODA2 URL for the endpoint.
-    // @todo: Is there a better way to check this?
     if (strpos($url, 'resource/') === false) {
       $form_state->setErrorByName('url', t('The endpoint "@url" does not point to a valid SODA2 resource. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json', ['@url' => $url]));
+      // Bail out or otherwise the query below will bork.
       return;
     }
 
