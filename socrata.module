@@ -49,6 +49,26 @@ function socrata_menu_links_discovered_alter(&$links) {
 }
 
 /**
+ * Implements hook_ENTITY_TYPE_insert( for menu entities.
+ */
+function socrata_endpoint_insert(Endpoint $endpoint) {
+  if (\Drupal::moduleHandler()->moduleExists('admin_toolbar_tools')) {
+    // Flushing all the caches is expensive, but is required to make the new
+    // endpoint show up in the Structure menu.
+    drupal_flush_all_caches();
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for menu entities.
+ */
+function socrata_endpoint_delete(Endpoint $endpoint) {
+  if (\Drupal::moduleHandler()->moduleExists('admin_toolbar_tools')) {
+    \Drupal::service('router.builder')->rebuild();
+  }
+}
+
+/**
  * Return an associative array of endpoints.
  *
  * @return array
