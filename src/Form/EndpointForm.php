@@ -58,7 +58,7 @@ class EndpointForm extends EntityForm {
       '#required' => TRUE,
     );
     $form['url'] = array(
-      '#type' => 'textfield',
+      '#type' => 'url',
       '#title' => $this->t('URL'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getUrl(),
