@@ -27,6 +27,16 @@ function socrata_menu_links_discovered_alter(&$links) {
         'endpoint' => $machine_name,
       ),
     );
+    if (\Drupal::moduleHandler()->moduleExists('devel')) {
+      $links['entity.endpoint.devel_load.' . $machine_name] = array(
+        'title' => t('Devel'),
+        'route_name' => 'entity.endpoint.devel_load',
+        'parent' => 'entity.endpoint.edit_form.' . $machine_name,
+        'route_parameters' => array(
+          'endpoint' => $machine_name,
+        ),
+      );
+    }
     $links['entity.endpoint.delete_form.' . $machine_name] = array(
       'title' => new \Drupal\Core\StringTranslation\TranslatableMarkup('Delete'),
       'route_name' => 'entity.endpoint.delete_form',
