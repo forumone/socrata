@@ -31,11 +31,14 @@ class SocrataSelectQuery extends SelectExtender {
   /**
    * Get the Socrata source object.
    */
-  public function setEndpoint() {
-    $tables = $this->query->getTables();
-    $table_names = array_keys($tables);
-    $id = $table_names[0];
-    $this->endpoint = Endpoint::load($id);
+  public function setEndpoint(Endpoint $endpoint = NULL) {
+    if (is_null($endpoint)) {
+      $tables = $this->query->getTables();
+      $table_names = array_keys($tables);
+      $id = $table_names[0];
+      $endpoint = Endpoint::load($id);
+    }
+    $this->endpoint = $endpoint;
   }
 
   /**
