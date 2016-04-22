@@ -79,17 +79,6 @@ function _socrata_dbg($msg, $vars = array(), $link = NULL) {
 }
 
 /**
- * Generates a watchdog log entry during execution of module.
- */
-function _socrata_log($msg, $vars = NULL, $severity = WATCHDOG_INFO, $link = NULL) {
-  // Catch passed-in objects or arrays and dump them accordingly.
-  if (!is_string($msg)) {
-    $msg = print_r($msg, TRUE);
-  }
-  \Drupal::logger('socrata')->notice($msg, []);
-}
-
-/**
  * Util function to resolve redirects.
  */
 function _socrata_resolve_redirects($endpoint) {
