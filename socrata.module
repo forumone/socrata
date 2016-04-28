@@ -5,6 +5,85 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\socrata\Entity\Endpoint;
+
+/**
+ *  Implements hook_menu_links_discovered_alter().
+ */
+function socrata_menu_links_discovered_alter(&$links) {
+  $links['entity.endpoint.add_form'] = [
+    'title' => new \Drupal\Core\StringTranslation\TranslatableMarkup('Add endpoint'),
+    'route_name' => 'entity.endpoint.add_form',
+    'parent' => 'entity.endpoint.collection',
+    'weight' => -50,
+  ];
+  // Adding links to /admin/structure/socrata.
+  foreach (socrata_get_endpoints() as $machine_name => $label) {
+    $links['entity.endpoint.edit_form.' . $machine_name] = array(
+      'title' => new \Drupal\Core\StringTranslation\TranslatableMarkup($label),
+      'route_name' => 'entity.endpoint.edit_form',
+      'parent' => 'entity.endpoint.collection',
+      'route_parameters' => array(
+        'endpoint' => $machine_name,
+      ),
+    );
+    if (\Drupal::moduleHandler()->moduleExists('devel')) {
+      $links['entity.endpoint.devel_load.' . $machine_name] = array(
+        'title' => t('Devel'),
+        'route_name' => 'entity.endpoint.devel_load',
+        'parent' => 'entity.endpoint.edit_form.' . $machine_name,
+        'route_parameters' => array(
+          'endpoint' => $machine_name,
+        ),
+      );
+    }
+    $links['entity.endpoint.delete_form.' . $machine_name] = array(
+      'title' => new \Drupal\Core\StringTranslation\TranslatableMarkup('Delete'),
+      'route_name' => 'entity.endpoint.delete_form',
+      'parent' => 'entity.endpoint.edit_form.' . $machine_name,
+      'route_parameters' => array(
+        'endpoint' => $machine_name,
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert( for menu entities.
+ */
+function socrata_endpoint_insert(Endpoint $endpoint) {
+  if (\Drupal::moduleHandler()->moduleExists('admin_toolbar_tools')) {
+    // Flushing all the caches is expensive, but is required to make the new
+    // endpoint show up in the Structure menu.
+    drupal_flush_all_caches();
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete() for menu entities.
+ */
+function socrata_endpoint_delete(Endpoint $endpoint) {
+  if (\Drupal::moduleHandler()->moduleExists('admin_toolbar_tools')) {
+    \Drupal::service('router.builder')->rebuild();
+  }
+}
+
+/**
+ * Return an associative array of endpoints.
+ *
+ * @return array
+ *   An array with the machine-readable names as the keys, and human-readable
+ *   titles as the values.
+ */
+function socrata_get_endpoints() {
+  if ($endpoints = Endpoint::loadMultiple()) {
+    foreach ($endpoints as $menu_name => $menu) {
+      $endpoints[$menu_name] = $menu->label();
+    }
+    asort($endpoints);
+  }
+  return $endpoints;
+}
 
 /**
  * Implements hook_ctools_plugin_api().
