@@ -7,6 +7,7 @@
 namespace Drupal\socrata\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Url;
 use Drupal\socrata\EndpointInterface;
 
 /**
@@ -82,6 +83,58 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
   }
 
   /**
+   * Return Socrata SODA URL with endpoint and parameters.
+   *
+   * @param array $params
+   *   Array of query parameters.
+   *
+   * @return string
+   *   Formatted URL
+   */
+  public function getSodaURL($params = []) {
+    // Add app token if available.
+    if ($this->getAppToken()) {
+      $params['$$app_token'] = $this->getAppToken();
+    }
+
+    return Url::fromUri($this->getUrl(), ['query' => $params, 'absolute' => TRUE])->toString();
+  }
+
+  /**
+   * Return Unencoded Socrata SODA URL with endpoint and parameters.
+   *
+   * @param array $params
+   *   Array of query parameters.
+   *
+   * @return string
+   *   Formatted URL
+   */
+  public function getUnencodedSodaURL($params = []) {
+    // We might not want to encode the URL in cases where we just want it to be
+    // output for humans to read, most notably in the query displayed in the
+    // views preview.
+    // In this case, assemble our URL with the query parameters directly,
+    // rather than passing them in as query arguments to the URL function, where
+    // they'll be URL-encoded.
+
+    // Add app token if available.
+    if ($this->getAppToken()) {
+      $params['$$app_token'] = $this->getAppToken();
+    }
+
+    $url_with_params = $this->getUrl();
+    if (!empty($params)) {
+      $url_with_params .= '?';
+      $params_query = [];
+      foreach ($params as $key => $value) {
+        $params_query[] = $key . '=' . $value;
+      }
+    }
+    $url_with_params .= implode('&', $params_query);
+    return Url::fromUri($url_with_params, ['absolute' => TRUE])->toString();
+  }
+
+  /**
    * Returns an embed URL.
    *
    * @return string
@@ -89,6 +142,32 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
   public function getEmbedURL() {
     $components = $this->getComponents();
     return "https://{$components['host']}/w/{$components['dataset_id']}";
+  }
+
+  /**
+   * Return download Socrata URL.
+   *
+   * @param $format string
+   *
+   * @return string
+   */
+  public function getDownloadUrl($format = 'csv') {
+    $components = $this->getComponents();
+
+    // Note that this is the old Socrata API style URL.
+    return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}/rows.{$format}?accessType=DOWNLOAD";
+  }
+
+  /**
+   * Return Socrata metadata URL.
+   *
+   * @return string
+   *   The download URL
+   */
+  public function getMetaDataUrl() {
+    $components = $this->getComponents();
+
+    return "{$components['scheme']}://{$components['host']}/api/views/{$components['dataset_id']}.json";
   }
 
   /**
