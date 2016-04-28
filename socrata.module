@@ -86,37 +86,6 @@ function socrata_get_endpoints() {
 }
 
 /**
- * Implements hook_ctools_plugin_api().
- */
-function socrata_ctools_plugin_api($module, $api) {
-  if ($module == 'socrata' && $api == 'socrata') {
-    return array('version' => 1);
-  }
-}
-
-/**
- * Implements hook_ctools_plugin_directory().
- */
-function socrata_ctools_plugin_directory($module, $type) {
-  // Load the export_ui plugin.
-  if ($type == 'export_ui') {
-    return 'plugins/export_ui';
-  }
-}
-
-/**
- * Implements hook_permission().
- */
-function socrata_permission() {
-  return array(
-    'administer socrata' => array(
-      'title' => t('Administer Socrata integration'),
-      'description' => t('Perform administration tasks for Socrata integration'),
-    ),
-  );
-}
-
-/**
  * Util function to split out the dataset components from an endpoint URL.
  */
 function socrata_components_from_endpoint($endpoint) {
