@@ -94,10 +94,13 @@ class SocrataSelectQuery extends SelectExtender {
           // Pull info from response and see if we had an error.
           $info = curl_getinfo($ch);
           if ($info['http_code'] >= 400) {
-            // @todo: Needs testing & probably should be pushed into a debug class.
-            $url = Url::fromUri($curl_url, array('absolute' => TRUE));
-            $link = Link::fromTextAndUrl('Socrata Request', $url)->toRenderable();
-            _socrata_log('Server returned error code @errno', array('@errno' => $info['http_code']), WATCHDOG_ERROR, $link);
+            \Drupal::logger('socrata')->error(
+              'Server returned error code @errno for @url',
+              [
+                '@errno' => $info['http_code'],
+                '@url' => $curl_url,
+              ]
+            );
 
             break;
           }
@@ -128,10 +131,14 @@ class SocrataSelectQuery extends SelectExtender {
           }
         }
         else {
-          // @todo: Needs testing & probably should be pushed into a debug class.
-          $url = Url::fromUri($curl_url, array('absolute' => TRUE));
-          $link = Link::fromTextAndUrl('Socrata Request', $url)->toRenderable();
-          _socrata_log('curl_exec failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR, $link);
+          \Drupal::logger('socrata')->error(
+            'curl_exec failed: @error [@errno] for @url',
+            [
+              '@error' => curl_error($ch),
+              '@errno' => curl_errno($ch),
+              '@url' => $curl_url,
+            ]
+          );
 
         }
       } while (FALSE !== $resp && !empty($retval['headers']['location']));
@@ -140,7 +147,13 @@ class SocrataSelectQuery extends SelectExtender {
       curl_close($ch);
     }
     else {
-      _socrata_log('curl_init failed: @error [@errno]', array('@error' => curl_error($ch), '@errno' => curl_errno($ch)), WATCHDOG_ERROR);
+      \Drupal::logger('socrata')->error(
+        'curl_init failed: @error [@errno]',
+        [
+          '@error' => curl_error($ch),
+          '@errno' => curl_errno($ch),
+        ]
+      );
     }
 
     return $retval;

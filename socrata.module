@@ -143,29 +143,20 @@ function socrata_components_from_endpoint($endpoint) {
  * When debugging is disabled, nothing happens.
  *
  * Set the config variable socrata_debug = TRUE to generate log output
+ *
+ * @param array or object $msg
+ * @param array $vars
  */
-function _socrata_dbg($msg, $vars = array(), $link = NULL) {
+function _socrata_dbg($msg, $vars = array()) {
   if (!$vars) {
     $vars = array();
   }
   if (\Drupal::config('socrata.settings')->get('socrata_debug')) {
     \Drupal::logger('socrata')->debug((is_array($msg) || is_object($msg)) ? '<pre>' . print_r($msg, TRUE) . '</pre>' : $msg, []);
-    if (function_exists('dpm')) {
-      // @ignore production_devel sniffer_functions_discouragedfunctions_discouraged sniffer_semantics_functioncall_notliteralstring sniffer_files_linelength_toolong
+    if (\Drupal::moduleHandler()->moduleExists('devel')) {
       dpm((is_array($msg) || is_object($msg)) ? $msg : t($msg, $vars));
     }
   }
-}
-
-/**
- * Generates a watchdog log entry during execution of module.
- */
-function _socrata_log($msg, $vars = NULL, $severity = WATCHDOG_INFO, $link = NULL) {
-  // Catch passed-in objects or arrays and dump them accordingly.
-  if (!is_string($msg)) {
-    $msg = print_r($msg, TRUE);
-  }
-  \Drupal::logger('socrata')->notice($msg, []);
 }
 
 /**
