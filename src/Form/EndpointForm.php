@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\socrata\Entity\Endpoint;
 
 class EndpointForm extends EntityForm {
 
@@ -48,6 +49,7 @@ class EndpointForm extends EntityForm {
       '#disabled' => !$endpoint->isNew(),
     );
     $form['label'] = array(
+      '#id' => 'id',
       '#type' => 'textfield',
       '#title' => $this->t('Name'),
       '#maxlength' => 255,
@@ -56,7 +58,7 @@ class EndpointForm extends EntityForm {
       '#required' => TRUE,
     );
     $form['url'] = array(
-      '#type' => 'textfield',
+      '#type' => 'url',
       '#title' => $this->t('URL'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getUrl(),
@@ -73,6 +75,34 @@ class EndpointForm extends EntityForm {
     );
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    parent::validateForm($form, $form_state);
+
+    $url = $form_state->getValue('url');
+    $app_token = $form_state->getValue('app_token');
+
+    // Ensure we have a SODA2 URL for the endpoint.
+    if (strpos($url, 'resource/') === false) {
+      $form_state->setErrorByName('url', t('The endpoint "@url" does not point to a valid SODA2 resource. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json', ['@url' => $url]));
+      // Bail out or otherwise the query below will bork.
+      return;
+    }
+
+    // Ensure we get a valid response from the endpoint.
+    $endpoint = new Endpoint(array('url' => $url), 'endpoint');
+    $query = db_select($url)->extend('Drupal\socrata\SocrataSelectQuery');
+    $query->setEndpoint($endpoint);
+    $query->params['$limit'] = 1;
+    $resp = $query->execute();
+
+    if (!$resp) {
+      $form_state->setErrorByName('url', t('A request to the endpoint "@url" did not return a valid response. Try pasting the URL into your browser to be sure you see results.', ['@url' => $url]));
+    }
   }
 
   /**
