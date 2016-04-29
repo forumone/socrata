@@ -12,19 +12,18 @@ function socrata_views_data() {
   $tables = array();
 
   // Load our available sources
-  // @todo: switch to getSource (or a new getSources wrapper)
-  ctools_include('export');
-  $sources = ctools_export_crud_load_all('socrata_sources');
+  $endpoints = \Drupal::entityManager()->getStorage('endpoint')->loadMultiple();
+  dpm($endpoints);
 
   // Iterate over all available tables, provide definitions to Views
-  foreach ($sources as $source_name => $source) {
-    $group = $source->description;
+  foreach ($endpoints as $endpoint_id => $endpoint) {
+    $group = $endpoint->label;
 
     // Retrieve table schema
-    $components = socrata_components_from_endpoint($source->endpoint);
+    $components = $endpoint->getComponents();
     $dataset = $components['dataset_id'];
 
-    $query = db_select($source_name)->extend('SocrataSelectQuery');
+    $query = db_select($endpoint_id)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
     //@todo: fix and add tag:
     //$query->addTag('socrata_data_' . [4x4 w/ dashes converted to underscores]);
@@ -40,12 +39,12 @@ function socrata_views_data() {
       $metadata_field_list = $resp_metadata['data']['columns'];
 
       // Define basic table info
-      $tables[$source_name] = array();
-      $table = &$tables[$source_name];
+      $tables[$endpoint_id] = array();
+      $table = &$tables[$endpoint_id];
       $table['table'] = array(
         'group' => $group,
-        'title' => $source_name,
-        'help' => "Field in {$source_name}",
+        'title' => $endpoint_id,
+        'help' => "Field in {$endpoint_id}",
       );
 
       // Stub out the base table information (key field will be extracted below)
