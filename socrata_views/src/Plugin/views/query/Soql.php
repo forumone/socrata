@@ -106,6 +106,11 @@ class Soql extends QueryPluginBase {
   var $tags = array();
 
   /**
+   * Socrata endpoint machine name.
+   */
+  var $base_table = '';
+
+  /**
    * Is the view marked as not distinct.
    *
    * @var bool
@@ -118,7 +123,8 @@ class Soql extends QueryPluginBase {
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
 
-    /*$base_table = $this->view->storage->get('base_table');
+    $base_table = $this->view->storage->get('base_table');
+    $this->base_table = $base_table;
     $base_field = $this->view->storage->get('base_field');
     $this->relationships[$base_table] = array(
       'link' => NULL,
@@ -146,7 +152,7 @@ class Soql extends QueryPluginBase {
       'field' => $base_field,
       'alias' => $base_field,
       'count' => TRUE,
-    );*/
+    );
   }
 
   /**
