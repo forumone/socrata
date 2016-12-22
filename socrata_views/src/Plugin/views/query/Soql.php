@@ -1177,152 +1177,9 @@ class Soql extends QueryPluginBase {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   public function query($get_count = FALSE) {
-    // Check query distinct value.
-    if (empty($this->noDistinct) && $this->distinct && !empty($this->fields)) {
-      $base_field_alias = $this->addField($this->view->storage->get('base_table'), $this->view->storage->get('base_field'));
-      $this->addGroupBy($base_field_alias);
-      $distinct = TRUE;
-    }
-
-    /**
-     * An optimized count query includes just the base field instead of all the fields.
-     * Determine of this query qualifies by checking for a groupby or distinct.
-     */
-    if ($get_count && !$this->groupby) {
-      foreach ($this->fields as $field) {
-        if (!empty($field['distinct']) || !empty($field['function'])) {
-          $this->getCountOptimized = FALSE;
-          break;
-        }
-      }
-    }
-    else {
-      $this->getCountOptimized = FALSE;
-    }
-    if (!isset($this->getCountOptimized)) {
-      $this->getCountOptimized = TRUE;
-    }
-
-    $options = array();
-    $target = 'default';
-    $key = 'default';
-    // Detect an external database and set the
-    if (isset($this->view->base_database)) {
-      $key = $this->view->base_database;
-    }
-
-    // Set the replica target if the replica option is set
-    if (!empty($this->options['replica'])) {
-      $target = 'replica';
-    }
-
-    // Go ahead and build the query.
-    // db_select doesn't support to specify the key, so use getConnection directly.
-    $query = Database::getConnection($target, $key)
-      ->select($this->view->storage->get('base_table'), $this->view->storage->get('base_table'), $options)
-      ->addTag('views')
-      ->addTag('views_' . $this->view->storage->id());
-
-    // Add the tags added to the view itself.
-    foreach ($this->tags as $tag) {
-      $query->addTag($tag);
-    }
-
-    if (!empty($distinct)) {
-      $query->distinct();
-    }
-
-    // Add all the tables to the query via joins. We assume all LEFT joins.
-    foreach ($this->tableQueue as $table) {
-      if (is_object($table['join'])) {
-        $table['join']->buildJoin($query, $table, $this);
-      }
-    }
-
-    // Assemble the groupby clause, if any.
-    $this->hasAggregate = FALSE;
-    $non_aggregates = $this->getNonAggregates();
-    if (count($this->having)) {
-      $this->hasAggregate = TRUE;
-    }
-    elseif (!$this->hasAggregate) {
-      // Allow 'GROUP BY' even no aggregation function has been set.
-      $this->hasAggregate = $this->view->display_handler->getOption('group_by');
-    }
-    $groupby = array();
-    if ($this->hasAggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
-      $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
-    }
-
-    // Make sure each entity table has the base field added so that the
-    // entities can be loaded.
-    $entity_information = $this->getEntityTableInfo();
-    if ($entity_information) {
-      $params = array();
-      if ($groupby) {
-        // Handle grouping, by retrieving the minimum entity_id.
-        $params = array(
-          'function' => 'min',
-        );
-      }
-
-      foreach ($entity_information as $entity_type_id => $info) {
-        $entity_type = \Drupal::entityManager()->getDefinition($info['entity_type']);
-        $base_field = !$info['revision'] ? $entity_type->getKey('id') : $entity_type->getKey('revision');
-        $this->addField($info['alias'], $base_field, '', $params);
-      }
-    }
-
-    // Add all fields to the query.
-    $this->compileFields($query);
-
-    // Add groupby.
-    if ($groupby) {
-      foreach ($groupby as $field) {
-        // Handle group by of field without table alias to avoid ambiguous
-        // column error.
-        if ($field == $this->view->storage->get('base_field')) {
-          $field = $this->view->storage->get('base_table') . '.' . $field;
-        }
-        $query->groupBy($field);
-      }
-      if (!empty($this->having) && $condition = $this->buildCondition('having')) {
-        $query->havingCondition($condition);
-      }
-    }
-
-    if (!$this->getCountOptimized) {
-      // we only add the orderby if we're not counting.
-      if ($this->orderby) {
-        foreach ($this->orderby as $order) {
-          if ($order['field'] == 'rand_') {
-            $query->orderRandom();
-          }
-          else {
-            $query->orderBy($order['field'], $order['direction']);
-          }
-        }
-      }
-    }
-
-    if (!empty($this->where) && $condition = $this->buildCondition('where')) {
-      $query->condition($condition);
-    }
-
-    // Add a query comment.
-    if (!empty($this->options['query_comment'])) {
-      $query->comment($this->options['query_comment']);
-    }
-
-    // Add the query tags.
-    if (!empty($this->options['query_tags'])) {
-      foreach ($this->options['query_tags'] as $tag) {
-        $query->addTag($tag);
-      }
-    }
-
-    // Add all query substitutions as metadata.
-    $query->addMetaData('views_substitutions', \Drupal::moduleHandler()->invokeAll('views_query_substitutions', array($this->view)));
+    $query = db_select($this->base_table)->extend('Drupal\socrata\SocrataSelectQuery');
+    $query->addTag('socrata');
+    $query->params['$limit'] = 3; // SoQL params
 
     return $query;
   }
@@ -1375,90 +1232,143 @@ class Soql extends QueryPluginBase {
     $query = $view->build_info['query'];
     $count_query = $view->build_info['count_query'];
 
-    $query->addMetaData('view', $view);
-    $count_query->addMetaData('view', $view);
+    // $query->addMetaData('view', $view);
+    // $count_query->addMetaData('view', $view);
 
-    if (empty($this->options['disable_sql_rewrite'])) {
-      $base_table_data = Views::viewsData()->get($this->view->storage->get('base_table'));
-      if (isset($base_table_data['table']['base']['access query tag'])) {
-        $access_tag = $base_table_data['table']['base']['access query tag'];
-        $query->addTag($access_tag);
-        $count_query->addTag($access_tag);
-      }
+    // if (empty($this->options['disable_sql_rewrite'])) {
+    //   $base_table_data = Views::viewsData()->get($this->view->storage->get('base_table'));
+    //   if (isset($base_table_data['table']['base']['access query tag'])) {
+    //     $access_tag = $base_table_data['table']['base']['access query tag'];
+    //     $query->addTag($access_tag);
+    //     $count_query->addTag($access_tag);
+    //   }
 
-      if (isset($base_table_data['table']['base']['query metadata'])) {
-        foreach ($base_table_data['table']['base']['query metadata'] as $key => $value) {
-          $query->addMetaData($key, $value);
-          $count_query->addMetaData($key, $value);
-        }
-      }
-    }
+    //   if (isset($base_table_data['table']['base']['query metadata'])) {
+    //     foreach ($base_table_data['table']['base']['query metadata'] as $key => $value) {
+    //       $query->addMetaData($key, $value);
+    //       $count_query->addMetaData($key, $value);
+    //     }
+    //   }
+    // }
 
     if ($query) {
-      $additional_arguments = \Drupal::moduleHandler()->invokeAll('views_query_substitutions', array($view));
+      $result = array();
+    //   $additional_arguments = \Drupal::moduleHandler()->invokeAll('views_query_substitutions', array($view));
 
-      // Count queries must be run through the preExecute() method.
-      // If not, then hook_query_node_access_alter() may munge the count by
-      // adding a distinct against an empty query string
-      // (e.g. COUNT DISTINCT(1) ...) and no pager will return.
-      // See pager.inc > PagerDefault::execute()
-      // http://api.drupal.org/api/drupal/includes--pager.inc/function/PagerDefault::execute/7
-      // See https://www.drupal.org/node/1046170.
-      $count_query->preExecute();
+    //   // Count queries must be run through the preExecute() method.
+    //   // If not, then hook_query_node_access_alter() may munge the count by
+    //   // adding a distinct against an empty query string
+    //   // (e.g. COUNT DISTINCT(1) ...) and no pager will return.
+    //   // See pager.inc > PagerDefault::execute()
+    //   // http://api.drupal.org/api/drupal/includes--pager.inc/function/PagerDefault::execute/7
+    //   // See https://www.drupal.org/node/1046170.
+    //   $count_query->preExecute();
 
-      // Build the count query.
-      $count_query = $count_query->countQuery();
+    //   // Build the count query.
+    //   $count_query = $count_query->countQuery();
 
-      // Add additional arguments as a fake condition.
-      // XXX: this doesn't work, because PDO mandates that all bound arguments
-      // are used on the query. TODO: Find a better way to do this.
-      if (!empty($additional_arguments)) {
-        // $query->where('1 = 1', $additional_arguments);
-        // $count_query->where('1 = 1', $additional_arguments);
-      }
+    //   // Add additional arguments as a fake condition.
+    //   // XXX: this doesn't work, because PDO mandates that all bound arguments
+    //   // are used on the query. TODO: Find a better way to do this.
+    //   if (!empty($additional_arguments)) {
+    //     // $query->where('1 = 1', $additional_arguments);
+    //     // $count_query->where('1 = 1', $additional_arguments);
+    //   }
 
       $start = microtime(TRUE);
+      // Get total count of items and force initial limit if not set.
+      $num_dataset_rows = 0;
+      $resp = $count_query->execute();
+      if ($resp !== FALSE && !empty($resp['data'])) {
+        $num_dataset_rows = count($resp['data']);
+      }
 
-      try {
-        if ($view->pager->useCountQuery() || !empty($view->get_total_rows)) {
-          $view->pager->executeCountQuery($count_query);
+      // Execute main query, looping if we need to get more than 1000 rows.
+      do {
+        $resp = $query->execute();
+        if ($resp !== FALSE) {
+          // Have to map Scorata result field labels back onto what Views knows them as.
+          $original_field_names = $view->query->fields;
+          $field_name_map = array();
+          foreach ($original_field_names as $field => $attributes) {
+            if ($attributes['field']) {
+              $field_alias = $attributes['field'];
+            }
+            else {
+              $field_alias = $field;
+            }
+            $field_name_map[$field_alias] = $field;
+          }
+
+          foreach ($resp['data'] as $row) {
+            $new_row = new ResultRow();
+            // Map the results with the correct field alias in field order.
+            foreach ($field_name_map as $alias => $field) {
+              // If Socrata returns a row with empty data, put in empty string.
+              if (isset($row[$alias])) {
+                $value = $row[$alias];
+              }
+              else {
+                $value = '';
+              }
+              $new_row->{$field} = $value;
+            }
+            $result[] = $new_row;
+          }
+
+        //   // If an "all items" query, bump offset, go again.
+        //   if (empty($query->params['$limit'])) {
+        //     $query->params['$offset'] = count($result);
+        //   }
         }
+      } while (empty($query->params['$limit']) && !empty($resp['data']));
 
-        // Let the pager modify the query to add limits.
-        $view->pager->preExecute($query);
+    // Store off values from query in View.
+    $view->result = $result;
+    $view->total_rows = count($result);
 
-        if (!empty($this->limit) || !empty($this->offset)) {
-          // We can't have an offset without a limit, so provide a very large limit instead.
-          $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
-          $offset = intval(!empty($this->offset) ? $this->offset : 0);
-          $query->range($offset, $limit);
-        }
+      // Let the pager modify the query to add limits.
+      // $this->pager->pre_execute($query);
+    //   try {
+    //     if ($view->pager->useCountQuery() || !empty($view->get_total_rows)) {
+    //       $view->pager->executeCountQuery($count_query);
+    //     }
 
-        $result = $query->execute();
-        $result->setFetchMode(\PDO::FETCH_CLASS, 'Drupal\views\ResultRow');
+    //     // Let the pager modify the query to add limits.
+    //     $view->pager->preExecute($query);
 
-        // Setup the result row objects.
-        $view->result = iterator_to_array($result);
+    //     if (!empty($this->limit) || !empty($this->offset)) {
+    //       // We can't have an offset without a limit, so provide a very large limit instead.
+    //       $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+    //       $offset = intval(!empty($this->offset) ? $this->offset : 0);
+    //       $query->range($offset, $limit);
+    //     }
+
+    //     $result = $query->execute();
+    //     $result->setFetchMode(\PDO::FETCH_CLASS, 'Drupal\views\ResultRow');
+
+    //     // Setup the result row objects.
+    //     $view->result = iterator_to_array($result);
         array_walk($view->result, function(ResultRow $row, $index) {
           $row->index = $index;
         });
 
-        $view->pager->postExecute($view->result);
-        $view->pager->updatePageInfo();
-        $view->total_rows = $view->pager->getTotalItems();
+    //     $view->pager->postExecute($view->result);
+    //     $view->pager->updatePageInfo();
+    //     $view->total_rows = $view->pager->getTotalItems();
 
-        // Load all entities contained in the results.
-        $this->loadEntities($view->result);
-      }
-      catch (DatabaseExceptionWrapper $e) {
-        $view->result = array();
-        if (!empty($view->live_preview)) {
-          drupal_set_message($e->getMessage(), 'error');
-        }
-        else {
-          throw new DatabaseExceptionWrapper("Exception in {$view->storage->label()}[{$view->storage->id()}]: {$e->getMessage()}");
-        }
-      }
+    //     // Load all entities contained in the results.
+    //     $this->loadEntities($view->result);
+    //   }
+    //   catch (DatabaseExceptionWrapper $e) {
+    //     $view->result = array();
+    //     if (!empty($view->live_preview)) {
+    //       drupal_set_message($e->getMessage(), 'error');
+    //     }
+    //     else {
+    //       throw new DatabaseExceptionWrapper("Exception in {$view->storage->label()}[{$view->storage->id()}]: {$e->getMessage()}");
+    //     }
+    //   }
 
     }
     else {
