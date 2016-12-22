@@ -50,7 +50,7 @@ function socrata_views_data() {
       $table['table']['base'] = array(
         'title' => "Socrata: {$group}",
         'help' => $group,
-        'query class' => 'socrata_query',
+        'query_id' => 'socrata_views_query',
       );
 
       // Add fields to table
