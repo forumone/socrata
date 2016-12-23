@@ -98,7 +98,7 @@ class Soql extends QueryPluginBase {
   /**
    * An array mapping table aliases and field names to field aliases.
    */
-  protected $fieldAliases = array();
+  // protected $fieldAliases = array();
 
   /**
    * Query tags which will be passed over to the dbtng query object.
@@ -907,9 +907,9 @@ class Soql extends QueryPluginBase {
    *
    * @see \Drupal\views\Plugin\views\query\Sql::addField
    */
-  protected function getFieldAlias($table_alias, $field) {
+  /*protected function getFieldAlias($table_alias, $field) {
     return isset($this->fieldAliases[$table_alias][$field]) ? $this->fieldAliases[$table_alias][$field] : FALSE;
-  }
+  }*/
 
   /**
    * Adds a query tag to the sql object.
@@ -1394,7 +1394,7 @@ class Soql extends QueryPluginBase {
    * @param \Drupal\views\ResultRow[] $results
    *   The result of the SQL query.
    */
-  public function loadEntities(&$results) {
+  /*public function loadEntities(&$results) {
     $entity_information = $this->getEntityTableInfo();
     // No entity tables found, nothing else to do here.
     if (empty($entity_information)) {
@@ -1463,7 +1463,7 @@ class Soql extends QueryPluginBase {
         }
       }
     }
-  }
+  }*/
 
   /**
    * {@inheritdoc}
