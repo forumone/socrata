@@ -671,15 +671,13 @@ class Soql extends QueryPluginBase {
    *   The name that this field can be referred to as. Usually this is the alias.
    */
   public function addField($table, $field, $alias = '', $params = array()) {
-    $alias = $field;
-
-    // PostgreSQL truncates aliases to 63 characters:
-    //   https://www.drupal.org/node/571548.
-
-    // We limit the length of the original alias up to 60 characters
-    // to get a unique alias later if its have duplicates
-    $alias = strtolower(substr($alias, 0, 60));
-
+    // Fields will alwasy be unique in Socrata endpoints.  Creating a custom
+    // array makes it much easier to craft the query URL.
+    if (isset($params['function'])) {
+      $alias = $params['function'] . '_' . $field;
+    } elseif (empty($alias)) {
+      $alias = $table . '_' . $field;
+    }
     // Create a field info array.
     $field_info = array(
       'field' => $field,
@@ -687,23 +685,10 @@ class Soql extends QueryPluginBase {
       'alias' => $alias,
     ) + $params;
 
-    // Test to see if the field is actually the same or not. Due to
-    // differing parameters changing the aggregation function, we need
-    // to do some automatic alias collision detection:
-    $base = $alias;
-    $counter = 0;
-    while (!empty($this->fields[$alias]) && $this->fields[$alias] != $field_info) {
-      $field_info['alias'] = $alias = $base . '_' . ++$counter;
-    }
+    $this->fields[$field] = $field_info;
 
-    if (empty($this->fields[$alias])) {
-      $this->fields[$alias] = $field_info;
-    }
+    return $field;
 
-    // Keep track of all aliases used.
-    $this->fieldAliases[$table][$field] = $alias;
-
-    return $alias;
   }
 
   /**
