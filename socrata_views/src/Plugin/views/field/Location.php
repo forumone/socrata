@@ -1,17 +1,30 @@
 <?php
-namespace Drupal\socrata;
 
 /**
- * Field handler to provide renderer capable of displaying Socrata location items
+ * @file
+ * Contains \Drupal\socrata_views\Plugin\views\field\Location.
+ */
+
+namespace Drupal\socrata_views\Plugin\views\field;
+
+use Drupal\views\Plugin\views\field\FieldPluginBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\ResultRow;
+
+/**
+ * Field handler to provide simple renderer that turns a URL into a clickable link.
  *
  * @ingroup views_field_handlers
+ *
+ * @ViewsField("location")
  */
-class socrata_views_handler_field_location extends views_handler_field {
+class Location extends FieldPluginBase {
+
   /**
-   * Collect options for field display.
+   * {@inheritdoc}
    */
-  function option_definition() {
-    $options = parent::option_definition();
+  protected function defineOptions() {
+    $options = parent::defineOptions();
 
     $options['display'] = array('default' => 'text');
     $options['link_text'] = array('default' => 'Map', 'translatable' => TRUE);
@@ -20,9 +33,9 @@ class socrata_views_handler_field_location extends views_handler_field {
   }
 
   /**
-   * Option form.
+   * Provide link to the page being visited.
    */
-  function options_form(&$form, &$form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['display'] = array(
       '#type' => 'select',
       '#title' => t('Display mode'),
@@ -41,32 +54,32 @@ class socrata_views_handler_field_location extends views_handler_field {
       '#default_value' => $this->options['link_text'],
     );
 
-    parent::options_form($form, $form_state);
+    parent::buildOptionsForm($form, $form_state);
   }
 
   /**
-   * Generate output of location.
+   * {@inheritdoc}
    */
-  function render($values) {
+  public function render(ResultRow $values) {
     $text = '';
-    $value = $this->get_value($values);
+    $value = $this->getValue($values);
     if (!empty($value)) {
       // Decode the nested address data if provided.
       if (!empty($value['human_address'])) {
         $value['human_address'] = json_decode($value['human_address'], TRUE);
-        $human_address = $this->sanitize_value(implode(', ', $value['human_address']), 'xss');
+        $human_address = $this->sanitizeValue(implode(', ', $value['human_address']), 'xss');
       }
 
       // Suss out default display text - TODO make themeable.
       if (!empty($this->options['link_text'])) {
-        $text = $this->sanitize_value($this->options['link_text'], 'xss');
+        $text = $this->sanitizeValue($this->options['link_text'], 'xss');
       }
       elseif (!empty($value['human_address'])) {
         $text = $human_address;
       }
       elseif (isset($value['latitude']) && isset($value['longitude'])) {
-        $longitude = $this->sanitize_value($value['longitude'], 'xss');
-        $latitude = $this->sanitize_value($value['latitude'], 'xss');
+        $longitude = $this->sanitizeValue($value['longitude'], 'xss');
+        $latitude = $this->sanitizeValue($value['latitude'], 'xss');
         // There is a method to the madness; This is the correct ordering for
         // embedding into a WKT POINT definition.
         $text = "{$longitude}, {$latitude}";
@@ -86,12 +99,13 @@ class socrata_views_handler_field_location extends views_handler_field {
         }
       }
       elseif ('wkt' == $this->options['display']) {
-        $longitude = $this->sanitize_value($value['longitude'], 'xss');
-        $latitude = $this->sanitize_value($value['latitude'], 'xss');
+        $longitude = $this->sanitizeValue($value['longitude'], 'xss');
+        $latitude = $this->sanitizeValue($value['latitude'], 'xss');
         $text = "POINT ({$longitude} {$latitude})";
       }
     }
 
     return $text;
   }
+
 }
