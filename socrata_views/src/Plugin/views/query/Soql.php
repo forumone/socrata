@@ -1282,7 +1282,7 @@ class Soql extends QueryPluginBase {
           $original_field_names = $view->query->fields;
           $field_name_map = array();
           foreach ($original_field_names as $field => $attributes) {
-            if ($attributes['function']) {
+            if (isset($attributes['function'])) {
               $field_alias = $attributes['alias'];
             }
             else {
