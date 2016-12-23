@@ -500,75 +500,7 @@ class Soql extends QueryPluginBase {
    *   cannot be ensured.
    */
   public function ensureTable($table, $relationship = NULL, JoinPluginBase $join = NULL) {
-    // ensure a relationship
-    if (empty($relationship)) {
-      $relationship = $this->view->storage->get('base_table');
-    }
-
-    // If the relationship is the primary table, this actually be a relationship
-    // link back from an alias. We store all aliases along with the primary table
-    // to detect this state, because eventually it'll hit a table we already
-    // have and that's when we want to stop.
-    if ($relationship == $this->view->storage->get('base_table') && !empty($this->tables[$relationship][$table])) {
-      return $this->tables[$relationship][$table]['alias'];
-    }
-
-    if (!array_key_exists($relationship, $this->relationships)) {
-      return FALSE;
-    }
-
-    if ($table == $this->relationships[$relationship]['base']) {
-      return $relationship;
-    }
-
-    // If we do not have join info, fetch it.
-    if (!isset($join)) {
-      $join = $this->getJoinData($table, $this->relationships[$relationship]['base']);
-    }
-
-    // If it can't be fetched, this won't work.
-    if (empty($join)) {
-      return;
-    }
-
-    // Adjust this join for the relationship, which will ensure that the 'base'
-    // table it links to is correct. Tables adjoined to a relationship
-    // join to a link point, not the base table.
-    $join = $this->adjustJoin($join, $relationship);
-
-    if ($this->ensurePath($table, $relationship, $join)) {
-      // Attempt to eliminate redundant joins.  If this table's
-      // relationship and join exactly matches an existing table's
-      // relationship and join, we do not have to join to it again;
-      // just return the existing table's alias.  See
-      // http://groups.drupal.org/node/11288 for details.
-      //
-      // This can be done safely here but not lower down in
-      // queueTable(), because queueTable() is also used by
-      // addTable() which requires the ability to intentionally add
-      // the same table with the same join multiple times.  For
-      // example, a view that filters on 3 taxonomy terms using AND
-      // needs to join taxonomy_term_data 3 times with the same join.
-
-      // scan through the table queue to see if a matching join and
-      // relationship exists.  If so, use it instead of this join.
-
-      // TODO: Scanning through $this->tableQueue results in an
-      // O(N^2) algorithm, and this code runs every time the view is
-      // instantiated (Views 2 does not currently cache queries).
-      // There are a couple possible "improvements" but we should do
-      // some performance testing before picking one.
-      foreach ($this->tableQueue as $queued_table) {
-        // In PHP 4 and 5, the == operation returns TRUE for two objects
-        // if they are instances of the same class and have the same
-        // attributes and values.
-        if ($queued_table['relationship'] == $relationship && $queued_table['join'] == $join) {
-          return $queued_table['alias'];
-        }
-      }
-
-      return $this->queueTable($table, $relationship, $join);
-    }
+    return $table;
   }
 
   /**
