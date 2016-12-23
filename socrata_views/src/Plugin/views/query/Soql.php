@@ -1080,7 +1080,6 @@ class Soql extends QueryPluginBase {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   public function query($get_count = FALSE) {
-    dpm($this->fields);
     $query = db_select($this->base_table)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->storage->id());
@@ -1115,29 +1114,29 @@ class Soql extends QueryPluginBase {
     // // Store off requested fields.
     // $this->hasAggregate = $this->view->display_handler->get_option('group_by');
 
-    // if (!empty($this->fields)) {
-    //   $fields_list = $non_aggregates = array();
-    //   foreach ($this->fields as $field => $field_info) {
-    //     // If an aggregate function is specified, wrap it around the field.
-    //     if (isset($field_info['function'])) {
-    //       $fields_list[] = $field_info['function'] . '(' . $field . ')';
-    //     }
-    //     else {
-    //       $fields_list[] = $field;
-    //       $non_aggregates[] = $field;
-    //     }
-    //   }
-    // }
-    // if ($this->hasAggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
-    //   $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
-    //   $query->params['$group'] = implode(',', $groupby);
-    // }
-    // else {
-    //   $fields_list = $non_aggregates;
-    //   $query->params['$group'] = NULL;
-    // }
-    // $query->params['$select'] = implode(',', $fields_list);
-    // $query->fields($this->base_table, $fields_list);
+    if (!empty($this->fields)) {
+      $fields_list = $non_aggregates = array();
+      foreach ($this->fields as $field => $field_info) {
+        // If an aggregate function is specified, wrap it around the field.
+        if (isset($field_info['function'])) {
+          $fields_list[] = $field_info['function'] . '(' . $field . ')';
+        }
+        else {
+          $fields_list[] = $field;
+          $non_aggregates[] = $field;
+        }
+      }
+    }
+    if ($this->hasAggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
+      $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
+      $query->params['$group'] = implode(',', $groupby);
+    }
+    else {
+      $fields_list = $non_aggregates;
+      $query->params['$group'] = NULL;
+    }
+    $query->params['$select'] = implode(',', $fields_list);
+    $query->fields($this->base_table, $fields_list);
 
     // If this is a full query build vs a counter query, add on options.
     if (!$get_count) {
