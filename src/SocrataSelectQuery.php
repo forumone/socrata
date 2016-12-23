@@ -53,6 +53,7 @@ class SocrataSelectQuery extends SelectExtender {
   public function execute($type = NULL) {
     $retval = FALSE;
 
+    // @todo Change to use Guzzle client a la http://www.lohmeyer.rocks/blog/2015/10/20/0070-how-make-custom-guzzle-requests-drupal-8-modules.
     // Create a new cURL resource.
     $ch = curl_init();
     if ($ch) {
