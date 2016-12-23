@@ -1085,34 +1085,34 @@ class Soql extends QueryPluginBase {
     $query->addTag('socrata_' . $this->view->storage->id());
 
     // Construct where clause from Views filter grouping.
-    // $groups = array();
-    // foreach ($this->where as $where) {
-    //   $queries = array();
-    //   foreach ($where['conditions'] as $cond) {
-    //     // Multiple values for condition, suss out.
-    //     if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
-    //       $in_queries = array();
-    //       foreach ($cond['value'] as $in_val) {
-    //         $in_queries[] = $this->_construct_query_comp($cond['field'], $in_val, $cond['operator']);
-    //       }
-    //       if (!empty($in_queries)) {
-    //         $queries[] = '(' . implode(' AND ', $in_queries) . ')';
-    //       }
-    //     }
-    //     // Otherwise simple field-value comparison.
-    //     else {
-    //       $queries[] = $this->_construct_query_comp($cond['field'], $cond['value'], $cond['operator']);
-    //     }
-    //   }
-    //   if (!empty($queries)) {
-    //     $groups[] = '(' . implode(" {$where['type']} ", $queries) . ')';
-    //     $query->where(implode(" {$this->groupOperator} ", $groups));
-    //   }
-    // }
-    // $query->params['$where'] = implode(" {$this->groupOperator} ", $groups);
+    $groups = array();
+    foreach ($this->where as $where) {
+      $queries = array();
+      foreach ($where['conditions'] as $cond) {
+        // Multiple values for condition, suss out.
+        if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
+          $in_queries = array();
+          foreach ($cond['value'] as $in_val) {
+            $in_queries[] = $this->_construct_query_comp($cond['field'], $in_val, $cond['operator']);
+          }
+          if (!empty($in_queries)) {
+            $queries[] = '(' . implode(' AND ', $in_queries) . ')';
+          }
+        }
+        // Otherwise simple field-value comparison.
+        else {
+          $queries[] = $this->_construct_query_comp($cond['field'], $cond['value'], $cond['operator']);
+        }
+      }
+      if (!empty($queries)) {
+        $groups[] = '(' . implode(" {$where['type']} ", $queries) . ')';
+        $query->where(implode(" {$this->groupOperator} ", $groups));
+      }
+    }
+    $query->params['$where'] = implode(" {$this->groupOperator} ", $groups);
 
-    // // Store off requested fields.
-    // $this->hasAggregate = $this->view->display_handler->get_option('group_by');
+    // Store off requested fields.
+    $this->hasAggregate = $this->view->display_handler->getOption('group_by');
 
     if (!empty($this->fields)) {
       $fields_list = $non_aggregates = array();
