@@ -1277,13 +1277,13 @@ class Soql extends QueryPluginBase {
       // Execute main query, looping if we need to get more than 1000 rows.
       do {
         $resp = $query->execute();
-        if ($resp !== FALSE) {
+        if ($resp !== FALSE && isset($resp['data'])) {
           // Have to map Socrata result field labels back onto what Views knows them as.
           $original_field_names = $view->query->fields;
           $field_name_map = array();
           foreach ($original_field_names as $field => $attributes) {
-            if ($attributes['field']) {
-              $field_alias = $attributes['field'];
+            if ($attributes['function']) {
+              $field_alias = $attributes['alias'];
             }
             else {
               $field_alias = $field;
