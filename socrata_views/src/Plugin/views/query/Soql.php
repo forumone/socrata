@@ -1179,7 +1179,90 @@ class Soql extends QueryPluginBase {
   public function query($get_count = FALSE) {
     $query = db_select($this->base_table)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
-    $query->params['$limit'] = 3; // SoQL params
+    $query->addTag('socrata_' . $this->view->storage->id());
+
+    // Construct where clause from Views filter grouping.
+    // $groups = array();
+    // foreach ($this->where as $where) {
+    //   $queries = array();
+    //   foreach ($where['conditions'] as $cond) {
+    //     // Multiple values for condition, suss out.
+    //     if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
+    //       $in_queries = array();
+    //       foreach ($cond['value'] as $in_val) {
+    //         $in_queries[] = $this->_construct_query_comp($cond['field'], $in_val, $cond['operator']);
+    //       }
+    //       if (!empty($in_queries)) {
+    //         $queries[] = '(' . implode(' AND ', $in_queries) . ')';
+    //       }
+    //     }
+    //     // Otherwise simple field-value comparison.
+    //     else {
+    //       $queries[] = $this->_construct_query_comp($cond['field'], $cond['value'], $cond['operator']);
+    //     }
+    //   }
+    //   if (!empty($queries)) {
+    //     $groups[] = '(' . implode(" {$where['type']} ", $queries) . ')';
+    //     $query->where(implode(" {$this->groupOperator} ", $groups));
+    //   }
+    // }
+    // $query->params['$where'] = implode(" {$this->groupOperator} ", $groups);
+
+    // // Store off requested fields.
+    // $this->hasAggregate = $this->view->display_handler->get_option('group_by');
+
+    // if (!empty($this->fields)) {
+    //   $fields_list = $non_aggregates = array();
+    //   foreach ($this->fields as $field => $field_info) {
+    //     // If an aggregate function is specified, wrap it around the field.
+    //     if (isset($field_info['function'])) {
+    //       $fields_list[] = $field_info['function'] . '(' . $field . ')';
+    //     }
+    //     else {
+    //       $fields_list[] = $field;
+    //       $non_aggregates[] = $field;
+    //     }
+    //   }
+    // }
+    // if ($this->hasAggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
+    //   $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
+    //   $query->params['$group'] = implode(',', $groupby);
+    // }
+    // else {
+    //   $fields_list = $non_aggregates;
+    //   $query->params['$group'] = NULL;
+    // }
+    // $query->params['$select'] = implode(',', $fields_list);
+    // $query->fields($this->base_table, $fields_list);
+
+    // If this is a full query build vs a counter query, add on options.
+    if (!$get_count) {
+      // Suss out offset-limit options.
+      if (!empty($this->limit)) {
+        $query->params['$limit'] = $this->limit;
+        $query->range(0, $this->limit);
+      }
+      if (!empty($this->offset)) {
+        $query->params['$offset'] = $this->offset;
+        $query->range($this->offset, $this->limit);
+      }
+
+      // Suss out sort fields.
+      if (!empty($this->orderby)) {
+        $sort_fields = array();
+        foreach ($this->orderby as $orderby) {
+          $sort_fields[] = "{$orderby['field']} {$orderby['direction']}";
+          $query->orderBy($orderby['field'], $orderby['direction']);
+        }
+        $query->params['$order'] = implode(',', $sort_fields);
+      }
+    }
+    else {
+      if (!$this->hasAggregate) {
+        $query->params['$select'] = 'count(*)';
+        $query->addExpression('count(*)');
+      }
+    }
 
     return $query;
   }
@@ -1216,6 +1299,11 @@ class Soql extends QueryPluginBase {
 
     // Let the pager modify the query to add limits.
     $view->pager->query();
+
+    // Have to override limit set by pager->query() above
+    // because Mini pager adds 1 for some odd reason.
+    // See line 61 of core/modules/views/src/Plugin/views/pager/Mini.php.
+    $this->limit = $view->pager->getItemsPerPage();
 
     $view->build_info['query'] = $this->query();
     $view->build_info['count_query'] = $this->query(TRUE);
@@ -1316,10 +1404,10 @@ class Soql extends QueryPluginBase {
             $result[] = $new_row;
           }
 
-        //   // If an "all items" query, bump offset, go again.
-        //   if (empty($query->params['$limit'])) {
-        //     $query->params['$offset'] = count($result);
-        //   }
+          // If an "all items" query, bump offset, go again.
+          if (empty($query->params['$limit'])) {
+            $query->params['$offset'] = count($result);
+          }
         }
       } while (empty($query->params['$limit']) && !empty($resp['data']));
 
