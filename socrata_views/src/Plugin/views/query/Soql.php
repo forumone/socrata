@@ -671,21 +671,7 @@ class Soql extends QueryPluginBase {
    *   The name that this field can be referred to as. Usually this is the alias.
    */
   public function addField($table, $field, $alias = '', $params = array()) {
-    // We check for this specifically because it gets a special alias.
-    if ($table == $this->view->storage->get('base_table') && $field == $this->view->storage->get('base_field') && empty($alias)) {
-      $alias = $this->view->storage->get('base_field');
-    }
-
-    if ($table && empty($this->tableQueue[$table])) {
-      $this->ensureTable($table);
-    }
-
-    if (!$alias && $table) {
-      $alias = $table . '_' . $field;
-    }
-
-    // Make sure an alias is assigned
-    $alias = $alias ? $alias : $field;
+    $alias = $field;
 
     // PostgreSQL truncates aliases to 63 characters:
     //   https://www.drupal.org/node/571548.
@@ -1109,6 +1095,7 @@ class Soql extends QueryPluginBase {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   public function query($get_count = FALSE) {
+    dpm($this->fields);
     $query = db_select($this->base_table)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->storage->id());
@@ -1307,7 +1294,7 @@ class Soql extends QueryPluginBase {
       do {
         $resp = $query->execute();
         if ($resp !== FALSE) {
-          // Have to map Scorata result field labels back onto what Views knows them as.
+          // Have to map Socrata result field labels back onto what Views knows them as.
           $original_field_names = $view->query->fields;
           $field_name_map = array();
           foreach ($original_field_names as $field => $attributes) {
