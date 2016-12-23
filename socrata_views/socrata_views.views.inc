@@ -216,7 +216,7 @@ function _socrata_views_handlers($name, $type, $options) {
 
     case 'calendar_date':
     case 'floating_timestamp':
-      $handlers['field']['id'] = 'socrata_views_handler_field_calendar_date';
+      $handlers['field']['id'] = 'calendar_date';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['id'] = 'standard';
       $handlers['filter']['id'] = 'socrata_views_handler_filter_date';
