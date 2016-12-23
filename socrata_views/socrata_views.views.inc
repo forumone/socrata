@@ -178,7 +178,7 @@ function _socrata_views_handlers($name, $type, $options) {
       break;
 
     case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
-      $handlers['field']['id'] = 'socrata_views_handler_field_location';
+      $handlers['field']['id'] = 'location';
       break;
 
     case 'point': // Longitude, latitude geo data
