@@ -232,7 +232,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['id'] = 'standard';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['id'] = 'standard';
-      $handlers['filter']['id'] = 'socrata_views_handler_filter_text';
+      $handlers['filter']['id'] = 'socrata_string';
       $handlers['argument']['id'] = 'socrata_views_handler_argument_text';
       break;
 
