@@ -1101,7 +1101,7 @@ class Soql extends QueryPluginBase {
         }
         // Otherwise simple field-value comparison.
         else {
-          $queries[] = $this->_construct_query_comp($cond['field'], $cond['value'], $cond['operator']);
+          $queries[] = _construct_query_component($cond['field'], $cond['value'], $cond['operator']);
         }
       }
       if (!empty($queries)) {
@@ -1763,4 +1763,28 @@ class Soql extends QueryPluginBase {
     }
   }
 
+}
+
+/**
+ * Utility method for constructing components for predicate.
+ *
+ * @param string $field
+ * @param string $value
+ * @param string $operator
+ *
+ * @return string
+ */
+function _construct_query_component($field, $value, $operator) {
+  $component = '';
+
+  // Check to see if the predicate component is a prebuilt formula.
+  if ('formula' == $operator) {
+    $component = $field;
+  }
+  // Otherwise, build a "normal" comparison predicate component.
+  else {
+    $component = "{$field}{$operator}'{$value}'";
+  }
+
+  return $component;
 }
