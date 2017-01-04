@@ -1093,7 +1093,7 @@ class Soql extends QueryPluginBase {
         if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
           $in_queries = array();
           foreach ($cond['value'] as $in_val) {
-            $in_queries[] = $this->_construct_query_comp($cond['field'], $in_val, $cond['operator']);
+            $in_queries[] = $this->construct_query_component($cond['field'], $in_val, $cond['operator']);
           }
           if (!empty($in_queries)) {
             $queries[] = '(' . implode(' AND ', $in_queries) . ')';
