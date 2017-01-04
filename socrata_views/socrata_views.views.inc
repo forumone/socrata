@@ -152,7 +152,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['id'] = 'numeric';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['id'] = 'standard';
-      $handlers['filter']['id'] = 'socrata_views_handler_filter_numeric_quoted';
+      $handlers['filter']['id'] = 'socrata_numeric';
       $handlers['argument']['id'] = 'socrata_views_handler_argument_numeric_quoted';
       break;
 
