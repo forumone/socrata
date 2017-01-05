@@ -1107,9 +1107,9 @@ class Soql extends QueryPluginBase {
       if (!empty($queries)) {
         $groups[] = '(' . implode(" {$where['type']} ", $queries) . ')';
         $query->where(implode(" {$this->groupOperator} ", $groups));
+        $query->params['$where'] = implode(" {$this->groupOperator} ", $groups);
       }
     }
-    $query->params['$where'] = implode(" {$this->groupOperator} ", $groups);
 
     // Store off requested fields.
     $this->hasAggregate = $this->view->display_handler->getOption('group_by');
@@ -1133,7 +1133,6 @@ class Soql extends QueryPluginBase {
     }
     else {
       $fields_list = $non_aggregates;
-      $query->params['$group'] = NULL;
     }
     $query->params['$select'] = implode(',', $fields_list);
     $query->fields($this->base_table, $fields_list);
