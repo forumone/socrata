@@ -233,7 +233,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['id'] = 'standard';
       $handlers['filter']['id'] = 'socrata_string';
-      $handlers['argument']['id'] = 'socrata_views_handler_argument_text';
+      $handlers['argument']['id'] = 'socrata_string';
       break;
 
     // Unsupported field types
