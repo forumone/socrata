@@ -184,15 +184,6 @@ class Soql extends QueryPluginBase {
 
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['disable_sql_rewrite'] = array(
-      'default' => FALSE,
-    );
-    $options['distinct'] = array(
-      'default' => FALSE,
-    );
-    $options['replica'] = array(
-      'default' => FALSE,
-    );
     $options['query_comment'] = array(
       'default' => '',
     );
@@ -209,25 +200,6 @@ class Soql extends QueryPluginBase {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $form['disable_sql_rewrite'] = array(
-      '#title' => $this->t('Disable SQL rewriting'),
-      '#description' => $this->t('Disabling SQL rewriting will omit all query tags, i. e. disable node access checks as well as override hook_query_alter() implementations in other modules.'),
-      '#type' => 'checkbox',
-      '#default_value' => !empty($this->options['disable_sql_rewrite']),
-      '#suffix' => '<div class="messages messages--warning sql-rewrite-warning js-hide">' . $this->t('WARNING: Disabling SQL rewriting means that node access security is disabled. This may allow users to see data they should not be able to see if your view is misconfigured. Use this option only if you understand and accept this security risk.') . '</div>',
-    );
-    $form['distinct'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Distinct'),
-      '#description' => $this->t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
-      '#default_value' => !empty($this->options['distinct']),
-    );
-    $form['replica'] = array(
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use Secondary Server'),
-      '#description' => $this->t('This will make the query attempt to connect to a replica server if available.  If no replica server is defined or available, it will fall back to the default server.'),
-      '#default_value' => !empty($this->options['replica']),
-    );
     $form['query_comment'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Query Comment'),
