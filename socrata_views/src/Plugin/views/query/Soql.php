@@ -1540,16 +1540,6 @@ private function construct_query_component($field, $value, $operator) {
           'sort' => 'groupby_numeric',
         ),
       ),
-      'count_distinct' => array(
-        'title' => $this->t('Count DISTINCT'),
-        'method' => 'aggregationMethodDistinct',
-        'handler' => array(
-          'argument' => 'groupby_numeric',
-          'field' => 'numeric',
-          'filter' => 'groupby_numeric',
-          'sort' => 'groupby_numeric',
-        ),
-      ),
       'sum' => array(
         'title' => $this->t('Sum'),
         'method' => 'aggregationMethodSimple',
@@ -1590,26 +1580,11 @@ private function construct_query_component($field, $value, $operator) {
           'sort' => 'groupby_numeric',
         ),
       ),
-      'stddev_pop' => array(
-        'title' => $this->t('Standard deviation'),
-        'method' => 'aggregationMethodSimple',
-        'handler' => array(
-          'argument' => 'groupby_numeric',
-          'field' => 'numeric',
-          'filter' => 'groupby_numeric',
-          'sort' => 'groupby_numeric',
-        ),
-      )
     );
   }
 
   public function aggregationMethodSimple($group_type, $field) {
     return strtoupper($group_type) . '(' . $field . ')';
-  }
-
-  public function aggregationMethodDistinct($group_type, $field) {
-    $group_type = str_replace('_distinct', '', $group_type);
-    return strtoupper($group_type) . '(DISTINCT ' . $field . ')';
   }
 
   /**
