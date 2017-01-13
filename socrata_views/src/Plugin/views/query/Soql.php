@@ -1472,52 +1472,6 @@ private function construct_query_component($field, $value, $operator) {
     }
   }*/
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheTags() {
-    $tags = [];
-    // Add cache tags for each row, if there is an entity associated with it.
-    if (!$this->hasAggregate) {
-      foreach ($this->getAllEntities() as $entity) {
-        $tags = Cache::mergeTags($entity->getCacheTags(), $tags);
-      }
-    }
-
-    return $tags;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheMaxAge() {
-    $max_age = parent::getCacheMaxAge();
-    foreach ($this->getAllEntities() as $entity) {
-      $max_age = Cache::mergeMaxAges($max_age, $entity->getCacheMaxAge());
-    }
-
-    return $max_age;
-  }
-
-  /**
-   * Gets all the involved entities of the view.
-   *
-   * @return \Drupal\Core\Entity\EntityInterface[]
-   */
-  protected function getAllEntities() {
-    $entities = [];
-    foreach ($this->view->result as $row) {
-      if ($row->_entity) {
-        $entities[] = $row->_entity;
-      }
-      foreach ($row->_relationship_entities as $entity) {
-        $entities[] = $entity;
-      }
-    }
-
-    return $entities;
-  }
-
   public function addSignature(ViewExecutable $view) {
     $view->query->addField(NULL, "'" . $view->storage->id() . ':' . $view->current_display . "'", 'view_name');
   }
