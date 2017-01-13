@@ -156,18 +156,6 @@ class Soql extends QueryPluginBase {
   }
 
   /**
-   * Set the view to be distinct (per base field).
-   *
-   * @param bool $value
-   *   Should the view be distincted.
-   */
-  protected function setDistinct($value = TRUE) {
-    if (!(isset($this->noDistinct) && $value)) {
-      $this->distinct = $value;
-    }
-  }
-
-  /**
    * Set what field the query will count() on for paging.
    */
   public function setCountField($table, $field, $alias = NULL) {
