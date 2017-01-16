@@ -870,7 +870,7 @@ private function constructQueryComponent($field, $value, $operator) {
 
       $start = microtime(TRUE);
       // Get total count of items and force initial limit if not set.
-      $num_dataset_rows = 0;
+      $num_dataset_rows = $index = 0;
       $resp = $count_query->execute();
       if ($resp !== FALSE && !empty($resp['data'])) {
         $num_dataset_rows = count($resp['data']);
@@ -906,6 +906,7 @@ private function constructQueryComponent($field, $value, $operator) {
               }
               $new_row->{$field} = $value;
             }
+            $new_row->index = $index++;
             $result[] = $new_row;
           }
 
@@ -940,12 +941,6 @@ private function constructQueryComponent($field, $value, $operator) {
     //     $result = $query->execute();
     //     $result->setFetchMode(\PDO::FETCH_CLASS, 'Drupal\views\ResultRow');
 
-    //     // Setup the result row objects.
-    //     $view->result = iterator_to_array($result);
-        array_walk($view->result, function(ResultRow $row, $index) {
-          $row->index = $index;
-        });
-
     //     $view->pager->postExecute($view->result);
     //     $view->pager->updatePageInfo();
     //     $view->total_rows = $view->pager->getTotalItems();
@@ -975,8 +970,6 @@ private function constructQueryComponent($field, $value, $operator) {
   }
 
   public function getAggregationInfo() {
-    // @todo -- need a way to get database specific and customized aggregation
-    // functions into here.
     return array(
       'group' => array(
         'title' => $this->t('Group results together'),
