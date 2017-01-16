@@ -697,7 +697,7 @@ class Soql extends QueryPluginBase {
       $fields_list = $non_aggregates = array();
       foreach ($this->fields as $field => $field_info) {
         // If an aggregate function is specified, wrap it around the field.
-        if (isset($field_info['function'])) {
+        if (isset($field_info['function']) && $this->hasAggregate) {
           $fields_list[] = $field_info['function'] . '(' . $field . ')';
         }
         else {
@@ -884,7 +884,7 @@ private function constructQueryComponent($field, $value, $operator) {
           $original_field_names = $view->query->fields;
           $field_name_map = array();
           foreach ($original_field_names as $field => $attributes) {
-            if (isset($attributes['function'])) {
+            if (isset($attributes['function']) && $this->hasAggregate) {
               $field_alias = $attributes['alias'];
             }
             else {
