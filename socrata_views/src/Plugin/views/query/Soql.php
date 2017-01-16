@@ -44,12 +44,6 @@ class Soql extends QueryPluginBase {
   var $tables = array();
 
   /**
-   * Holds an array of relationships, which are aliases of the primary
-   * table that represent different ways to join the same table in.
-   */
-  var $relationships = array();
-
-  /**
    * An array of sections of the WHERE query. Each section is in itself
    * an array of pieces and a flag as to whether or not it should be AND
    * or OR.
@@ -126,12 +120,6 @@ class Soql extends QueryPluginBase {
     $base_table = $this->view->storage->get('base_table');
     $this->base_table = $base_table;
     $base_field = $this->view->storage->get('base_field');
-    $this->relationships[$base_table] = array(
-      'link' => NULL,
-      'table' => $base_table,
-      'alias' => $base_table,
-      'base' => $base_table
-    );
 
     // init the table queue with our primary table.
     $this->tableQueue[$base_table] = array(
@@ -233,46 +221,6 @@ class Soql extends QueryPluginBase {
    */
   public function ensureTable($table, $relationship = NULL, JoinPluginBase $join = NULL) {
     return $table;
-  }
-
-  /**
-   * Retrieve join data from the larger join data cache.
-   *
-   * @param $table
-   *   The table to get the join information for.
-   * @param $base_table
-   *   The path we're following to get this join.
-   *
-   * @return \Drupal\views\Plugin\views\join\JoinPluginBase
-   *   A Join object or child object, if one exists.
-   */
-  public function getJoinData($table, $base_table) {
-    // Check to see if we're linking to a known alias. If so, get the real
-    // table's data instead.
-    if (!empty($this->tableQueue[$table])) {
-      $table = $this->tableQueue[$table]['table'];
-    }
-    return HandlerBase::getTableJoin($table, $base_table);
-  }
-
-  /**
-   * Get the information associated with a table.
-   *
-   * If you need the alias of a table with a particular relationship, use
-   * ensureTable().
-   */
-  public function getTableInfo($table) {
-    if (!empty($this->tableQueue[$table])) {
-      return $this->tableQueue[$table];
-    }
-
-    // In rare cases we might *only* have aliased versions of the table.
-    if (!empty($this->tables[$this->view->storage->get('base_table')][$table])) {
-      $alias = $this->tables[$this->view->storage->get('base_table')][$table]['alias'];
-      if (!empty($this->tableQueue[$alias])) {
-        return $this->tableQueue[$alias];
-      }
-    }
   }
 
   /**
