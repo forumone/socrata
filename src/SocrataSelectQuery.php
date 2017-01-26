@@ -53,6 +53,7 @@ class SocrataSelectQuery extends SelectExtender {
   public function execute($type = NULL) {
     $retval = FALSE;
 
+    // @todo Change to use Guzzle client a la http://www.lohmeyer.rocks/blog/2015/10/20/0070-how-make-custom-guzzle-requests-drupal-8-modules.
     // Create a new cURL resource.
     $ch = curl_init();
     if ($ch) {
@@ -168,9 +169,8 @@ class SocrataSelectQuery extends SelectExtender {
   public function __toString() {
     if ($this->endpoint) {
       $soda_url = $this->endpoint->getUnencodedSodaURL($this->params);
-      $this->query->comment('Socrata URL: "' . $soda_url . '" Corresponding SQL query: ');
+      $this->query->comment('Socrata URL: "' . $soda_url . '"' . "\r\nCorresponding SQL query: ");
     }
-
     return (string) $this->query;
   }
 }

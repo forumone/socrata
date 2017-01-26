@@ -86,27 +86,6 @@ function socrata_get_endpoints() {
 }
 
 /**
- * Util function to split out the dataset components from an endpoint URL.
- */
-function socrata_components_from_endpoint($endpoint) {
-  $components = parse_url($endpoint);
-  $dataset_id = '';
-  $path = $components['path'];
-  if ($path) {
-    $parts = explode('/', $path);
-    if (!empty($parts)) {
-      $tmp = explode('.', array_pop($parts));
-      if (!empty($tmp)) {
-        $dataset_id = $tmp[0];
-      }
-    }
-  }
-  $components['dataset_id'] = $dataset_id;
-
-  return $components;
-}
-
-/**
  * Create watchdog entry during debugging and try to call dpm from devel module.
  *
  * When debugging is disabled, nothing happens.

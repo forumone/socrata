@@ -12,19 +12,17 @@ function socrata_views_data() {
   $tables = array();
 
   // Load our available sources
-  // @todo: switch to getSource (or a new getSources wrapper)
-  ctools_include('export');
-  $sources = ctools_export_crud_load_all('socrata_sources');
+  $endpoints = \Drupal::entityManager()->getStorage('endpoint')->loadMultiple();
 
   // Iterate over all available tables, provide definitions to Views
-  foreach ($sources as $source_name => $source) {
-    $group = $source->description;
+  foreach ($endpoints as $endpoint_id => $endpoint) {
+    $group = $endpoint->label;
 
     // Retrieve table schema
-    $components = socrata_components_from_endpoint($source->endpoint);
+    $components = $endpoint->getComponents();
     $dataset = $components['dataset_id'];
 
-    $query = db_select($source_name)->extend('SocrataSelectQuery');
+    $query = db_select($endpoint_id)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
     //@todo: fix and add tag:
     //$query->addTag('socrata_data_' . [4x4 w/ dashes converted to underscores]);
@@ -40,19 +38,19 @@ function socrata_views_data() {
       $metadata_field_list = $resp_metadata['data']['columns'];
 
       // Define basic table info
-      $tables[$source_name] = array();
-      $table = &$tables[$source_name];
+      $tables[$endpoint_id] = array();
+      $table = &$tables[$endpoint_id];
       $table['table'] = array(
         'group' => $group,
-        'title' => $source_name,
-        'help' => "Field in {$source_name}",
+        'title' => $endpoint_id,
+        'help' => "Field in {$endpoint_id}",
       );
 
       // Stub out the base table information (key field will be extracted below)
       $table['table']['base'] = array(
         'title' => "Socrata: {$group}",
         'help' => $group,
-        'query class' => 'socrata_query',
+        'query_id' => 'socrata_views_query',
       );
 
       // Add fields to table
@@ -151,91 +149,91 @@ function _socrata_views_handlers($name, $type, $options) {
     case 'money':
     case 'percent':
     case 'stars':
-      $handlers['field']['handler'] = 'views_handler_field_numeric';
+      $handlers['field']['id'] = 'numeric';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
-      $handlers['filter']['handler'] = 'socrata_views_handler_filter_numeric_quoted';
-      $handlers['argument']['handler'] = 'socrata_views_handler_argument_numeric_quoted';
+      $handlers['sort']['id'] = 'standard';
+      $handlers['filter']['id'] = 'socrata_numeric';
+      $handlers['argument']['id'] = 'socrata_views_handler_argument_numeric_quoted';
       break;
 
     case 'number':
     case 'double':
-      $handlers['field']['handler'] = 'views_handler_field_numeric';
+      $handlers['field']['id'] = 'numeric';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
-      $handlers['filter']['handler'] = 'socrata_views_handler_filter_numeric';
-      $handlers['argument']['handler'] = 'socrata_views_handler_argument_numeric';
+      $handlers['sort']['id'] = 'standard';
+      $handlers['filter']['id'] = 'socrata_numeric';
+      $handlers['argument']['id'] = 'socrata_views_handler_argument_numeric';
       break;
 
     case 'checkbox':
-      $handlers['field']['handler'] = 'views_handler_field_boolean';
+      $handlers['field']['id'] = 'boolean';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
-      $handlers['filter']['handler'] = 'socrata_views_handler_filter_checkbox';
-      $handlers['argument']['handler'] = 'socrata_views_handler_argument_checkbox';
+      $handlers['sort']['id'] = 'standard';
+      $handlers['filter']['id'] = 'socrata_views_handler_filter_checkbox';
+      $handlers['argument']['id'] = 'socrata_views_handler_argument_checkbox';
       break;
 
     case 'url': // Compound type: description, url
-      $handlers['field']['handler'] = 'socrata_views_handler_field_url';
+      $handlers['field']['id'] = 'socrata_url';
       break;
 
     case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
-      $handlers['field']['handler'] = 'socrata_views_handler_field_location';
+      $handlers['field']['id'] = 'location';
       break;
 
     case 'point': // Longitude, latitude geo data
-      $handlers['field']['handler'] = 'socrata_views_handler_field_point';
+      $handlers['field']['id'] = 'socrata_views_handler_field_point';
       break;
 
     case 'email':
-      $handlers['field']['handler'] = 'socrata_views_handler_field_email';
+      $handlers['field']['id'] = 'socrata_views_handler_field_email';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['sort']['id'] = 'standard';
       break;
 
     case 'document': // Compound type: file_id, filename
-      $handlers['field']['handler'] = 'socrata_views_handler_field_document';
+      $handlers['field']['id'] = 'socrata_views_handler_field_document';
       break;
 
     case 'photo':
-      $handlers['field']['handler'] = 'socrata_views_handler_field_photo';
+      $handlers['field']['id'] = 'socrata_views_handler_field_photo';
       break;
 
     case 'phone': // Compound type: phone_number, phone_type
-      $handlers['field']['handler'] = 'socrata_views_handler_field_phone';
+      $handlers['field']['id'] = 'socrata_views_handler_field_phone';
       break;
 
     case 'html':
-      $handlers['field']['handler'] = 'socrata_views_handler_field_html';
+      $handlers['field']['id'] = 'socrata_views_handler_field_html';
       break;
 
     case 'date':
-      $handlers['field']['handler'] = 'views_handler_field_date';
+      $handlers['field']['id'] = 'date';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
-      $handlers['filter']['handler'] = 'socrata_views_handler_filter_date';
+      $handlers['sort']['id'] = 'standard';
+      $handlers['filter']['id'] = 'socrata_views_handler_filter_date';
       break;
 
     case 'calendar_date':
     case 'floating_timestamp':
-      $handlers['field']['handler'] = 'socrata_views_handler_field_calendar_date';
+      $handlers['field']['id'] = 'calendar_date';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
-      $handlers['filter']['handler'] = 'socrata_views_handler_filter_date';
+      $handlers['sort']['id'] = 'standard';
+      $handlers['filter']['id'] = 'socrata_views_handler_filter_date';
       break;
 
     case 'flag':
-      $handlers['field']['handler'] = 'views_handler_field';
+      $handlers['field']['id'] = 'standard';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
+      $handlers['sort']['id'] = 'standard';
       break;
 
     case 'text':
-      $handlers['field']['handler'] = 'views_handler_field';
+      $handlers['field']['id'] = 'standard';
       $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['handler'] = 'views_handler_sort';
-      $handlers['filter']['handler'] = 'socrata_views_handler_filter_text';
-      $handlers['argument']['handler'] = 'socrata_views_handler_argument_text';
+      $handlers['sort']['id'] = 'standard';
+      $handlers['filter']['id'] = 'socrata_string';
+      $handlers['argument']['id'] = 'socrata_string';
       break;
 
     // Unsupported field types
