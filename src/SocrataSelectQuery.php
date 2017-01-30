@@ -42,6 +42,13 @@ class SocrataSelectQuery extends SelectExtender {
   }
 
   /**
+   * Return the Endpoint of the query.
+   */
+  public function getEndpoint() {
+    return $this->endpoint;
+  }
+
+  /**
    * Execute the query. In our case, this is actually the cURL request.
    *
    * @param $type string
