@@ -1,9 +1,11 @@
 socrata.settings:
-  type: mapping
+  type: config_object
   label: Settings
   mapping:
     socrata_debug:
       type: boolean
+    socrata_curl_options:
+      type: sequence
 socrata.endpoint.*:
   type: config_entity
   label: 'Endpoint config'

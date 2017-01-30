@@ -15,23 +15,25 @@ use Drupal\socrata\Entity\Endpoint;
 class SocrataSelectQueryTest extends KernelTestBase {
 
   /**
+   * Endpoint URL.
+   *
+   * @var string
+   */
+  protected $url;
+
+  /**
    * Modules to enable.
    *
    * The test runner will merge the $modules lists from this class, the class
    * it extends, and so on up the class hierarchy. It is not necessary to
    * include modules in your list that a parent class has already declared.
    *
+   * @var array
+   *
    * @see \Drupal\Tests\KernelTestBase::enableModules()
    * @see \Drupal\Tests\KernelTestBase::bootKernel()
-   *
-   * @var array
    */
   public static $modules = ['socrata'];
-
-  /**
-   * Endpoint URL
-   */
-  protected $url;
 
   /**
    * {@inheritdoc}
@@ -49,6 +51,7 @@ class SocrataSelectQueryTest extends KernelTestBase {
     $connection = Database::getConnection();
     $query = $connection->select($this->url)->extend('\Drupal\socrata\SocrataSelectQuery');
     $query->setEndpoint();
+
     $this->assertNull($query->getEndpoint());
   }
 
@@ -66,6 +69,7 @@ class SocrataSelectQueryTest extends KernelTestBase {
     $endpoint = new Endpoint($data, 'endpoint');
     $endpoint->save();
     $query = $connection->select('endpoint')->extend('\Drupal\socrata\SocrataSelectQuery');
+
     $this->assertTrue(is_a($query->getEndpoint(), '\Drupal\socrata\Entity\Endpoint'));
   }
 
@@ -77,16 +81,23 @@ class SocrataSelectQueryTest extends KernelTestBase {
     $query = $connection->select($this->url)->extend('\Drupal\socrata\SocrataSelectQuery');
     $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
     $query->setEndpoint($endpoint);
+
     $this->assertTrue(is_a($query->getEndpoint(), '\Drupal\socrata\Entity\Endpoint'));
   }
 
-  // public function testExecuteQuery() {
-  //   $connection = Database::getConnection();
-  //   $query = $connection->select($this->url)->extend('\Drupal\socrata\SocrataSelectQuery');
-  //   $endpoint = new Endpoint(array('url' => $this->url), 'endpoint');
-  //   $query->setEndpoint($endpoint);
-  //   $ret = $query->execute();
-  //   $this->assertTrue(is_a($query->getEndpoint(), '\Drupal\socrata\Entity\Endpoint'));
-  // }
+  /**
+   * Test execution of a SocrataSelectQuery.
+   */
+  public function testExecuteQuery() {
+    $this->installConfig(['socrata']);
+    $connection = Database::getConnection();
+    $query = $connection->select($this->url)->extend('\Drupal\socrata\SocrataSelectQuery');
+    $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
+    $query->setEndpoint($endpoint);
+    $ret = $query->execute();
+
+    $this->assertTrue(is_array($ret));
+    $this->assertArrayHasKey('data', $ret);
+  }
 
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Drupal\socrata;
 
 use Drupal\Core\Database\Query\SelectExtender;
@@ -51,11 +52,12 @@ class SocrataSelectQuery extends SelectExtender {
   /**
    * Execute the query. In our case, this is actually the cURL request.
    *
-   * @param $type string
+   * @param string $type
    *   cURL request type, if not the default. The only acceptable value is
    *   currently 'metadata', but we might want others in the future?
    *
    * @return array
+   *   Array containing response data.
    */
   public function execute($type = NULL) {
     $retval = FALSE;
