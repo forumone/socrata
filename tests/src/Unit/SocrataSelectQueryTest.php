@@ -4,7 +4,6 @@ namespace Drupal\Tests\socrata\Unit;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Core\Database\Database;
-use Drupal\socrata\SocrataSelectQuery;
 use Drupal\socrata\Entity\Endpoint;
 
 /**
