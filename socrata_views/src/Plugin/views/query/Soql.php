@@ -719,10 +719,11 @@ class Soql extends QueryPluginBase {
     // If this is a full query build vs a counter query, add on options.
     if (!$get_count) {
       // Suss out offset-limit options.
-      if (!empty($this->limit)) {
-        $query->params['$limit'] = $this->limit;
-        $query->range(0, $this->limit);
+      if (empty($this->limit)) {
+        $this->limit = 1000;
       }
+      $query->params['$limit'] = $this->limit;
+      $query->range(0, $this->limit);
       if (!empty($this->offset)) {
         $query->params['$offset'] = $this->offset;
         $query->range($this->offset, $this->limit);
