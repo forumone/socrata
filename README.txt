@@ -6,7 +6,6 @@ query solution and an input filter.
 
 REQUIREMENTS
 ------------
-* Chaos Tool Suite (ctools) (https://drupal.org/project/ctools) for Socrata Views.
 * Views (https://drupal.org/project/views) for Socrata Views.
 
 INSTALLATION
