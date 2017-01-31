@@ -9,13 +9,14 @@ use Drupal\socrata\Entity\Endpoint;
 
 /**
  * @file
- * Decorator class for a Socrata dataset query
+ * Decorator class for a Socrata dataset query.
  */
-
 class SocrataSelectQuery extends SelectExtender {
 
   /**
    * Socrata Query Language parameters.
+   *
+   * @var array
    */
   public $params = array();
 
@@ -182,4 +183,5 @@ class SocrataSelectQuery extends SelectExtender {
     }
     return (string) $this->query;
   }
+
 }
