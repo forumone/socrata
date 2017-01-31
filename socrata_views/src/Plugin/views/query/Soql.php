@@ -825,56 +825,25 @@ private function constructQueryComponent($field, $value, $operator) {
     $query = $view->build_info['query'];
     $count_query = $view->build_info['count_query'];
 
-    // $query->addMetaData('view', $view);
-    // $count_query->addMetaData('view', $view);
-
-    // if (empty($this->options['disable_sql_rewrite'])) {
-    //   $base_table_data = Views::viewsData()->get($this->view->storage->get('base_table'));
-    //   if (isset($base_table_data['table']['base']['access query tag'])) {
-    //     $access_tag = $base_table_data['table']['base']['access query tag'];
-    //     $query->addTag($access_tag);
-    //     $count_query->addTag($access_tag);
-    //   }
-
-    //   if (isset($base_table_data['table']['base']['query metadata'])) {
-    //     foreach ($base_table_data['table']['base']['query metadata'] as $key => $value) {
-    //       $query->addMetaData($key, $value);
-    //       $count_query->addMetaData($key, $value);
-    //     }
-    //   }
-    // }
-
     if ($query) {
       $result = array();
-    //   $additional_arguments = \Drupal::moduleHandler()->invokeAll('views_query_substitutions', array($view));
-
-    //   // Count queries must be run through the preExecute() method.
-    //   // If not, then hook_query_node_access_alter() may munge the count by
-    //   // adding a distinct against an empty query string
-    //   // (e.g. COUNT DISTINCT(1) ...) and no pager will return.
-    //   // See pager.inc > PagerDefault::execute()
-    //   // http://api.drupal.org/api/drupal/includes--pager.inc/function/PagerDefault::execute/7
-    //   // See https://www.drupal.org/node/1046170.
-    //   $count_query->preExecute();
-
-    //   // Build the count query.
-    //   $count_query = $count_query->countQuery();
-
-    //   // Add additional arguments as a fake condition.
-    //   // XXX: this doesn't work, because PDO mandates that all bound arguments
-    //   // are used on the query. TODO: Find a better way to do this.
-    //   if (!empty($additional_arguments)) {
-    //     // $query->where('1 = 1', $additional_arguments);
-    //     // $count_query->where('1 = 1', $additional_arguments);
-    //   }
+      // Count queries must be run through the preExecute() method.
+      $count_query->preExecute();
 
       $start = microtime(TRUE);
       // Get total count of items and force initial limit if not set.
-      $num_dataset_rows = $index = 0;
+      $total_items = $index = 0;
       $resp = $count_query->execute();
-      if ($resp !== FALSE && !empty($resp['data'])) {
-        $num_dataset_rows = count($resp['data']);
+      if ($resp !== FALSE && !empty($resp['data'][0]['count'])) {
+        $total_items = intval($resp['data'][0]['count']);
       }
+
+      // Just set total rows on pager instead of calling pager->executeCountQuery()
+      // because method calls fetchField(), which breaks for non-SQL queries.
+      $view->pager->total_items = $total_items;
+
+      // Let the pager modify the query to add limits.
+      $view->pager->preExecute($query);
 
       // Execute main query, looping if we need to get more than 1000 rows.
       do {
@@ -919,44 +888,10 @@ private function constructQueryComponent($field, $value, $operator) {
 
     // Store off values from query in View.
     $view->result = $result;
-    $view->total_rows = count($result);
 
-      // Let the pager modify the query to add limits.
-      // $this->pager->pre_execute($query);
-    //   try {
-    //     if ($view->pager->useCountQuery() || !empty($view->get_total_rows)) {
-    //       $view->pager->executeCountQuery($count_query);
-    //     }
-
-    //     // Let the pager modify the query to add limits.
-    //     $view->pager->preExecute($query);
-
-    //     if (!empty($this->limit) || !empty($this->offset)) {
-    //       // We can't have an offset without a limit, so provide a very large limit instead.
-    //       $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
-    //       $offset = intval(!empty($this->offset) ? $this->offset : 0);
-    //       $query->range($offset, $limit);
-    //     }
-
-    //     $result = $query->execute();
-    //     $result->setFetchMode(\PDO::FETCH_CLASS, 'Drupal\views\ResultRow');
-
-    //     $view->pager->postExecute($view->result);
-    //     $view->pager->updatePageInfo();
-    //     $view->total_rows = $view->pager->getTotalItems();
-
-    //     // Load all entities contained in the results.
-    //     $this->loadEntities($view->result);
-    //   }
-    //   catch (DatabaseExceptionWrapper $e) {
-    //     $view->result = array();
-    //     if (!empty($view->live_preview)) {
-    //       drupal_set_message($e->getMessage(), 'error');
-    //     }
-    //     else {
-    //       throw new DatabaseExceptionWrapper("Exception in {$view->storage->label()}[{$view->storage->id()}]: {$e->getMessage()}");
-    //     }
-    //   }
+    $view->pager->postExecute($view->result);
+    $view->pager->updatePageInfo();
+    $view->total_rows = $view->pager->getTotalItems();
 
     }
     else {
