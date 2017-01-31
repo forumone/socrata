@@ -48,7 +48,7 @@ class SocrataSelectQueryTest extends KernelTestBase {
    */
   public function testInvalidTable() {
     $connection = Database::getConnection();
-    $query = $connection->select($this->url)->extend('\Drupal\socrata\SocrataSelectQuery');
+    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
     $query->setEndpoint();
 
     $this->assertNull($query->getEndpoint());
@@ -97,6 +97,61 @@ class SocrataSelectQueryTest extends KernelTestBase {
 
     $this->assertTrue(is_array($ret));
     $this->assertArrayHasKey('data', $ret);
+  }
+
+  /**
+   * Test execution of a SocrataSelectQuery using an invalid URL.
+   */
+  public function testExecuteQueryFailure() {
+    $this->installConfig(['socrata']);
+    $connection = Database::getConnection();
+    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
+    $endpoint = new Endpoint(['url' => 'https://data.seattle.gov/resource'], 'endpoint');
+    $query->setEndpoint($endpoint);
+    $ret = $query->execute();
+
+    $this->assertFalse($ret);
+  }
+
+  /**
+   * Test execution of a SocrataSelectQuery of type "metadata".
+   */
+  public function testExecuteQueryMetadata() {
+    $this->installConfig(['socrata']);
+    $connection = Database::getConnection();
+    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
+    $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
+    $query->setEndpoint($endpoint);
+    $ret = $query->execute('metadata');
+
+    $this->assertTrue(is_array($ret));
+    $this->assertArrayHasKey('data', $ret);
+    $this->assertArrayHasKey('metadata', $ret['data']);
+  }
+
+  /**
+   * Test conversion of SocrataSelectQuery to a string.
+   */
+  public function testQueryToString() {
+    $connection = Database::getConnection();
+    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
+    $string = $query->__toString();
+
+    $this->assertContains('SELECT', $string);
+    $this->assertContains('FROM', $string);
+  }
+
+  /**
+   * Test conversion of SocrataSelectQuery with an Endpoint to a string.
+   */
+  public function testQueryToStringWithEndpoint() {
+    $connection = Database::getConnection();
+    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
+    $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
+    $query->setEndpoint($endpoint);
+    $string = $query->__toString();
+
+    $this->assertContains($this->url, $string);
   }
 
 }
