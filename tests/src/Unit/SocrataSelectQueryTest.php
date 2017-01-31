@@ -44,47 +44,6 @@ class SocrataSelectQueryTest extends KernelTestBase {
   }
 
   /**
-   * Test having an non-existant endpoint.
-   */
-  public function testInvalidTable() {
-    $connection = Database::getConnection();
-    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
-    $query->setEndpoint();
-
-    $this->assertNull($query->getEndpoint());
-  }
-
-  /**
-   * Test the class setting an endpoint on query initialization.
-   */
-  public function testQueryWithEndpoint() {
-    $connection = Database::getConnection();
-    $data = [
-      'url' => $this->url,
-      'id' => 'endpoint',
-      'label' => 'Endpoint',
-      'app_token' => '',
-    ];
-    $endpoint = new Endpoint($data, 'endpoint');
-    $endpoint->save();
-    $query = $connection->select('endpoint')->extend('\Drupal\socrata\SocrataSelectQuery');
-
-    $this->assertTrue(is_a($query->getEndpoint(), '\Drupal\socrata\Entity\Endpoint'));
-  }
-
-  /**
-   * Test setting an endpoint manually with the setEndpoint method.
-   */
-  public function testSetEndpoint() {
-    $connection = Database::getConnection();
-    $query = $connection->select($this->url)->extend('\Drupal\socrata\SocrataSelectQuery');
-    $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
-    $query->setEndpoint($endpoint);
-
-    $this->assertTrue(is_a($query->getEndpoint(), '\Drupal\socrata\Entity\Endpoint'));
-  }
-
-  /**
    * Test execution of a SocrataSelectQuery.
    */
   public function testExecuteQuery() {
