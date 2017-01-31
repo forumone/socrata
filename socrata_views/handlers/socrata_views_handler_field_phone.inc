@@ -48,7 +48,7 @@ class socrata_views_handler_field_phone extends views_handler_field {
     $form['link_text'] = array(
       '#type' => 'textfield',
       '#title' => t('Link text'),
-      '#description' => t('Text to use for link based on selection above'),
+      '#description' => t('Text to use for link based on selection above.'),
       '#default_value' => $this->options['link_text'],
     );
 

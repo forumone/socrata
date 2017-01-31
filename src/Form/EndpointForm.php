@@ -54,7 +54,7 @@ class EndpointForm extends EntityForm {
       '#title' => $this->t('Name'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->label(),
-      '#description' => $this->t("Name of the endpoint."),
+      '#description' => $this->t("The human-readable name of this endpoint."),
       '#required' => TRUE,
     );
     $form['url'] = array(
@@ -62,7 +62,7 @@ class EndpointForm extends EntityForm {
       '#title' => $this->t('URL'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getUrl(),
-      '#description' => $this->t("URL of the endpoint."),
+      '#description' => $this->t("URL of the dataset endpoint (e.g., https://data.seattle.gov/resource/tqh5-8vm2.json)."),
       '#required' => TRUE,
     );
     $form['app_token'] = array(
@@ -70,7 +70,7 @@ class EndpointForm extends EntityForm {
       '#title' => $this->t('Application token'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getAppToken(),
-      '#description' => $this->t("Application token."),
+      '#description' => $this->t("Application token (some endpoints require this for access)."),
       '#required' => FALSE,
     );
 

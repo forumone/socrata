@@ -40,7 +40,7 @@ class socrata_views_handler_field_url extends views_handler_field {
       '#title' => t('Select what to use as the link text'),
       '#options' => array(
         'url' => t('URL'),
-        'socrata_description' => t('Description from Socrata, otherwise provided text'),
+        'socrata_description' => t('Description from Socrata, otherwise provided text.'),
         'link_text' => t('Provided link text'),
       ),
       '#default_value' => $this->options['link_text_option'],
@@ -48,7 +48,7 @@ class socrata_views_handler_field_url extends views_handler_field {
     $form['link_text'] = array(
       '#type' => 'textfield',
       '#title' => t('Link text'),
-      '#description' => t('Text to use for link based on selection above'),
+      '#description' => t('Text to use for link based on selection above.'),
       '#default_value' => $this->options['link_text'],
     );
 
