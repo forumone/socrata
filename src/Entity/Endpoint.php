@@ -129,8 +129,9 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
       foreach ($params as $key => $value) {
         $params_query[] = $key . '=' . $value;
       }
+      $url_with_params .= implode('&', $params_query);
     }
-    $url_with_params .= implode('&', $params_query);
+
     return Url::fromUri($url_with_params, ['absolute' => TRUE])->toString();
   }
 
