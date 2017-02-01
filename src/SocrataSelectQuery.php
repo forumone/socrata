@@ -5,6 +5,7 @@ use Drupal\Core\Database\Query\SelectExtender;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\socrata\Entity\Endpoint;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 
 /**
  * @file
@@ -12,6 +13,8 @@ use Drupal\socrata\Entity\Endpoint;
  */
 
 class SocrataSelectQuery extends SelectExtender {
+
+  use DependencySerializationTrait;
 
   /**
    * Socrata Query Language parameters.
