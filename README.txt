@@ -6,11 +6,11 @@ There are four modules in this project:
 
 Socrata
 -------
-Manages the dataset instances and allows for import/export of these definitions. When enabled, you will find a menu item under Structure > Socrata that will allow you to manage those. They can then be used in conjunction with other modules.
+Manages the dataset endpoints and allows for import/export of these definitions. When enabled, you will find a menu item under Structure > Socrata that will allow you to manage those. They can then be used in conjunction with other modules.
 
 Socrata Views
 -------------
-This is a query plugin for Views 3.x that allows you to build a View against a dataset instance defined above. Once enabled, when you go to add a new View it will present all the datasets configured by the socrata module. After selecting a dataset, it will allow you to map fields and format them just like you would in a normal View. Any Views 3.x-compatible display plugin that operates on fields should be able to be used to render the data. Tested recently:
+This is a query plugin for Views 3.x that allows you to build a View against a dataset endpoint defined above. Once enabled, when you go to add a new View it will present all the datasets configured by the socrata module. After selecting a dataset, it will allow you to map fields and format them just like you would in a normal View. Any Views 3.x-compatible display plugin that operates on fields should be able to be used to render the data. Tested recently:
 
 * Charts
 * GMap
@@ -37,7 +37,7 @@ REQUIREMENTS
 INSTALLATION
 ------------
 Enable the socrata_views modules for Views integration and the socrata_filter module for an input
-filter.  Both modules will enable the base socrata module as a dependency.
+filter.  Both modules will enable the base Socrata module as a dependency.
 
 
 CONFIGURATION
