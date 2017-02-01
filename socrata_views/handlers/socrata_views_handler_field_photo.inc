@@ -36,7 +36,7 @@ class socrata_views_handler_field_photo extends views_handler_field {
     $form['link_text'] = array(
       '#type' => 'textfield',
       '#title' => t('Link text'),
-      '#description' => t('Text to use for link.'),
+      '#description' => t('Text to use for link'),
       '#default_value' => $this->options['link_text'],
     );
 
