@@ -1,5 +1,5 @@
 name: Socrata Views
-description: 'Provides queryable datasource for Views'
+description: 'Provides queryable datasource for Views.'
 package: Socrata
 core: 8.x
 dependencies:

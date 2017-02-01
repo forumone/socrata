@@ -18,7 +18,7 @@ use Drupal\socrata\Entity\Endpoint;
  * @Filter(
  *   id = "filter_socrata",
  *   title = @Translation("Embed Socrata dataset views"),
- *   description = @Translation("Allow users to embed a Socrata dataset\'s default view in an editable content area"),
+ *   description = @Translation("Allow users to embed a Socrata dataset's default view in an editable content area."),
  *   type = Drupal\filter\Plugin\FilterInterface::TYPE_MARKUP_LANGUAGE,
  *   settings = {
  *     "socrata_filter_width" = 500,
@@ -77,14 +77,14 @@ class FilterSocrata extends FilterBase {
     $form['socrata_filter_width'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Default width of embed'),
-      '#description' => $this->t('The default width of the embedded Socrata view (in pixels) to use if not specified in the embed tag'),
+      '#description' => $this->t('The default width of the embedded Socrata view (in pixels) to use if not specified in the embed tag.'),
       '#default_value' => $this->settings['socrata_filter_width'],
     );
 
     $form['socrata_filter_height'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Default height of embed'),
-      '#description' => $this->t('The default height of the embedded Socrata view (in pixels) to use if not specified in the embed tag'),
+      '#description' => $this->t('The default height of the embedded Socrata view (in pixels) to use if not specified in the embed tag.'),
       '#default_value' => $this->settings['socrata_filter_height'],
     );
     return $form;
