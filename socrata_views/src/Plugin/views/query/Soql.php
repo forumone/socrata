@@ -890,7 +890,10 @@ private function constructQueryComponent($field, $value, $operator) {
     // Store off values from query in View.
     $view->result = $result;
 
-    $view->pager->postExecute($view->result);
+    // The mini pager changes its total_items property in its postExecute() method
+    // which breaks the mini pager so we'll just disable calling that method.
+    // $view->pager->postExecute($view->result);
+
     $view->pager->updatePageInfo();
     $view->total_rows = $view->pager->getTotalItems();
 
