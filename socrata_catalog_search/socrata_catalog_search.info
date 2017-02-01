@@ -1,0 +1,30 @@
+name = Socrata Catalog Search Views
+description = Provides queryable datasource for Views
+package = Socrata
+core = 7.x
+
+dependencies[] = socrata_views
+dependencies[] = views
+dependencies[] = ctools
+
+files[] = SocrataCatalogSearchSelectQuery.inc
+
+;; Plugin class files
+files[] = plugins/socrata_catalog_search_plugin_query.inc
+
+;; Field handler class files
+files[] = handlers/socrata_catalog_search_handler_field_date.inc
+files[] = handlers/socrata_catalog_search_handler_field_list.inc
+
+;; Filter handler class files
+files[] = handlers/socrata_catalog_search_handler_filter_list.inc
+files[] = handlers/socrata_catalog_search_handler_filter_domain.inc
+files[] = handlers/socrata_catalog_search_handler_filter_fulltext.inc
+files[] = handlers/socrata_catalog_search_handler_filter_type.inc
+
+;; Argument handler class files
+files[] = handlers/socrata_catalog_search_handler_argument_fulltext.inc
+files[] = handlers/socrata_catalog_search_handler_argument_list.inc
+
+;; Sort handler class files
+files[] = handlers/socrata_catalog_search_handler_sort.inc
