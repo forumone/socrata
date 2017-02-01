@@ -1,7 +1,6 @@
 Socrata module - http://drupal.org/project/socrata
 ==================================================
-Provides an integration point for Socrata within Drupal via their SODA2 interface, including a Views
-query solution and an input filter.
+Provides an integration point for Socrata within Drupal via their SODA2 interface, including a Views query solution and an input filter.
 
 There are four modules in this project:
 
