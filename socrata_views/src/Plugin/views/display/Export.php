@@ -17,7 +17,7 @@ use Drupal\views\Views;
 // use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * The plugin that handles a feed, such as RSS or atom.
+ * The plugin that handles export of Socrata data.
  *
  * @ingroup views_display_plugins
  *
@@ -47,10 +47,33 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
   protected $usesPager = FALSE;
 
   /**
+   * Whether the display allows the use of a 'more' link or not.
+   *
+   * @var bool
+   */
+  protected $usesMore = FALSE;
+
+  /**
+   * Whether the display allows attachments.
+   *
+   * @var bool
+   *   TRUE if the display can use attachments, or FALSE otherwise.
+   */
+  protected $usesAttachments = FALSE;
+
+  /**
+   * Whether the display allows area plugins.
+   *
+   * @var bool
+   */
+  protected $usesAreas = FALSE;
+
+
+  /**
    * {@inheritdoc}
    */
   public function getType() {
-    return 'feed';
+    return 'socrata_export';
   }
 
   /**
@@ -85,16 +108,16 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
    * {@inheritdoc}
    */
   public function execute() {
-    parent::execute();
+    // parent::execute();
 
-    return $this->view->render();
+    // return $this->view->render();
   }
 
   /**
    * {@inheritdoc}
    */
   public function preview() {
-    $output = $this->view->render();
+    /*$output = $this->view->render();
 
     if (!empty($this->view->live_preview)) {
       $output = array(
@@ -102,21 +125,26 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
         '#plain_text' => drupal_render_root($output),
         '#suffix' => '</pre>',
       );
-    }
+    }*/
 
+    $output = array(
+      '#prefix' => '<pre>',
+      '#plain_text' => 'blarg',
+      '#suffix' => '</pre>',
+    );
     return $output;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function render() {
+  /*public function render() {
     $build = $this->view->style_plugin->render($this->view->result);
 
     $this->applyDisplayCachablityMetadata($build);
 
     return $build;
-  }
+  }*/
 
   /**
    * {@inheritdoc}
@@ -152,7 +180,7 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
     $options['displays'] = array('default' => array());
 
     // Overrides for standard stuff.
-    $options['style']['contains']['type']['default'] = 'socrata_export';
+    $options['style']['contains']['type']['default'] = 'csv';
     $options['style']['contains']['options']['default']  = array('description' => '');
     $options['sitename_title']['default'] = FALSE;
     // $options['row']['contains']['type']['default'] = 'rss_fields';
@@ -171,14 +199,14 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
     // Set the default row style. Ideally this would be part of the option
     // definition, but in this case it's dependent on the view's base table,
     // which we don't know until init().
-    /*if (empty($this->options['row']['type']) || $this->options['row']['type'] === 'rss_fields') {
+    if (empty($this->options['row']['type']) || $this->options['row']['type'] === 'rss_fields') {
       $row_plugins = Views::fetchPluginNames('row', $this->getType(), array($this->view->storage->get('base_table')));
       $default_row_plugin = key($row_plugins);
 
       $options = $this->getOption('row');
       $options['type'] = $default_row_plugin;
       $this->setOption('row', $options);
-    }*/
+    }
   }
 
   /**
@@ -270,8 +298,32 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
           '#default_value' => $this->getOption('displays'),
         );
         break;
-      case 'path':
-        $form['path']['#description'] = $this->t('This view will be displayed by visiting this path on your site. It is recommended that the path be something like "path/%/%/feed" or "path/%/%/rss.xml", putting one % in the path for each contextual filter you have defined in the view.');
+      /*case 'path':
+        $form['path']['#description'] = $this->t('This view will be displayed by visiting this path on your site. It is recommended that the path be something like "path/%/%/feed" or "path/%/%/rss.xml", putting one % in the path for each contextual filter you have defined in the view.');*/
+      /*case 'style':
+        $form['#title'] .= $this->t('How should this view be styled');
+        $style_plugin = $this->getPlugin('style');
+        $form['style'] = array(
+          '#prefix' => '<div class="clearfix">',
+          '#suffix' => '</div>',
+          '#tree' => TRUE,
+        );
+        $form['style']['type'] = array(
+          '#title' => $this->t('Style'),
+          '#title_display' => 'invisible',
+          '#type' => 'radios',
+          '#options' => Views::fetchPluginNames('style', $this->getType(), array($this->view->storage->get('base_table'))),
+          '#default_value' => $style_plugin->definition['id'],
+          '#description' => $this->t('If the style you choose has settings, be sure to click the settings button that will appear next to it in the View summary.'),
+        );
+
+        if ($style_plugin->usesOptions()) {
+          $form['markup'] = array(
+            '#prefix' => '<div class="js-form-item form-item description">',
+            '#suffix' => '</div>',
+            '#markup' => $this->t('You may also adjust the @settings for the currently selected style.', array('@settings' => $this->optionLink($this->t('settings'), 'style_options'))),
+          );
+        }*/
     }
   }
 
@@ -294,28 +346,29 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
   /**
    * {@inheritdoc}
    */
-  /*public function attachTo(ViewExecutable $view, $display_id, array &$build) {
+  public function attachTo(ViewExecutable $clone, $display_id, array &$build) {
     $displays = $this->getOption('displays');
     if (empty($displays[$display_id])) {
       return;
     }
 
-    // // Defer to the feed style; it may put in meta information, and/or
-    // // attach a feed icon.
-    // $clone->setArguments($this->view->args);
-    // $clone->setDisplay($this->display['id']);
-    // $clone->buildTitle();
-    // if ($plugin = $clone->display_handler->getPlugin('style')) {
-    //   $plugin->attachTo($build, $display_id, $clone->getUrl(), $clone->getTitle());
-    //   foreach ($clone->feedIcons as $feed_icon) {
-    //     $this->view->feedIcons[] = $feed_icon;
-    //   }
-    // }
+    // Defer to the feed style; it may put in meta information, and/or
+    // attach a feed icon.
+    $clone->setArguments($this->view->args);
+    $clone->setDisplay($this->display['id']);
+    $clone->buildTitle();
+    if ($plugin = $clone->display_handler->getPlugin('style')) {
+      $attachment = $plugin->attachTo();
+      $this->view->attachment_after[] = $attachment;
+      foreach ($clone->feedIcons as $feed_icon) {
+        $this->view->feedIcons[] = $feed_icon;
+      }
+    }
 
-    // // Clean up.
-    // $clone->destroy();
-    // unset($clone);
-  }*/
+    // Clean up.
+    $clone->destroy();
+    unset($clone);
+  }
 
   /**
    * {@inheritdoc}
