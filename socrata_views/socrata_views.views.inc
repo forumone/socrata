@@ -182,7 +182,7 @@ function _socrata_views_handlers($name, $type, $options) {
       break;
 
     case 'point': // Longitude, latitude geo data
-      $handlers['field']['id'] = 'socrata_views_handler_field_point';
+      $handlers['field']['id'] = 'socrata_point';
       break;
 
     case 'email':
