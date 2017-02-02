@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\Tests\socrata\Unit;
+namespace Drupal\Tests\socrata\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Core\Database\Database;
