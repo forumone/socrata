@@ -2,22 +2,22 @@
 
 /**
  * @file
- * Contains \Drupal\socrata_views\Plugin\views\filter\SocrataNumericFilter.
+ * Contains \Drupal\socrata_views\Plugin\views\argument\SocrataNumericArgument.
  */
 
-namespace Drupal\socrata_views\Plugin\views\filter;
+namespace Drupal\socrata_views\Plugin\views\argument;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\views\Plugin\views\filter\NumericFilter;
+use Drupal\views\Plugin\views\argument\NumericArgument;
 
 /**
  * Simple filter to handle greater than/less than filters
  *
- * @ingroup views_filter_handlers
+ * @ingroup views_argument_handlers
  *
- * @ViewsFilter("socrata_numeric")
+ * @ViewsArgument("socrata_numeric")
  */
-class SocrataNumericFilter extends NumericFilter {
+class SocrataNumericArgument extends NumericArgument {
   protected function defineOptions() {
     $options = parent::defineOptions();
     // Remove the irrelevant min & max options.

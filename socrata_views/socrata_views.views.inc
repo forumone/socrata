@@ -162,7 +162,7 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['id'] = 'standard';
       $handlers['filter']['id'] = 'socrata_numeric';
-      $handlers['argument']['id'] = 'socrata_views_handler_argument_numeric';
+      $handlers['argument']['id'] = 'socrata_numeric';
       break;
 
     case 'checkbox':
