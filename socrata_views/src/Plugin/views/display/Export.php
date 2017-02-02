@@ -30,7 +30,7 @@ use Drupal\views\Views;
  *   returns_response = TRUE
  * )
  */
-class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface {
+class Export extends DisplayPluginBase {
 
   /**
    * Whether the display allows the use of AJAX or not.
@@ -79,91 +79,13 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
   /**
    * {@inheritdoc}
    */
-  public static function buildResponse($view_id, $display_id, array $args = []) {
-    $build = static::buildBasicRenderable($view_id, $display_id, $args);
-
-    // Set up an empty response, so for example RSS can set the proper
-    // Content-Type header.
-    $response = new CacheableResponse('', 200);
-    $build['#response'] = $response;
-
-    /** @var \Drupal\Core\Render\RendererInterface $renderer */
-    $renderer = \Drupal::service('renderer');
-
-    $output = (string) $renderer->renderRoot($build);
-
-    if (empty($output)) {
-      throw new NotFoundHttpException();
-    }
-
-    $response->setContent($output);
-    $cache_metadata = CacheableMetadata::createFromRenderArray($build);
-    $response->addCacheableDependency($cache_metadata);
-
-    return $response;
-  }
-
-
-  /**
-   * {@inheritdoc}
-   */
-  public function execute() {
-    // parent::execute();
-
-    // return $this->view->render();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function preview() {
-    /*$output = $this->view->render();
-
-    if (!empty($this->view->live_preview)) {
-      $output = array(
-        '#prefix' => '<pre>',
-        '#plain_text' => drupal_render_root($output),
-        '#suffix' => '</pre>',
-      );
-    }*/
-
     $output = array(
       '#prefix' => '<pre>',
       '#plain_text' => 'blarg',
       '#suffix' => '</pre>',
     );
     return $output;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  /*public function render() {
-    $build = $this->view->style_plugin->render($this->view->result);
-
-    $this->applyDisplayCachablityMetadata($build);
-
-    return $build;
-  }*/
-
-  /**
-   * {@inheritdoc}
-   */
-  public function defaultableSections($section = NULL) {
-    $sections = parent::defaultableSections($section);
-
-    if (in_array($section, array('style', 'row'))) {
-      return FALSE;
-    }
-
-    // Tell views our sitename_title option belongs in the title section.
-    if ($section == 'title') {
-      $sections[] = 'sitename_title';
-    }
-    elseif (!$section) {
-      $sections['title'][] = 'sitename_title';
-    }
-    return $sections;
   }
 
   /**
@@ -178,11 +100,12 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
     unset($options['cache']);
 
     $options['displays'] = array('default' => array());
+    $options['attachment_position'] = array('default' => 'before');
 
     // Overrides for standard stuff.
     $options['style']['contains']['type']['default'] = 'csv';
     $options['style']['contains']['options']['default']  = array('description' => '');
-    $options['sitename_title']['default'] = FALSE;
+    // $options['sitename_title']['default'] = FALSE;
     // $options['row']['contains']['type']['default'] = 'rss_fields';
     $options['defaults']['default']['style'] = FALSE;
     $options['defaults']['default']['row'] = FALSE;
@@ -190,23 +113,18 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
     return $options;
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function newDisplay() {
-    parent::newDisplay();
+  public function attachmentPositions($position = NULL) {
+    $positions = array(
+      'before' => $this->t('Before'),
+      'after' => $this->t('After'),
+      'both' => $this->t('Both'),
+    );
 
-    // Set the default row style. Ideally this would be part of the option
-    // definition, but in this case it's dependent on the view's base table,
-    // which we don't know until init().
-    if (empty($this->options['row']['type']) || $this->options['row']['type'] === 'rss_fields') {
-      $row_plugins = Views::fetchPluginNames('row', $this->getType(), array($this->view->storage->get('base_table')));
-      $default_row_plugin = key($row_plugins);
-
-      $options = $this->getOption('row');
-      $options['type'] = $default_row_plugin;
-      $this->setOption('row', $options);
+    if ($position) {
+      return $positions[$position];
     }
+
+    return $positions;
   }
 
   /**
@@ -216,23 +134,16 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
     parent::optionsSummary($categories, $options);
 
     // Disable unused sections
-    // unset($options['path']);
     unset($options['pager']);
     unset($options['cache']);
 
-    // Since we're childing off the 'path' type, we'll still *call* our
-    // category 'page' but let's override it so it says feed settings.
-    $categories['page'] = array(
-      'title' => $this->t('Feed settings'),
+    $categories['attachment'] = array(
+      'title' => $this->t('Attachment settings'),
       'column' => 'second',
       'build' => array(
         '#weight' => -10,
       ),
     );
-
-    if ($this->getOption('sitename_title')) {
-      $options['title']['value'] = $this->t('Using the site name');
-    }
 
     $displays = array_filter($this->getOption('displays'));
     if (count($displays) > 1) {
@@ -251,9 +162,15 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
     }
 
     $options['displays'] = array(
-      'category' => 'page',
+      'category' => 'attachment',
       'title' => $this->t('Attach to'),
       'value' => $attach_to,
+    );
+
+    $options['attachment_position'] = array(
+      'category' => 'attachment',
+      'title' => $this->t('Attachment position'),
+      'value' => $this->attachmentPositions($this->getOption('attachment_position')),
     );
   }
 
@@ -298,32 +215,16 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
           '#default_value' => $this->getOption('displays'),
         );
         break;
-      /*case 'path':
-        $form['path']['#description'] = $this->t('This view will be displayed by visiting this path on your site. It is recommended that the path be something like "path/%/%/feed" or "path/%/%/rss.xml", putting one % in the path for each contextual filter you have defined in the view.');*/
-      /*case 'style':
-        $form['#title'] .= $this->t('How should this view be styled');
-        $style_plugin = $this->getPlugin('style');
-        $form['style'] = array(
-          '#prefix' => '<div class="clearfix">',
-          '#suffix' => '</div>',
-          '#tree' => TRUE,
-        );
-        $form['style']['type'] = array(
-          '#title' => $this->t('Style'),
-          '#title_display' => 'invisible',
+      case 'attachment_position':
+        $form['#title'] .= $this->t('Position');
+        $form['attachment_position'] = array(
+          '#title' => $this->t('Position'),
           '#type' => 'radios',
-          '#options' => Views::fetchPluginNames('style', $this->getType(), array($this->view->storage->get('base_table'))),
-          '#default_value' => $style_plugin->definition['id'],
-          '#description' => $this->t('If the style you choose has settings, be sure to click the settings button that will appear next to it in the View summary.'),
+          '#description' => $this->t('Attach before or after the parent display?'),
+          '#options' => $this->attachmentPositions(),
+          '#default_value' => $this->getOption('attachment_position'),
         );
-
-        if ($style_plugin->usesOptions()) {
-          $form['markup'] = array(
-            '#prefix' => '<div class="js-form-item form-item description">',
-            '#suffix' => '</div>',
-            '#markup' => $this->t('You may also adjust the @settings for the currently selected style.', array('@settings' => $this->optionLink($this->t('settings'), 'style_options'))),
-          );
-        }*/
+        break;
     }
   }
 
@@ -338,6 +239,7 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
         $this->setOption('sitename_title', $form_state->getValue('sitename_title'));
         break;
       case 'displays':
+      case 'attachment_position':
         $this->setOption($section, $form_state->getValue($section));
         break;
     }
@@ -346,35 +248,34 @@ class Export extends DisplayPluginBase implements ResponseDisplayPluginInterface
   /**
    * {@inheritdoc}
    */
-  public function attachTo(ViewExecutable $clone, $display_id, array &$build) {
+  public function attachTo(ViewExecutable $view, $display_id, array &$build) {
     $displays = $this->getOption('displays');
+
     if (empty($displays[$display_id])) {
       return;
     }
 
-    // Defer to the feed style; it may put in meta information, and/or
-    // attach a feed icon.
-    $clone->setArguments($this->view->args);
-    $clone->setDisplay($this->display['id']);
-    $clone->buildTitle();
-    if ($plugin = $clone->display_handler->getPlugin('style')) {
+    if (!$this->access()) {
+      return;
+    }
+
+    $view->setDisplay($this->display['id']);
+
+    if ($plugin = $view->display_handler->getPlugin('style')) {
       $attachment = $plugin->attachTo();
-      $this->view->attachment_after[] = $attachment;
-      foreach ($clone->feedIcons as $feed_icon) {
-        $this->view->feedIcons[] = $feed_icon;
+      switch ($this->getOption('attachment_position')) {
+        case 'before':
+          $this->view->attachment_before[] = $attachment;
+          break;
+        case 'after':
+          $this->view->attachment_after[] = $attachment;
+          break;
+        case 'both':
+          $this->view->attachment_before[] = $attachment;
+          $this->view->attachment_after[] = $attachment;
+          break;
       }
     }
 
-    // Clean up.
-    $clone->destroy();
-    unset($clone);
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function usesLinkDisplay() {
-    return TRUE;
-  }
-
 }
