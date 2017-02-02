@@ -8,6 +8,7 @@
 namespace Drupal\socrata_views\Plugin\views\style;
 
 use Drupal\views\Plugin\views\style\StylePluginBase;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
@@ -45,7 +46,7 @@ class CSV extends StylePluginBase {
     $endpoint = Endpoint::load($base_table);
     $url = $endpoint->getDownloadUrl($download_format);
 
-    $title = $this->options['attach_text'];
+    $title = Html::escape($this->options['attach_text']);
     $link = Link::fromTextAndUrl($title, Url::fromUri($url));
     $link = $link->toRenderable();
 
