@@ -80,12 +80,10 @@ class Export extends DisplayPluginBase {
    * {@inheritdoc}
    */
   public function preview() {
-    $output = array(
-      '#prefix' => '<pre>',
-      '#plain_text' => 'blarg',
-      '#suffix' => '</pre>',
-    );
-    return $output;
+    if ($plugin = $this->view->display_handler->getPlugin('style')) {
+      return $plugin->attachTo();
+    }
+    return NULL;
   }
 
   /**
