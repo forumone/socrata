@@ -92,6 +92,37 @@ class EndpointTest extends UnitTestCase {
   }
 
   /**
+   * Test getting the SODA URL.
+   */
+  public function testGetUnencodedSodaUrlWithoutParams() {
+    $this->assertEquals($this->data['url'], $this->endpoint->getUnencodedSodaURL());
+  }
+
+  /**
+   * Test getting the SODA URL with token and parameters.
+   *
+   * @dataProvider getUrlOptions
+   */
+  public function testGetUnencodedSodaUrlWithParams($token, $params) {
+    $this->endpoint->app_token = $token;
+    $query_params = isset($token) ? $params + ['$$app_token' => $token] : $params;
+    $url = $this->data['url'] . '?' . urldecode(http_build_query($query_params));
+
+    $this->assertEquals($url, $this->endpoint->getUnencodedSodaURL($params));
+  }
+
+  /**
+   * Test getting the URL components.
+   *
+   * The dataset is the string of characters followed by the .json file
+   * extension.
+   */
+  public function testGetComponents() {
+    $components = $this->endpoint->getComponents();
+    $this->assertEquals('rn6u-vkuv', $components['dataset_id']);
+  }
+
+  /**
    * Data provider for ::testGetSodaUrlWithParams().
    *
    * @return array
