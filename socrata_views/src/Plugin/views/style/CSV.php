@@ -64,7 +64,7 @@ class CSV extends StylePluginBase {
     $form['attach_text'] = array(
       '#type' => 'textfield',
       '#title' => t('Attach text'),
-      '#default_value' => $this->options['attach_text'],
+      '#default_value' => $this->options['attach_text']?: $this->t('Download'),
       '#description' => $this->t('This text is used in building the export link. By default it is the data format.'),
     );
   }
