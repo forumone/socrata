@@ -7,14 +7,11 @@
 
 namespace Drupal\socrata_views\Plugin\views\display;
 
-// use Drupal\Core\Cache\CacheableMetadata;
-// use Drupal\Core\Cache\CacheableResponse;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\display\ResponseDisplayPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
-// use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * The plugin that handles export of Socrata data.
@@ -103,8 +100,6 @@ class Export extends DisplayPluginBase {
     // Overrides for standard stuff.
     $options['style']['contains']['type']['default'] = 'csv';
     $options['style']['contains']['options']['default']  = array('description' => '');
-    // $options['sitename_title']['default'] = FALSE;
-    // $options['row']['contains']['type']['default'] = 'rss_fields';
     $options['defaults']['default']['style'] = FALSE;
     $options['defaults']['default']['row'] = FALSE;
 
@@ -180,22 +175,6 @@ class Export extends DisplayPluginBase {
     parent::buildOptionsForm($form, $form_state);
 
     switch ($form_state->get('section')) {
-      case 'title':
-        $title = $form['title'];
-        // A little juggling to move the 'title' field beyond our checkbox.
-        unset($form['title']);
-        $form['sitename_title'] = array(
-          '#type' => 'checkbox',
-          '#title' => $this->t('Use the site name for the title'),
-          '#default_value' => $this->getOption('sitename_title'),
-        );
-        $form['title'] = $title;
-        $form['title']['#states'] = array(
-          'visible' => array(
-            ':input[name="sitename_title"]' => array('checked' => FALSE),
-          ),
-        );
-        break;
       case 'displays':
         $form['#title'] .= $this->t('Attach to');
         $displays = array();
@@ -233,9 +212,6 @@ class Export extends DisplayPluginBase {
     parent::submitOptionsForm($form, $form_state);
     $section = $form_state->get('section');
     switch ($section) {
-      case 'title':
-        $this->setOption('sitename_title', $form_state->getValue('sitename_title'));
-        break;
       case 'displays':
       case 'attachment_position':
         $this->setOption($section, $form_state->getValue($section));
@@ -274,6 +250,5 @@ class Export extends DisplayPluginBase {
           break;
       }
     }
-
   }
 }
