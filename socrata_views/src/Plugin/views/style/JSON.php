@@ -18,7 +18,6 @@ use Drupal\socrata_views\Plugin\views\style\SocrataExport;
  *   id = "json",
  *   title = @Translation("JSON File"),
  *   help = @Translation("Export the Socrata endpoint data to a JSON file."),
- *   theme = "views_view_rss",
  *   display_types = {"socrata_export"}
  * )
  */
