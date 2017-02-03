@@ -100,8 +100,16 @@ class Export extends DisplayPluginBase {
     // Overrides for standard stuff.
     $options['style']['contains']['type']['default'] = 'csv';
     $options['style']['contains']['options']['default']  = array('description' => '');
+    $options['row']['contains']['type']['default'] = 'socrata_export';
     $options['defaults']['default']['style'] = FALSE;
     $options['defaults']['default']['row'] = FALSE;
+
+    // Make sure the query is not cached.
+    $options['defaults']['default']['cache'] = FALSE;
+
+    // Set the display title to an empty string (not used in this display type).
+    $options['title']['default'] = '';
+    $options['defaults']['default']['title'] = FALSE;
 
     return $options;
   }
@@ -127,8 +135,14 @@ class Export extends DisplayPluginBase {
     parent::optionsSummary($categories, $options);
 
     // Disable unused sections
+    unset($options['title']);
     unset($options['pager']);
     unset($options['cache']);
+    unset($options['query']);
+    unset($options['use_ajax']);
+    unset($options['group_by']);
+    unset($options['link_display']);
+    unset($options['exposed_form']);
 
     $categories['attachment'] = array(
       'title' => $this->t('Attachment settings'),
