@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Endpoint units tests.
  *
- * @group endpoint
+ * @group socrata
  * @group endpoint
  */
 class EndpointTest extends UnitTestCase {
