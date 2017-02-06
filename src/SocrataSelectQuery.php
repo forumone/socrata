@@ -21,6 +21,9 @@ class SocrataSelectQuery extends SelectExtender {
    */
   public $params = array();
 
+  /**
+   * Socrata Endpoint object.
+   */
   protected $endpoint;
 
   /**
