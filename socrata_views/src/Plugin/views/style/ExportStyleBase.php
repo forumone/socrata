@@ -33,10 +33,8 @@ abstract class ExportStyleBase extends StylePluginBase {
     return 'generic';
   }
 
-  public function attachTo() {
-    $base_table = $this->view->storage->get('base_table');
+  public function attachTo(Endpoint $endpoint) {
     $download_format = $this->getDownloadFormat();
-    $endpoint = Endpoint::load($base_table);
     $url = $endpoint->getDownloadUrl($download_format);
 
     $title = Html::escape($this->options['attach_text']);

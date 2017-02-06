@@ -12,6 +12,7 @@ use Drupal\views\Plugin\views\display\ResponseDisplayPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
+use Drupal\socrata\Entity\Endpoint;
 
 /**
  * The plugin that handles export of Socrata data.
@@ -67,6 +68,11 @@ class Export extends DisplayPluginBase {
 
 
   /**
+   * Socrata Endpoint object.
+   */
+  protected $endpoint;
+
+  /**
    * {@inheritdoc}
    */
   public function getType() {
@@ -76,9 +82,20 @@ class Export extends DisplayPluginBase {
   /**
    * {@inheritdoc}
    */
+  public function initDisplay(ViewExecutable $view, array &$display, array &$options = NULL) {
+    parent::initDisplay($view, $display, $options);
+
+    // Set the endpoint for later use by style plugins.
+    $base_table = $this->view->storage->get('base_table');
+    $this->endpoint = Endpoint::load($base_table);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function preview() {
     if ($plugin = $this->view->display_handler->getPlugin('style')) {
-      return $plugin->attachTo();
+      return $plugin->attachTo($this->endpoint);
     }
     return NULL;
   }
@@ -250,7 +267,7 @@ class Export extends DisplayPluginBase {
     $view->setDisplay($this->display['id']);
 
     if ($plugin = $view->display_handler->getPlugin('style')) {
-      $attachment = $plugin->attachTo();
+      $attachment = $plugin->attachTo($this->endpoint);
       switch ($this->getOption('attachment_position')) {
         case 'before':
           $this->view->attachment_before[] = $attachment;
