@@ -119,7 +119,9 @@ class EndpointTest extends UnitTestCase {
    */
   public function testGetComponents() {
     $components = $this->endpoint->getComponents();
-    $this->assertEquals('rn6u-vkuv', $components['dataset_id']);
+    $parsed_url = parse_url($this->data['url']);
+    preg_match('/([^\/]+)?\.\w+$/', $parsed_url['path'], $matches);
+    $this->assertEquals($matches[1], $components['dataset_id']);
   }
 
   /**
