@@ -111,12 +111,12 @@ class Export extends DisplayPluginBase {
     unset($options['pager']);
     unset($options['cache']);
 
-    $options['displays'] = array('default' => array());
-    $options['attachment_position'] = array('default' => 'before');
+    $options['displays'] = ['default' => []];
+    $options['attachment_position'] = ['default' => 'before'];
 
     // Overrides for standard stuff.
     $options['style']['contains']['type']['default'] = 'csv';
-    $options['style']['contains']['options']['default']  = array('description' => '');
+    $options['style']['contains']['options']['default']  = ['description' => ''];
     $options['row']['contains']['type']['default'] = 'socrata_export';
     $options['defaults']['default']['style'] = FALSE;
     $options['defaults']['default']['row'] = FALSE;
@@ -132,11 +132,11 @@ class Export extends DisplayPluginBase {
   }
 
   public function attachmentPositions($position = NULL) {
-    $positions = array(
+    $positions = [
       'before' => $this->t('Before'),
       'after' => $this->t('After'),
       'both' => $this->t('Both'),
-    );
+    ];
 
     if ($position) {
       return $positions[$position];
@@ -161,13 +161,13 @@ class Export extends DisplayPluginBase {
     unset($options['link_display']);
     unset($options['exposed_form']);
 
-    $categories['attachment'] = array(
+    $categories['attachment'] = [
       'title' => $this->t('Attachment settings'),
       'column' => 'second',
-      'build' => array(
+      'build' => [
         '#weight' => -10,
-      ),
-    );
+      ],
+    ];
 
     $displays = array_filter($this->getOption('displays'));
     if (count($displays) > 1) {
@@ -185,17 +185,17 @@ class Export extends DisplayPluginBase {
       $attach_to = $this->t('None');
     }
 
-    $options['displays'] = array(
+    $options['displays'] = [
       'category' => 'attachment',
       'title' => $this->t('Attach to'),
       'value' => $attach_to,
-    );
+    ];
 
-    $options['attachment_position'] = array(
+    $options['attachment_position'] = [
       'category' => 'attachment',
       'title' => $this->t('Attachment position'),
       'value' => $this->attachmentPositions($this->getOption('attachment_position')),
-    );
+    ];
   }
 
   /**
@@ -208,30 +208,30 @@ class Export extends DisplayPluginBase {
     switch ($form_state->get('section')) {
       case 'displays':
         $form['#title'] .= $this->t('Attach to');
-        $displays = array();
+        $displays = [];
         foreach ($this->view->storage->get('display') as $display_id => $display) {
           // @todo The display plugin should have display_title and id as well.
           if ($this->view->displayHandlers->has($display_id) && $this->view->displayHandlers->get($display_id)->acceptAttachments()) {
             $displays[$display_id] = $display['display_title'];
           }
         }
-        $form['displays'] = array(
+        $form['displays'] = [
           '#title' => $this->t('Displays'),
           '#type' => 'checkboxes',
           '#description' => $this->t('The feed icon will be available only to the selected displays.'),
           '#options' => array_map('\Drupal\Component\Utility\Html::escape', $displays),
           '#default_value' => $this->getOption('displays'),
-        );
+        ];
         break;
       case 'attachment_position':
         $form['#title'] .= $this->t('Position');
-        $form['attachment_position'] = array(
+        $form['attachment_position'] = [
           '#title' => $this->t('Position'),
           '#type' => 'radios',
           '#description' => $this->t('Attach before or after the parent display?'),
           '#options' => $this->attachmentPositions(),
           '#default_value' => $this->getOption('attachment_position'),
-        );
+        ];
         break;
     }
   }

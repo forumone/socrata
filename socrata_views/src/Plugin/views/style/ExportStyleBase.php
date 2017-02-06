@@ -53,12 +53,12 @@ abstract class ExportStyleBase extends StylePluginBase {
     // Disable irrelevant options.
     unset($form['uses_fields']);
 
-    $form['attach_text'] = array(
+    $form['attach_text'] = [
       '#type' => 'textfield',
       '#title' => t('Attach text'),
       '#default_value' => $this->options['attach_text'] ?: $this->t('Download'),
       '#description' => $this->t('This text is used for building the export link.'),
-    );
+    ];
   }
 
 }
