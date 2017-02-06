@@ -1,0 +1,11 @@
+endpoints:
+  valid:
+    url: https://data.seattle.gov/resource/rn6u-vkuv.json
+    id: 'endpoint'
+    label: 'Endpoint'
+    app_token: ''
+  invalid:
+    url: https://data.seattle.gov/resource/invalid-resource.json
+    id: 'inv_endpoint'
+    label: 'Invalid Endpoint'
+    app_token: ''

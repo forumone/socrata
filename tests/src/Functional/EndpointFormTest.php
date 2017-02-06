@@ -5,6 +5,7 @@ namespace Drupal\Tests\socrata\Functional;
 use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\socrata\Entity\Endpoint;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Tests the Endpoint config entity form.
@@ -21,6 +22,21 @@ class EndpointFormTest extends BrowserTestBase {
    * @var array
    */
   public static $modules = ['socrata'];
+
+  /**
+   * Endpoint data.
+   *
+   * @var array
+   */
+  protected $data;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+    $this->data = Yaml::parse(file_get_contents(__DIR__ . '/../../config/data.yml'));
+  }
 
   /**
    * Tests accessing Socrata form as a authenticated user without permission.
@@ -44,9 +60,6 @@ class EndpointFormTest extends BrowserTestBase {
     $this->drupalLogin($this->drupalCreateUser(['administer socrata']));
     $this->drupalGet(Url::fromRoute('entity.endpoint.collection'));
 
-    $endpoint_label = 'Endpoint';
-    $url = 'https://data.seattle.gov/resource/rn6u-vkuv.json';
-
     $edit = [];
     $this->drupalPostForm(Url::fromRoute('entity.endpoint.add_form'), $edit, t('Save'));
     $this->assertSession()->statusCodeEquals(200);
@@ -54,17 +67,17 @@ class EndpointFormTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('Name field is required');
     $this->assertSession()->pageTextContains('URL field is required');
 
-    $edit['label'] = $endpoint_label;
-    $edit['id'] = strtolower($endpoint_label);
-    $edit['url'] = str_replace('resource/', '', $url);
+    $edit['label'] = $this->data['endpoints']['valid']['label'];
+    $edit['id'] = $this->data['endpoints']['valid']['id'];
+    $edit['url'] = str_replace('resource/', '', $this->data['endpoints']['valid']['url']);
     $this->drupalPostForm(Url::fromRoute('entity.endpoint.add_form'), $edit, t('Save'));
     $this->assertSession()->pageTextContains("does not point to a valid SODA2 resource");
 
-    $edit['url'] = $url;
+    $edit['url'] = $this->data['endpoints']['valid']['url'];
     $this->drupalPostForm(Url::fromRoute('entity.endpoint.add_form'), $edit, t('Save'));
     $this->assertSession()->pageTextNotContains('does not point to a valid SODA2 resource');
     $this->assertSession()->pageTextNotContains('did not return a valid response');
-    $this->assertSession()->pageTextContains("Saved the $endpoint_label endpoint");
+    $this->assertSession()->pageTextContains("Saved the {$edit['label']} endpoint");
     $endpoint = Endpoint::load($edit['id']);
     $this->assertNotNull($endpoint);
 
@@ -77,7 +90,7 @@ class EndpointFormTest extends BrowserTestBase {
 
     $this->drupalPostForm(Url::fromRoute('entity.endpoint.delete_form', ['endpoint' => $edit['id']]), [], t('Delete'));
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextContains("$endpoint_label has been deleted");
+    $this->assertSession()->pageTextContains("{$edit['label']} has been deleted");
     $endpoint = Endpoint::load($edit['id']);
     $this->assertNull($endpoint);
 

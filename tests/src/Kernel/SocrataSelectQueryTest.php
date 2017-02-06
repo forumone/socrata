@@ -5,6 +5,7 @@ namespace Drupal\Tests\socrata\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Core\Database\Database;
 use Drupal\socrata\Entity\Endpoint;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * SocrataSelectQuery units tests.
@@ -14,11 +15,11 @@ use Drupal\socrata\Entity\Endpoint;
 class SocrataSelectQueryTest extends KernelTestBase {
 
   /**
-   * Endpoint URL.
+   * Endpoint data.
    *
-   * @var string
+   * @var array
    */
-  protected $url;
+  protected $data;
 
   /**
    * Modules to enable.
@@ -39,8 +40,7 @@ class SocrataSelectQueryTest extends KernelTestBase {
    */
   protected function setUp() {
     parent::setUp();
-
-    $this->url = 'https://data.seattle.gov/resource/rn6u-vkuv.json';
+    $this->data = Yaml::parse(file_get_contents(__DIR__ . '/../../config/data.yml'));
   }
 
   /**
@@ -49,8 +49,8 @@ class SocrataSelectQueryTest extends KernelTestBase {
   public function testExecuteQuery() {
     $this->installConfig(['socrata']);
     $connection = Database::getConnection();
-    $query = $connection->select($this->url)->extend('\Drupal\socrata\SocrataSelectQuery');
-    $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
+    $query = $connection->select($this->data['endpoints']['valid']['url'])->extend('\Drupal\socrata\SocrataSelectQuery');
+    $endpoint = new Endpoint(['url' => $this->data['endpoints']['valid']['url']], 'endpoint');
     $query->setEndpoint($endpoint);
     $ret = $query->execute();
 
@@ -65,7 +65,7 @@ class SocrataSelectQueryTest extends KernelTestBase {
     $this->installConfig(['socrata']);
     $connection = Database::getConnection();
     $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
-    $endpoint = new Endpoint(['url' => 'https://data.seattle.gov/resource'], 'endpoint');
+    $endpoint = new Endpoint(['url' => $this->data['endpoints']['invalid']['url']], 'endpoint');
     $query->setEndpoint($endpoint);
     $ret = $query->execute();
 
@@ -79,7 +79,7 @@ class SocrataSelectQueryTest extends KernelTestBase {
     $this->installConfig(['socrata']);
     $connection = Database::getConnection();
     $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
-    $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
+    $endpoint = new Endpoint(['url' => $this->data['endpoints']['valid']['url']], 'endpoint');
     $query->setEndpoint($endpoint);
     $ret = $query->execute('metadata');
 
@@ -106,11 +106,11 @@ class SocrataSelectQueryTest extends KernelTestBase {
   public function testQueryToStringWithEndpoint() {
     $connection = Database::getConnection();
     $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
-    $endpoint = new Endpoint(['url' => $this->url], 'endpoint');
+    $endpoint = new Endpoint(['url' => $this->data['endpoints']['valid']['url']], 'endpoint');
     $query->setEndpoint($endpoint);
     $string = $query->__toString();
 
-    $this->assertContains($this->url, $string);
+    $this->assertContains($this->data['endpoints']['valid']['url'], $string);
   }
 
 }

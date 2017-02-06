@@ -6,6 +6,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\socrata\Entity\Endpoint;
 use Drupal\filter\FilterPluginCollection;
 use Drupal\Core\Render\RenderContext;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Endpoint units tests.
@@ -41,13 +42,9 @@ class FilterSocrataTest extends KernelTestBase {
   public function setUp() {
     parent::setUp();
 
-    $data = [
-      'url' => 'https://data.seattle.gov/resource/rn6u-vkuv.json',
-      'id' => 'endpoint',
-      'label' => 'Endpoint',
-      'app_token' => '',
-    ];
-    $this->endpoint = new Endpoint($data, 'endpoint');
+    $data = Yaml::parse(file_get_contents(__DIR__ . '/../../../../tests/config/data.yml'));
+
+    $this->endpoint = new Endpoint($data['endpoints']['valid'], 'endpoint');
     $this->endpoint->save();
 
     $this->filters = $manager = $this->container->get('plugin.manager.filter');

@@ -9,6 +9,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Utility\UnroutedUrlAssembler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Endpoint units tests.
@@ -38,13 +39,8 @@ class EndpointTest extends UnitTestCase {
   protected function setUp() {
     parent::setUp();
 
-    $this->data = [
-      'url' => 'https://data.seattle.gov/resource/rn6u-vkuv.json',
-      'id' => 'endpoint',
-      'label' => 'Endpoint',
-      'app_token' => '',
-    ];
-    $this->endpoint = new Endpoint($this->data, 'endpoint');
+    $this->data = Yaml::parse(file_get_contents(__DIR__ . '/../../config/data.yml'));
+    $this->endpoint = new Endpoint($this->data['endpoints']['valid'], 'endpoint');
 
     $container = new ContainerBuilder();
 
@@ -61,21 +57,21 @@ class EndpointTest extends UnitTestCase {
    * Test getting the URL.
    */
   public function testGetUrl() {
-    $this->assertEquals($this->endpoint->getUrl(), $this->data['url']);
+    $this->assertEquals($this->endpoint->getUrl(), $this->data['endpoints']['valid']['url']);
   }
 
   /**
    * Test getting the app token.
    */
   public function testGetAppToken() {
-    $this->assertEquals($this->endpoint->getAppToken(), $this->data['app_token']);
+    $this->assertEquals($this->endpoint->getAppToken(), $this->data['endpoints']['valid']['app_token']);
   }
 
   /**
    * Test getting the SODA URL.
    */
   public function testGetSodaUrlWithoutParams() {
-    $this->assertEquals($this->data['url'], $this->endpoint->getSodaURL());
+    $this->assertEquals($this->data['endpoints']['valid']['url'], $this->endpoint->getSodaURL());
   }
 
   /**
@@ -86,7 +82,7 @@ class EndpointTest extends UnitTestCase {
   public function testGetSodaUrlWithParams($token, $params) {
     $this->endpoint->app_token = $token;
     $query_params = isset($token) ? $params + ['$$app_token' => $token] : $params;
-    $url = $this->data['url'] . '?' . UrlHelper::buildQuery($query_params);
+    $url = $this->data['endpoints']['valid']['url'] . '?' . UrlHelper::buildQuery($query_params);
 
     $this->assertEquals($url, $this->endpoint->getSodaURL($params));
   }
@@ -95,7 +91,7 @@ class EndpointTest extends UnitTestCase {
    * Test getting the SODA URL.
    */
   public function testGetUnencodedSodaUrlWithoutParams() {
-    $this->assertEquals($this->data['url'], $this->endpoint->getUnencodedSodaURL());
+    $this->assertEquals($this->data['endpoints']['valid']['url'], $this->endpoint->getUnencodedSodaURL());
   }
 
   /**
@@ -106,7 +102,7 @@ class EndpointTest extends UnitTestCase {
   public function testGetUnencodedSodaUrlWithParams($token, $params) {
     $this->endpoint->app_token = $token;
     $query_params = isset($token) ? $params + ['$$app_token' => $token] : $params;
-    $url = $this->data['url'] . '?' . urldecode(http_build_query($query_params));
+    $url = $this->data['endpoints']['valid']['url'] . '?' . urldecode(http_build_query($query_params));
 
     $this->assertEquals($url, $this->endpoint->getUnencodedSodaURL($params));
   }
@@ -119,7 +115,7 @@ class EndpointTest extends UnitTestCase {
    */
   public function testGetComponents() {
     $components = $this->endpoint->getComponents();
-    $parsed_url = parse_url($this->data['url']);
+    $parsed_url = parse_url($this->data['endpoints']['valid']['url']);
     preg_match('/([^\/]+)?\.\w+$/', $parsed_url['path'], $matches);
     $this->assertEquals($matches[1], $components['dataset_id']);
   }
