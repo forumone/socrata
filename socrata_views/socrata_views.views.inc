@@ -166,10 +166,11 @@ function _socrata_views_handlers($name, $type, $options) {
       break;
 
     case 'checkbox':
+    case 'boolean':
       $handlers['field']['id'] = 'boolean';
       $handlers['field']['click sortable'] = TRUE;
       $handlers['sort']['id'] = 'standard';
-      $handlers['filter']['id'] = 'socrata_views_handler_filter_checkbox';
+      $handlers['filter']['id'] = 'socrata_boolean';
       $handlers['argument']['id'] = 'socrata_views_handler_argument_checkbox';
       break;
 
