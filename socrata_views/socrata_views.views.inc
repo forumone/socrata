@@ -167,38 +167,16 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['argument']['id'] = 'socrata_boolean';
       break;
 
-    case 'url': // Compound type: description, url
+    case 'url': // Compound type: description, url.
       $handlers['field']['id'] = 'socrata_url';
       break;
 
-    case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON)
+    case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON).
       $handlers['field']['id'] = 'location';
       break;
 
-    case 'point': // Longitude, latitude geo data
+    case 'point': // Longitude, latitude geo data.
       $handlers['field']['id'] = 'socrata_point';
-      break;
-
-    case 'email':
-      $handlers['field']['id'] = 'socrata_views_handler_field_email';
-      $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['id'] = 'standard';
-      break;
-
-    case 'document': // Compound type: file_id, filename
-      $handlers['field']['id'] = 'socrata_views_handler_field_document';
-      break;
-
-    case 'photo':
-      $handlers['field']['id'] = 'socrata_views_handler_field_photo';
-      break;
-
-    case 'phone': // Compound type: phone_number, phone_type
-      $handlers['field']['id'] = 'socrata_views_handler_field_phone';
-      break;
-
-    case 'html':
-      $handlers['field']['id'] = 'socrata_views_handler_field_html';
       break;
 
     case 'date':
@@ -216,12 +194,6 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['filter']['id'] = 'socrata_date';
       break;
 
-    case 'flag':
-      $handlers['field']['id'] = 'standard';
-      $handlers['field']['click sortable'] = TRUE;
-      $handlers['sort']['id'] = 'standard';
-      break;
-
     case 'text':
       $handlers['field']['id'] = 'standard';
       $handlers['field']['click sortable'] = TRUE;
@@ -230,13 +202,19 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['argument']['id'] = 'socrata_string';
       break;
 
-    // Unsupported field types
+    // Unsupported field types.
     case 'drop_down_list':
+    case 'email':
+    case 'document':
+    case 'flag':
+    case 'html':
+    case 'photo':
+    case 'phone':
     default:
       break;
   }
 
-  // Add field options to each handler group that has been defined
+  // Add field options to each handler group that has been defined.
   foreach ($handlers as $group => &$info) {
     $info += $options;
   }
