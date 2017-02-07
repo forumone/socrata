@@ -2,20 +2,28 @@
 
 /**
  * @file
- * Definition of socrata_views_handler_field_point.
+ * Definition of SocrataPoint.
  */
 
+namespace Drupal\socrata_views\Plugin\views\field;
+
+use Drupal\views\Plugin\views\field\FieldPluginBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\ResultRow;
+
 /**
- * Field handler to provide renderer capable of displaying Socrata point items.
+ * Field handler to provide simple renderer that turns a URL into a clickable link.
  *
  * @ingroup views_field_handlers
+ *
+ * @ViewsField("socrata_point")
  */
-class socrata_views_handler_field_point extends views_handler_field {
+class SocrataPoint extends FieldPluginBase {
   /**
    * Collect options for field display
    */
-  function option_definition() {
-    $options = parent::option_definition();
+  protected function defineOptions() {
+    $options = parent::defineOptions();
 
     $options['display'] = array('default' => 'text');
     $options['link_text'] = array('default' => 'Map', 'translatable' => TRUE);
@@ -26,7 +34,7 @@ class socrata_views_handler_field_point extends views_handler_field {
   /**
    * Option form.
    */
-  function options_form(&$form, &$form_state) {
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['display'] = array(
       '#type' => 'select',
       '#title' => t('Display mode'),
@@ -45,23 +53,23 @@ class socrata_views_handler_field_point extends views_handler_field {
       '#default_value' => $this->options['link_text'],
     );
 
-    parent::options_form($form, $form_state);
+    parent::buildOptionsForm($form, $form_state);
   }
 
   /**
    * Generate output of point.
    */
-  function render($values) {
+  public function render(ResultRow $values) {
     $text = '';
-    $value = $this->get_value($values);
+    $value = $this->getValue($values);
     if (!empty($value)) {
       // Get the lat/long in the order as specified
       // at http://dev.socrata.com/docs/datatypes/point.html.
-      $longitude = $this->sanitize_value($value['coordinates'][0], 'xss');
-      $latitude = $this->sanitize_value($value['coordinates'][1], 'xss');
+      $longitude = $this->sanitizeValue($value['coordinates'][0], 'xss');
+      $latitude = $this->sanitizeValue($value['coordinates'][1], 'xss');
       // Suss out default display text - TODO make themeable
       if (!empty($this->options['link_text'])) {
-        $text = $this->sanitize_value($this->options['link_text'], 'xss');
+        $text = $this->sanitizeValue($this->options['link_text'], 'xss');
       }
       elseif ($longitude && $latitude) {
         // There is a method to the madness;this is the correct ordering
