@@ -5,6 +5,7 @@ namespace Drupal\socrata;
 use Drupal\Core\Database\Query\SelectExtender;
 use Drupal\socrata\Entity\Endpoint;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * @file
@@ -90,7 +91,7 @@ class SocrataSelectQuery extends SelectExtender {
       \Drupal::logger('socrata')->error(
         'Server returned error code @errno for @url',
         [
-          '@errno' => $res->getStatusCode(),
+          '@errno' => $e->getCode(),
           '@url' => $url,
         ]
       );
