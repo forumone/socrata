@@ -172,14 +172,11 @@ $curlopts = \Drupal::config('socrata.settings')->get('socrata_curl_options');
  * Util function to parse out HTTP response headers.
  */
 function _socrata_parse_headers($headers) {
-  $headers_arr = array();
-
-  $headers = explode("\r\n", $headers);
-  foreach ($headers as $header) {
-    if ('HTTP' == substr($header, 0, 4)) {
+  $headers_arr = [];
+  foreach ($headers as $name => $value) {
+    if ('HTTP' == substr($name, 0, 4)) {
       continue;
     }
-    list($name, $value) = explode(':', $header, 2);
     $name = strtolower(trim($name));
     if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
       $headers_arr[$name] = json_decode($value);
