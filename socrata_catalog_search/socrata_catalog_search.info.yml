@@ -1,0 +1,8 @@
+name: 'Socrata Catalog Search Views'
+description: 'Provides queryable datasource for Views'
+package: Socrata
+core: 8.x
+dependencies:
+  - socrata_views
+  - views
+type: module
