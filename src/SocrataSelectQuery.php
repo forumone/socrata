@@ -1,28 +1,23 @@
 <?php
+
 namespace Drupal\socrata;
 
 use Drupal\Core\Database\Query\SelectExtender;
-use Drupal\Core\Url;
-use Drupal\Core\Link;
 use Drupal\socrata\Entity\Endpoint;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 
-use Drupal\socrata\CustomGuzzleHttp;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 /**
  * @file
- * Decorator class for a Socrata dataset query
+ * Decorator class for a Socrata dataset query.
  */
-
 class SocrataSelectQuery extends SelectExtender {
 
   use DependencySerializationTrait;
 
   /**
    * Socrata Query Language parameters.
+   *
+   * @var array
    */
   public $params = array();
 
@@ -52,11 +47,12 @@ class SocrataSelectQuery extends SelectExtender {
   /**
    * Execute the query. In our case, this is actually the cURL request.
    *
-   * @param $type string
+   * @param string $type
    *   cURL request type, if not the default. The only acceptable value is
    *   currently 'metadata', but we might want others in the future?
    *
    * @return array
+   *   An array containing headers and response body
    */
   // public function execute($type = NULL) {
   //   $retval = FALSE;
