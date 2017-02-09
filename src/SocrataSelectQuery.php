@@ -67,6 +67,7 @@ class SocrataSelectQuery extends SelectExtender {
     try {
       $options = \Drupal::config('socrata.settings')->get('socrata_curl_options');
       \Drupal::moduleHandler()->alter('socrata_curl_options', $options);
+
       if ($type == 'metadata') {
         // Note that 'metadata' here represents an entirely separate API and
         // endpoint, and is different from the special fields of type
