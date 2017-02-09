@@ -18,14 +18,14 @@ class SocrataCatalogSearchSelectQuery extends SocrataSelectQuery {
   /**
    * Get the Socrata Catalog Search source object.
    */
-  public function setEndpoint() {
+  public function setEndpoint(Endpoint $endpoint = NULL) {
     $values = [
       'id' => 'catalog_search',
       'label' => 'Catalog Search API',
       'url' => 'http://api.us.socrata.com/api/catalog/v1',
       'app_token' => '',
     ];
-    $this->endpoint = new Endpoint($values);
+    $this->endpoint = new Endpoint($values, 'endpoint');
   }
 
 }
