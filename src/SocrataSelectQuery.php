@@ -61,7 +61,7 @@ class SocrataSelectQuery extends SelectExtender {
    *   An array containing headers and response body
    */
   public function execute($type = NULL) {
-    $retval = FALSE;
+    $return_data = FALSE;
     $client = \Drupal::httpClient();
     try {
       $options = \Drupal::config('socrata.settings')->get('socrata_curl_options');
@@ -80,17 +80,17 @@ class SocrataSelectQuery extends SelectExtender {
       }
       _socrata_dbg($url);
 
-      $res = $client->get($url, [
+      $response = $client->get($url, [
         'curl' => $options,
       ]);
 
-      $retval['headers'] = _socrata_parse_headers($res->getHeaders());
-      if (isset($retval['headers']['x-soda2-fields']) && isset($retval['headers']['x-soda2-types'])) {
-        foreach ($retval['headers']['x-soda2-fields'] as $idx => $name) {
-          $retval['fields'][$name] = $retval['headers']['x-soda2-types'][$idx];
+      $return_data['headers'] = _socrata_parse_headers($response->getHeaders());
+      if (isset($return_data['headers']['x-soda2-fields']) && isset($return_data['headers']['x-soda2-types'])) {
+        foreach ($return_data['headers']['x-soda2-fields'] as $idx => $name) {
+          $return_data['fields'][$name] = $return_data['headers']['x-soda2-types'][$idx];
         }
       }
-      $retval['data'] = json_decode($res->getBody()->getContents(), TRUE);
+      $return_data['data'] = json_decode($response->getBody()->getContents(), TRUE);
     }
     catch (RequestException $e) {
       \Drupal::logger('socrata')->error(
@@ -102,7 +102,7 @@ class SocrataSelectQuery extends SelectExtender {
       );
     }
 
-    return $retval;
+    return $return_data;
   }
 
   /**
