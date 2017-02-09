@@ -23,7 +23,7 @@ class SocrataSelectQuery extends SelectExtender {
   public $params = [];
 
   /**
-   * Socrata Endpoint config entity.
+   * Socrata Endpoint object.
    *
    * @var \Drupal\socrata\Entity\Endpoint
    */
