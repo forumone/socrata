@@ -1,28 +1,43 @@
 <?php
-namespace Drupal\socrata_catalog_search;
-
 /**
  * @file
  * A Views query plugin for executing queries against a Socrata dataset
  */
 
-class socrata_catalog_search_plugin_query extends socrata_views_plugin_query {
+namespace Drupal\socrata_catalog_search\Plugin\views\query;
+
+use Drupal\views\Plugin\views\display\DisplayPluginBase;
+use Drupal\views\ViewExecutable;
+use Drupal\socrata_views\Plugin\views\query\Soql;
+
+/**
+ * Views query plugin for a Socrata Catalog Search query.
+ *
+ * @ingroup views_query_plugins
+ *
+ * @ViewsQuery(
+ *   id = "socrata_catalog_search_query",
+ *   title = @Translation("Socrata Catalog Search Query"),
+ *   help = @Translation("Query will be generated and run using the Socrata Catalog Search API.")
+ * )
+ */
+class SocrataCatalogSearch extends Soql {
   // Properties
   var $where = array();
   var $orderby = array();
   var $has_aggregate = FALSE;
 
   /**
-   * Constructor; Create the basic query object and fill with default values.
+   * {@inheritdoc}
    */
-  function init($base_table, $base_field, $options) {
-    parent::init($base_table, $base_field, $options);
+  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+    parent::init($view, $display, $options);
   }
 
   /**
    * Get aggregation info for group by queries.
    */
-  function get_aggregation_info() {
+  function getAggregationInfo() {
     return array();
   }
 
@@ -35,7 +50,7 @@ class socrata_catalog_search_plugin_query extends socrata_views_plugin_query {
    */
   function query($get_count = FALSE) {
     // Build the query.
-    $query = db_select($this->base_table)->extend('SocrataCatalogSearchSelectQuery');
+    $query = db_select($this->base_table)->extend('Drupal\socrata_catalog_search\SocrataCatalogSearchSelectQuery');
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->name);
 
@@ -187,14 +202,14 @@ class socrata_catalog_search_plugin_query extends socrata_views_plugin_query {
     // Store off values from query in View.
     $view->result = $result;
     $view->total_rows = count($result);
-    $this->pager->post_execute($view->result);
+    // $this->pager->post_execute($view->result);
 
     // Execute count query for pager if necessary.
-    if ($this->pager->use_count_query()) {
+    // if ($this->pager->use_count_query()) {
       $this->pager->total_items = $num_dataset_rows;
-      $view->total_rows = $this->pager->get_total_items();
-      $this->pager->update_page_info();
-    }
+      $view->total_rows = $view->pager->getTotalItems();
+      $view->pager->updatePageInfo();
+    // }
 
     // Wrap up query.
     $view->execute_time = microtime(TRUE) - $start;
@@ -205,7 +220,7 @@ class socrata_catalog_search_plugin_query extends socrata_views_plugin_query {
    * for ensuring that the fields are fully qualified and the table is properly
    * added.
    */
-  function add_groupby($clause) {
-    $this->groupby = array();
+  public function addGroupBy($clause) {
+    $this->groupby = [];
   }
 }
