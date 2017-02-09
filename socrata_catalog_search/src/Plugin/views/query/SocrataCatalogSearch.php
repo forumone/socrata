@@ -8,6 +8,7 @@ namespace Drupal\socrata_catalog_search\Plugin\views\query;
 
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ViewExecutable;
+use Drupal\views\ResultRow;
 use Drupal\socrata_views\Plugin\views\query\Soql;
 
 /**
@@ -52,7 +53,7 @@ class SocrataCatalogSearch extends Soql {
     // Build the query.
     $query = db_select($this->base_table)->extend('Drupal\socrata_catalog_search\SocrataCatalogSearchSelectQuery');
     $query->addTag('socrata');
-    $query->addTag('socrata_' . $this->view->name);
+    $query->addTag('socrata_' . $this->view->storage->id());
 
     // Construct where clause from Views filter grouping.
     foreach ($this->where as $where) {
@@ -115,7 +116,7 @@ class SocrataCatalogSearch extends Soql {
    * @param view $view
    *   The view which is executed.
    */
-  function execute(&$view) {
+  function execute(ViewExecutable $view) {
     _socrata_dbg($view->build_info);
     $query = $view->build_info['query'];
     $count_query = $view->build_info['count_query'];
@@ -124,89 +125,85 @@ class SocrataCatalogSearch extends Soql {
     $result = array();
     $table = $this->base_table;
 
-    // Load source info.
-    $source = $query->getSource();
-    if ($source) {
-      // Get total count of items and force initial limit if not set.
-      $num_dataset_rows = 0;
-      $resp = $count_query->execute();
-      if ($resp !== FALSE && !empty($resp['data']) && isset($resp['data']['resultSetSize'])) {
-        $num_dataset_rows = $resp['data']['resultSetSize'];
-      }
+    // Get total count of items and force initial limit if not set.
+    $num_dataset_rows = 0;
+    $resp = $count_query->execute();
+    if ($resp !== FALSE && !empty($resp['data']) && isset($resp['data']['resultSetSize'])) {
+      $num_dataset_rows = $resp['data']['resultSetSize'];
+    }
 
-      // Let the pager modify the query to add limits.
-      $this->pager->pre_execute($query);
+    // Let the pager modify the query to add limits.
+    $view->pager->preExecute($query);
 
-      // Execute main query, looping if we need to get more than 100 rows.
-      do {
-        $resp = $query->execute();
-        if ($resp !== FALSE) {
-          foreach ($resp['data']['results'] as $row) {
-            // Put each row into an array instead of an object
-            // in case we need to sort on one or more fields.
-            $new_row = array();
+    // Execute main query, looping if we need to get more than 100 rows.
+    do {
+      $resp = $query->execute();
+      if ($resp !== FALSE) {
+        foreach ($resp['data']['results'] as $row) {
+          // Put each row into an array instead of an object
+          // in case we need to sort on one or more fields.
+          $new_row = new ResultRow();
 
-            // Hard-coded mapping
-            $new_row['id'] = $row['resource']['id'];
-            $new_row['name'] = $row['resource']['name'];
-            $new_row['description'] = $row['resource']['description'];
-            $new_row['updatedAt'] = $row['resource']['updatedAt'];
-            $new_row['type'] = $row['resource']['type'];
-            $new_row['categories'] = implode(',', $row['classification']['categories']);
-            $new_row['tags'] = implode(',', $row['classification']['tags']);
-            $new_row['domain'] = $row['metadata']['domain'];
-            $new_row['permalink'] = $row['permalink'];
-            $new_row['link'] = $row['link'];
-            $result[] = $new_row;
-          }
-
-          // If an "all items" query, bump offset, go again.
-          if (empty($query->params['limit'])) {
-            $query->params['offset'] = count($result);
-          }
+          // Hard-coded mapping
+          $new_row->id = $row['resource']['id'];
+          $new_row->name = $row['resource']['name'];
+          $new_row->description = $row['resource']['description'];
+          $new_row->updatedAt = $row['resource']['updatedAt'];
+          $new_row->type = $row['resource']['type'];
+          $new_row->categories = implode(',', $row['classification']['categories']);
+          $new_row->tags = implode(',', $row['classification']['tags']);
+          $new_row->domain = $row['metadata']['domain'];
+          $new_row->permalink = $row['permalink'];
+          $new_row->link = $row['link'];
+          $result[] = $new_row;
         }
-      } while (empty($query->params['limit']) && !empty($resp['data']));
 
-      // Sort the result in Drupal because the API doesn't support it.
-      // Adapted from https://secure.php.net/manual/en/function.array-multisort.php#100534.
-      if (isset($query->orderBy) && $result) {
-        $order_by_fields = $query->orderBy;
-
-        // Build the arguments from the order by fields.
-        $args = array();
-        foreach ($order_by_fields as $order_by_field => $order) {
-          $tmp = array();
-          foreach ($result as $key => $row) {
-            $tmp[$key] = $row[$order_by_field];
-          }
-          $args[] = $tmp;
-          if ($order == 'DESC') {
-            $args[] = SORT_DESC;
-          } else {
-            $args[] = SORT_ASC;
-          }
+        // If an "all items" query, bump offset, go again.
+        if (empty($query->params['limit'])) {
+          $query->params['offset'] = count($result);
         }
-        // Add the data to the args.
-        $args[] = &$result;
-
-        call_user_func_array('array_multisort', $args);
-        $result = array_pop($args);
       }
+    } while (empty($query->params['limit']) && !empty($resp['data']));
 
-      // Convert the row arrays to objects for use by Views.
-      foreach ($result as $key => $row) {
-        $result[$key] = (object) $row;
+    // Sort the result in Drupal because the API doesn't support it.
+    // Adapted from https://secure.php.net/manual/en/function.array-multisort.php#100534.
+    if (isset($query->orderBy) && $result) {
+      $order_by_fields = $query->orderBy;
+
+      // Build the arguments from the order by fields.
+      $args = array();
+      foreach ($order_by_fields as $order_by_field => $order) {
+        $tmp = array();
+        foreach ($result as $key => $row) {
+          $tmp[$key] = $row[$order_by_field];
+        }
+        $args[] = $tmp;
+        if ($order == 'DESC') {
+          $args[] = SORT_DESC;
+        } else {
+          $args[] = SORT_ASC;
+        }
       }
+      // Add the data to the args.
+      $args[] = &$result;
+
+      call_user_func_array('array_multisort', $args);
+      $result = array_pop($args);
+    }
+
+    // Convert the row arrays to objects for use by Views.
+    foreach ($result as $key => $row) {
+      $result[$key] = (object) $row;
     }
 
     // Store off values from query in View.
     $view->result = $result;
     $view->total_rows = count($result);
-    // $this->pager->post_execute($view->result);
+    // $view->pager->post_execute($view->result);
 
     // Execute count query for pager if necessary.
     // if ($this->pager->use_count_query()) {
-      $this->pager->total_items = $num_dataset_rows;
+      $view->pager->total_items = $num_dataset_rows;
       $view->total_rows = $view->pager->getTotalItems();
       $view->pager->updatePageInfo();
     // }
