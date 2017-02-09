@@ -20,7 +20,7 @@ class SocrataSelectQuery extends SelectExtender {
    *
    * @var array
    */
-  public $params = array();
+  public $params = [];
 
   protected $endpoint;
 
