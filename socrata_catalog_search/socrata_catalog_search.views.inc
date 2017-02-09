@@ -25,7 +25,6 @@ function socrata_catalog_search_views_data() {
     'id' => array(
       'title' => t('4x4 ID'),
       'help' => t('Endpoint Identifier'),
-      'mapping' => array('resource' => array('id')),
     ),
     'description' => array(
       'title' => t('Description'),
@@ -139,7 +138,7 @@ function socrata_catalog_search_views_data() {
   // Add field boiler plate settings.
   $field_boiler_plate = array(
     'field' => array(
-      'handler' => 'standard',
+      'id' => 'standard',
       'click sortable' => TRUE,
     ),
     'sort' => array(
