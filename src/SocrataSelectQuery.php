@@ -63,6 +63,7 @@ class SocrataSelectQuery extends SelectExtender {
   public function execute($type = NULL) {
     $return_data = FALSE;
     $client = \Drupal::httpClient();
+
     try {
       $options = \Drupal::config('socrata.settings')->get('socrata_curl_options');
       \Drupal::moduleHandler()->alter('socrata_curl_options', $options);
@@ -78,6 +79,7 @@ class SocrataSelectQuery extends SelectExtender {
         // Can build the SODA URL now that all the parameters have been set.
         $url = $this->endpoint->getSodaURL($this->params);
       }
+
       _socrata_dbg($url);
 
       $response = $client->get($url, [
@@ -85,11 +87,13 @@ class SocrataSelectQuery extends SelectExtender {
       ]);
 
       $return_data['headers'] = _socrata_parse_headers($response->getHeaders());
+
       if (isset($return_data['headers']['x-soda2-fields']) && isset($return_data['headers']['x-soda2-types'])) {
         foreach ($return_data['headers']['x-soda2-fields'] as $idx => $name) {
           $return_data['fields'][$name] = $return_data['headers']['x-soda2-types'][$idx];
         }
       }
+
       $return_data['data'] = json_decode($response->getBody()->getContents(), TRUE);
     }
     catch (RequestException $e) {
