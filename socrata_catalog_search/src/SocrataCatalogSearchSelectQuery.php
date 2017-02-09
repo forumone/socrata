@@ -2,10 +2,11 @@
 namespace Drupal\socrata_catalog_search;
 
 use Drupal\socrata\Entity\Endpoint;
+use Drupal\socrata\SocrataSelectQuery;
 
 /**
  * @file
- * Decorator class for a Socrata dataset query
+ * Decorator class for a Socrata catalog search query.
  */
 
 class SocrataCatalogSearchSelectQuery extends SocrataSelectQuery {

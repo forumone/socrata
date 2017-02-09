@@ -18,7 +18,7 @@ function socrata_catalog_search_views_data() {
         'field' => 'id',
         'title' => t('Socrata Catalog Search'),
         'help' => t('The local table of responses imported from SDRG SDRG'),
-        'query class' => 'socrata_catalog_search_query',
+        'query_id' => 'socrata_catalog_search_query',
       ),
       'group' => t('Socrata Catalog Search'),
     ),
@@ -139,7 +139,7 @@ function socrata_catalog_search_views_data() {
   // Add field boiler plate settings.
   $field_boiler_plate = array(
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'standard',
       'click sortable' => TRUE,
     ),
     'sort' => array(
