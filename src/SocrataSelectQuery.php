@@ -86,7 +86,7 @@ class SocrataSelectQuery extends SelectExtender {
         'curl' => $options,
       ]);
 
-      $return_data['headers'] = _socrata_parse_headers($response->getHeaders());
+      $return_data['headers'] = $this->parseHeaders($response->getHeaders());
 
       if (isset($return_data['headers']['x-soda2-fields']) && isset($return_data['headers']['x-soda2-types'])) {
         foreach ($return_data['headers']['x-soda2-fields'] as $idx => $name) {
@@ -121,6 +121,30 @@ class SocrataSelectQuery extends SelectExtender {
       $this->query->comment('Socrata URL: "' . $soda_url . '"' . "\r\nCorresponding SQL query: ");
     }
     return (string) $this->query;
+  }
+
+  /**
+   * Util function to parse out HTTP response headers.
+   */
+  private function parseHeaders($headers) {
+    $headers_arr = [];
+    foreach ($headers as $header => $values) {
+      if ('HTTP' == substr($header, 0, 4)) {
+        continue;
+      }
+      $name = strtolower(trim($header));
+      if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
+        $headers_arr[$name] = [];
+        foreach ($values as $value) {
+          $headers_arr[$name] = array_merge($headers_arr[$name], json_decode($value));
+        }
+      }
+      else {
+        $headers_arr[$name] = trim(implode(', ', $values));
+      }
+    }
+
+    return $headers_arr;
   }
 
 }

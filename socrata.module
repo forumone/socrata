@@ -106,27 +106,3 @@ function _socrata_dbg($msg, $vars = array()) {
     }
   }
 }
-
-/**
- * Util function to parse out HTTP response headers.
- */
-function _socrata_parse_headers($headers) {
-  $headers_arr = [];
-  foreach ($headers as $header => $values) {
-    if ('HTTP' == substr($header, 0, 4)) {
-      continue;
-    }
-    $name = strtolower(trim($header));
-    if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
-      $headers_arr[$name] = [];
-      foreach ($values as $value) {
-        $headers_arr[$name] = array_merge($headers_arr[$name], json_decode($value));
-      }
-    }
-    else {
-      $headers_arr[$name] = trim(implode(', ', $values));
-    }
-  }
-
-  return $headers_arr;
-}
