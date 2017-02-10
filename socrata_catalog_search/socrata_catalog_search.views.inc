@@ -56,7 +56,7 @@ function socrata_catalog_search_views_data() {
         'id' => 'socrata_catalog_sort',
       ),
       'filter' => array(
-        'id' => 'socrata_catalog_search_handler_filter_type',
+        'id' => 'socrata_type',
       ),
       'argument' => array(
         'id' => 'string',
