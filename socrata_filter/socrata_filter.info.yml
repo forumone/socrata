@@ -1,5 +1,5 @@
 name: Socrata Input Filter
-description: 'Provides an input filter for embedding Socrata datasets in editable content'
+description: 'Provides an input filter for embedding Socrata datasets in editable content.'
 package: Socrata
 core: 8.x
 type: module

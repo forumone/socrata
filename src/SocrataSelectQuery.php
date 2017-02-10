@@ -3,9 +3,9 @@
 namespace Drupal\socrata;
 
 use Drupal\Core\Database\Query\SelectExtender;
-use Drupal\Core\Url;
-use Drupal\Core\Link;
 use Drupal\socrata\Entity\Endpoint;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * @file
@@ -13,13 +13,20 @@ use Drupal\socrata\Entity\Endpoint;
  */
 class SocrataSelectQuery extends SelectExtender {
 
+  use DependencySerializationTrait;
+
   /**
    * Socrata Query Language parameters.
    *
    * @var array
    */
-  public $params = array();
+  public $params = [];
 
+  /**
+   * Socrata Endpoint object.
+   *
+   * @var \Drupal\socrata\Entity\Endpoint
+   */
   protected $endpoint;
 
   /**
@@ -54,113 +61,53 @@ class SocrataSelectQuery extends SelectExtender {
    *   Array containing response data.
    */
   public function execute($type = NULL) {
-    $retval = FALSE;
+    $return_data = FALSE;
+    $client = \Drupal::httpClient();
 
-    // @todo Change to use Guzzle client a la http://www.lohmeyer.rocks/blog/2015/10/20/0070-how-make-custom-guzzle-requests-drupal-8-modules.
-    // Create a new cURL resource.
-    $ch = curl_init();
-    if ($ch) {
-      // Pull and set custom curl options.
-      $curlopts = \Drupal::config('socrata.settings')->get('socrata_curl_options');
-      \Drupal::moduleHandler()->alter('socrata_curl_options', $curlopts);
-      curl_setopt_array($ch, $curlopts);
+    try {
+      $options = \Drupal::config('socrata.settings')->get('socrata_curl_options');
+      \Drupal::moduleHandler()->alter('socrata_curl_options', $options);
 
-      // Set required curl options.
-      $req_curlopts = array(
-        CURLOPT_HEADER => TRUE,
-        CURLOPT_RETURNTRANSFER => TRUE,
-      );
-      curl_setopt_array($ch, $req_curlopts);
+      if ($type == 'metadata') {
+        // Note that 'metadata' here represents an entirely separate API and
+        // endpoint, and is different from the special fields of type
+        // 'meta_data' (mentioned below) that are returned from the normal
+        // dataset API/endpoint, but when using an old version of the API.
+        // @todo Add version number for "old".
+        $url = $this->endpoint->getMetaDataURL();
+      }
+      else {
+        // Can build the SODA URL now that all the parameters have been set.
+        $url = $this->endpoint->getSodaURL($this->params);
+      }
 
-      // Execute the request and cleanup.
-      curl_setopt_array($ch, $curlopts);
-      do {
-        $retval = FALSE;
+      _socrata_dbg($url);
 
-        // Construct the URL, based on the $type parameter.
-        if ($type == 'metadata') {
-          // Note that 'metadata' here represents an entirely separate API and
-          // endpoint, and is different from the special fields of type
-          // 'meta_data' (mentioned below) that are returned from the normal
-          // dataset API/endpoint, but when using an old version of the API.
-          // @todo Add version number for "old".
-          $curl_url = $this->endpoint->getMetaDataURL();
+      $response = $client->get($url, [
+        'curl' => $options,
+      ]);
+
+      $return_data['headers'] = $this->parseHeaders($response->getHeaders());
+
+      if (isset($return_data['headers']['x-soda2-fields']) && isset($return_data['headers']['x-soda2-types'])) {
+        foreach ($return_data['headers']['x-soda2-fields'] as $idx => $name) {
+          $return_data['fields'][$name] = $return_data['headers']['x-soda2-types'][$idx];
         }
-        else {
-          // Can build the SODA URL now that all the parameters have been set.
-          $curl_url = $this->endpoint->getSodaURL($this->params);
-        }
-        _socrata_dbg($curl_url);
+      }
 
-        curl_setopt($ch, CURLOPT_URL, $curl_url);
-        $resp = curl_exec($ch);
-        if (FALSE !== $resp) {
-          // Pull info from response and see if we had an error.
-          $info = curl_getinfo($ch);
-          if ($info['http_code'] >= 400) {
-            \Drupal::logger('socrata')->error(
-              'Server returned error code @errno for @url',
-              [
-                '@errno' => $info['http_code'],
-                '@url' => $curl_url,
-              ]
-            );
-
-            break;
-          }
-          else {
-            // Split out response headers into name => value array.
-            list($headers, $data) = explode("\r\n\r\n", $resp, 2);
-            $retval['headers'] = _socrata_parse_headers($headers);
-
-            // Test for redirect in the event curl wasn't able to automagically
-            // follow due to server config.
-            if (!empty($retval['headers']['location'])) {
-              $url = $retval['headers']['location'];
-            }
-            else {
-              // Generate an array mapping fields to types, if provided
-              // Note that the old API returns some fields of type 'meta_data'
-              // (e.g. ':id', ':created_at', ':updated_at').
-              // @todo Add version number for "old".
-              if (isset($retval['headers']['x-soda2-fields']) && isset($retval['headers']['x-soda2-types'])) {
-                foreach ($retval['headers']['x-soda2-fields'] as $idx => $name) {
-                  $retval['fields'][$name] = $retval['headers']['x-soda2-types'][$idx];
-                }
-              }
-
-              // Decode data payload.
-              $retval['data'] = json_decode($data, TRUE);
-            }
-          }
-        }
-        else {
-          \Drupal::logger('socrata')->error(
-            'curl_exec failed: @error [@errno] for @url',
-            [
-              '@error' => curl_error($ch),
-              '@errno' => curl_errno($ch),
-              '@url' => $curl_url,
-            ]
-          );
-
-        }
-      } while (FALSE !== $resp && !empty($retval['headers']['location']));
-
-      // Close and cleanup.
-      curl_close($ch);
+      $return_data['data'] = json_decode($response->getBody()->getContents(), TRUE);
     }
-    else {
+    catch (RequestException $e) {
       \Drupal::logger('socrata')->error(
-        'curl_init failed: @error [@errno]',
+        'Server returned error code @errno for @url',
         [
-          '@error' => curl_error($ch),
-          '@errno' => curl_errno($ch),
+          '@errno' => $e->getCode(),
+          '@url' => $url,
         ]
       );
     }
 
-    return $retval;
+    return $return_data;
   }
 
   /**
@@ -175,6 +122,30 @@ class SocrataSelectQuery extends SelectExtender {
       $this->query->comment('Socrata URL: "' . $soda_url . '"' . "\r\nCorresponding SQL query: ");
     }
     return (string) $this->query;
+  }
+
+  /**
+   * Util function to parse out HTTP response headers.
+   */
+  private function parseHeaders($headers) {
+    $headers_arr = [];
+    foreach ($headers as $header => $values) {
+      if ('HTTP' == substr($header, 0, 4)) {
+        continue;
+      }
+      $name = strtolower(trim($header));
+      if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
+        $headers_arr[$name] = [];
+        foreach ($values as $value) {
+          $headers_arr[$name] = array_merge($headers_arr[$name], json_decode($value));
+        }
+      }
+      else {
+        $headers_arr[$name] = trim(implode(', ', $values));
+      }
+    }
+
+    return $headers_arr;
   }
 
 }
