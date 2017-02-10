@@ -34,11 +34,11 @@ function socrata_catalog_search_views_data() {
       'title' => t('Last Updated'),
       'help' => t('Endpoint Last Updated Timestamp'),
       'field' => array(
-        'handler' => 'socrata_catalog_search_handler_field_date',
+        'id' => 'calendar_date',
         'click sortable' => TRUE,
       ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_search_handler_sort',
       ),
     ),
     'name' => array(
@@ -49,68 +49,68 @@ function socrata_catalog_search_views_data() {
       'title' => t('Type'),
       'help' => t('Endpoint Type'),
       'field' => array(
-        'handler' => 'views_handler_field',
+        'id' => 'standard',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_type',
+        'id' => 'socrata_catalog_search_handler_filter_type',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
     'categories' => array(
       'title' => t('Categories'),
       'help' => t('Endpoint Categories'),
       'field' => array(
-        'handler' => 'socrata_catalog_search_handler_field_list',
+        'id' => 'socrata_catalog_search_handler_field_list',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_list',
+        'id' => 'socrata_catalog_search_handler_filter_list',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
     'tags' => array(
       'title' => t('Tags'),
       'help' => t('Endpoint Tags'),
       'field' => array(
-        'handler' => 'socrata_catalog_search_handler_field_list',
+        'id' => 'socrata_catalog_search_handler_field_list',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_list',
+        'id' => 'socrata_catalog_search_handler_filter_list',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
     'domain' => array(
       'title' => t('Domain'),
       'help' => t('Endpoint Domain'),
       'field' => array(
-        'handler' => 'views_handler_field',
+        'id' => 'standard',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_search_handler_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_domain',
+        'id' => 'socrata_catalog_search_handler_filter_domain',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
     'permalink' => array(
@@ -127,10 +127,10 @@ function socrata_catalog_search_views_data() {
       'title' => t('Fulltext search'),
       'help' => t('Search all Endpoint fields'),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_fulltext',
+        'id' => 'socrata_catalog_search_handler_filter_fulltext',
       ),
       'argument' => array(
-        'handler' => 'socrata_catalog_search_handler_argument_fulltext',
+        'id' => 'socrata_catalog_search_handler_argument_fulltext',
       ),
     ),
   );
@@ -142,7 +142,7 @@ function socrata_catalog_search_views_data() {
       'click sortable' => TRUE,
     ),
     'sort' => array(
-      'handler' => 'socrata_catalog_search_handler_sort',
+      'id' => 'socrata_catalog_search_handler_sort',
     ),
   );
 
