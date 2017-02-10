@@ -26,7 +26,7 @@ class SocrataFullText extends StringFilter {
   function operators() {
     $operators = array(
       '=' => array(
-        'title' => t('Is equal to'),
+        'title' => t('Contains'),
         'method' => 'opEqual',
         'short' => t('='),
         'values' => 1,
