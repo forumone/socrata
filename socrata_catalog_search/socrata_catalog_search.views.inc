@@ -79,9 +79,9 @@ function socrata_catalog_search_views_data() {
         'id' => 'string',
       ),
     ),
-    'tags' => array(
+    'domain_tags' => array(
       'title' => t('Tags'),
-      'help' => t('A list of tags that have been automatically assigned by stastically derived models.'),
+      'help' => t('A list of tags given to the endpoint by the owning domain.'),
       'field' => array(
         'id' => 'socrata_list',
         'click sortable' => TRUE,
