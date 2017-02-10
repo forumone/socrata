@@ -62,11 +62,11 @@ function socrata_catalog_search_views_data() {
         'id' => 'string',
       ),
     ),
-    'categories' => array(
-      'title' => t('Categories'),
-      'help' => t('A list of categories that have been automatically assigned by stastically derived models.'),
+    'domain_category' => array(
+      'title' => t('Category'),
+      'help' => t('The singular category given to the endpoint by the owning domain.'),
       'field' => array(
-        'id' => 'socrata_list',
+        'id' => 'standard',
         'click sortable' => TRUE,
        ),
       'sort' => array(

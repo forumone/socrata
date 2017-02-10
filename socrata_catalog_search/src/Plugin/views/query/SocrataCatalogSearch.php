@@ -150,7 +150,7 @@ class SocrataCatalogSearch extends Soql {
           $new_row->description = $row['resource']['description'];
           $new_row->updatedAt = $row['resource']['updatedAt'];
           $new_row->type = $row['resource']['type'];
-          $new_row->categories = implode(',', $row['classification']['categories']);
+          $new_row->domain_category = $row['classification']['domain_category'];
           $new_row->domain_tags = implode(',', $row['classification']['domain_tags']);
           $new_row->domain = $row['metadata']['domain'];
           $new_row->permalink = $row['permalink'];
