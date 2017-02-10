@@ -127,10 +127,10 @@ function socrata_catalog_search_views_data() {
       'title' => t('Fulltext search'),
       'help' => t('Search all Endpoint fields.'),
       'filter' => array(
-        'id' => 'socrata_catalog_search_handler_filter_fulltext',
+        'id' => 'socrata_full_text',
       ),
       'argument' => array(
-        'id' => 'socrata_catalog_search_handler_argument_fulltext',
+        'id' => 'socrata_full_text',
       ),
     ),
   );
