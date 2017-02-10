@@ -175,7 +175,7 @@ class SocrataCatalogSearch extends Soql {
       foreach ($order_by_fields as $order_by_field => $order) {
         $tmp = array();
         foreach ($result as $key => $row) {
-          $tmp[$key] = $row[$order_by_field];
+          $tmp[$key] = $row->{$order_by_field};
         }
         $args[] = $tmp;
         if ($order == 'DESC') {
