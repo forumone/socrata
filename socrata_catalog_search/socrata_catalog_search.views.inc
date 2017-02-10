@@ -66,7 +66,7 @@ function socrata_catalog_search_views_data() {
       'title' => t('Categories'),
       'help' => t('Endpoint Categories'),
       'field' => array(
-        'id' => 'socrata_catalog_search_handler_field_list',
+        'id' => 'socrata_list',
         'click sortable' => TRUE,
        ),
       'sort' => array(
@@ -83,7 +83,7 @@ function socrata_catalog_search_views_data() {
       'title' => t('Tags'),
       'help' => t('Endpoint Tags'),
       'field' => array(
-        'id' => 'socrata_catalog_search_handler_field_list',
+        'id' => 'socrata_list',
         'click sortable' => TRUE,
        ),
       'sort' => array(
