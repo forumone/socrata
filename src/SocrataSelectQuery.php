@@ -58,7 +58,7 @@ class SocrataSelectQuery extends SelectExtender {
    *   currently 'metadata', but we might want others in the future?
    *
    * @return array
-   *   An array containing headers and response body
+   *   Array containing response data.
    */
   public function execute($type = NULL) {
     $return_data = FALSE;
