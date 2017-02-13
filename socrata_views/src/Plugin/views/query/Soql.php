@@ -887,16 +887,15 @@ private function constructQueryComponent($field, $value, $operator) {
         }
       } while (empty($query->params['$limit']) && !empty($resp['data']));
 
-    // Store off values from query in View.
-    $view->result = $result;
+      // Store off values from query in View.
+      $view->result = $result;
 
-    // The mini pager changes its total_items property in its postExecute() method
-    // which breaks the mini pager so we'll just disable calling that method.
-    // $view->pager->postExecute($view->result);
+      // The mini pager changes its total_items property in its postExecute() method
+      // which breaks the mini pager so we'll just disable calling that method.
+      // $view->pager->postExecute($view->result);
 
-    $view->pager->updatePageInfo();
-    $view->total_rows = $view->pager->getTotalItems();
-
+      $view->pager->updatePageInfo();
+      $view->total_rows = $view->pager->getTotalItems();
     }
     else {
       $start = microtime(TRUE);

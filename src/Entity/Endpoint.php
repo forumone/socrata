@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\socrata\Entity\Endpoint.
- */
 
 namespace Drupal\socrata\Entity;
 
@@ -67,7 +63,6 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    */
   public $app_token;
 
-
   /**
    * {@inheritdoc}
    */
@@ -91,7 +86,7 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * @return string
    *   Formatted URL
    */
-  public function getSodaURL($params = []) {
+  public function getSodaURL(array $params = []) {
     // Add app token if available.
     if ($this->getAppToken()) {
       $params['$$app_token'] = $this->getAppToken();
@@ -109,7 +104,7 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * @return string
    *   Formatted URL
    */
-  public function getUnencodedSodaURL($params = []) {
+  public function getUnencodedSodaURL(array $params = []) {
     // We might not want to encode the URL in cases where we just want it to be
     // output for humans to read, most notably in the query displayed in the
     // views preview.
@@ -129,8 +124,9 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
       foreach ($params as $key => $value) {
         $params_query[] = $key . '=' . $value;
       }
+      $url_with_params .= implode('&', $params_query);
     }
-    $url_with_params .= implode('&', $params_query);
+
     return Url::fromUri($url_with_params, ['absolute' => TRUE])->toString();
   }
 
