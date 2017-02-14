@@ -88,7 +88,7 @@ class EndpointForm extends EntityForm {
 
     // Ensure we have a SODA2 URL for the endpoint.
     if (strpos($url, 'resource/') === false) {
-      $form_state->setErrorByName('url', t('The endpoint "@url" does not point to a valid SODA2 resource. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json', ['@url' => $url]));
+      $form_state->setErrorByName('url', $this->t('The endpoint "@url" does not point to a valid SODA2 resource. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json', ['@url' => $url]));
       // Bail out or otherwise the query below will bork.
       return;
     }
@@ -101,7 +101,7 @@ class EndpointForm extends EntityForm {
     $resp = $query->execute();
 
     if (!$resp) {
-      $form_state->setErrorByName('url', t('A request to the endpoint "@url" did not return a valid response. Try pasting the URL into your browser to be sure you see results.', ['@url' => $url]));
+      $form_state->setErrorByName('url', $this->t('A request to the endpoint "@url" did not return a valid response. Try pasting the URL into your browser to be sure you see results.', ['@url' => $url]));
     }
   }
 
