@@ -17,121 +17,114 @@ function socrata_catalog_search_views_data() {
       'base' => array(
         'field' => 'id',
         'title' => t('Socrata Catalog Search'),
-        'help' => t('The local table of responses imported from SDRG SDRG'),
-        'query class' => 'socrata_catalog_search_query',
+        'help' => t('The local table of responses imported from SDRG SDRG.'),
+        'query_id' => 'socrata_catalog_search_query',
       ),
       'group' => t('Socrata Catalog Search'),
     ),
     'id' => array(
       'title' => t('4x4 ID'),
-      'help' => t('Endpoint Identifier'),
-      'mapping' => array('resource' => array('id')),
+      'help' => t('The unique identifier for the endpoint.'),
     ),
     'description' => array(
       'title' => t('Description'),
-      'help' => t('Endpoint Description'),
+      'help' => t('The description for the endpoint, if one has been provided.'),
     ),
     'updatedAt' => array(
       'title' => t('Last Updated'),
-      'help' => t('Endpoint Last Updated Timestamp'),
+      'help' => t('The timestamp at which the endpoint was last updated.'),
       'field' => array(
-        'handler' => 'socrata_catalog_search_handler_field_date',
+        'id' => 'calendar_date',
         'click sortable' => TRUE,
       ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_sort',
       ),
     ),
     'name' => array(
       'title' => t('Name'),
-      'help' => t('Endpoint Name'),
+      'help' => t('The title of the endpoint.'),
     ),
     'type' => array(
       'title' => t('Type'),
-      'help' => t('Endpoint Type'),
+      'help' => t('The type of the endpoint.'),
       'field' => array(
-        'handler' => 'views_handler_field',
+        'id' => 'standard',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_type',
+        'id' => 'socrata_type',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
-    'categories' => array(
-      'title' => t('Categories'),
-      'help' => t('Endpoint Categories'),
+    'domain_category' => array(
+      'title' => t('Category'),
+      'help' => t('The singular category given to the endpoint by the owning domain.'),
       'field' => array(
-        'handler' => 'socrata_catalog_search_handler_field_list',
+        'id' => 'standard',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
-      ),
-      'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_list',
+        'id' => 'socrata_catalog_sort',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
-    'tags' => array(
+    'domain_tags' => array(
       'title' => t('Tags'),
-      'help' => t('Endpoint Tags'),
+      'help' => t('A list of tags given to the endpoint by the owning domain.'),
       'field' => array(
-        'handler' => 'socrata_catalog_search_handler_field_list',
+        'id' => 'socrata_list',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
-      ),
-      'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_list',
+        'id' => 'socrata_catalog_sort',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
     'domain' => array(
       'title' => t('Domain'),
-      'help' => t('Endpoint Domain'),
+      'help' => t('The endpoint base domain.'),
       'field' => array(
-        'handler' => 'views_handler_field',
+        'id' => 'standard',
         'click sortable' => TRUE,
        ),
       'sort' => array(
-        'handler' => 'socrata_catalog_search_handler_sort',
+        'id' => 'socrata_catalog_sort',
       ),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_domain',
+        'id' => 'socrata_domain',
       ),
       'argument' => array(
-        'handler' => 'views_handler_argument_string',
+        'id' => 'string',
       ),
     ),
     'permalink' => array(
       'title' => t('Permalink'),
-      'help' => t('Endpoint Permalink'),
+      'help' => t('The Permalink to the resource.'),
     ),
     'link' => array(
       'title' => t('Link'),
-      'help' => t('Endpoint Link'),
+      'help' => t('The endpoint API link.'),
     ),
     // Full text search filter.
     'fulltext' => array(
       'group' => t('Socrata Catalog Search'),
       'title' => t('Fulltext search'),
-      'help' => t('Search all Endpoint fields'),
+      'help' => t('Search all Endpoint fields.'),
       'filter' => array(
-        'handler' => 'socrata_catalog_search_handler_filter_fulltext',
+        'id' => 'socrata_full_text',
       ),
       'argument' => array(
-        'handler' => 'socrata_catalog_search_handler_argument_fulltext',
+        'id' => 'socrata_full_text',
       ),
     ),
   );
@@ -139,11 +132,11 @@ function socrata_catalog_search_views_data() {
   // Add field boiler plate settings.
   $field_boiler_plate = array(
     'field' => array(
-      'handler' => 'views_handler_field',
+      'id' => 'standard',
       'click sortable' => TRUE,
     ),
     'sort' => array(
-      'handler' => 'socrata_catalog_search_handler_sort',
+      'id' => 'socrata_catalog_sort',
     ),
   );
 
