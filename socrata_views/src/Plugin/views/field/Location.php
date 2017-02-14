@@ -38,19 +38,19 @@ class Location extends FieldPluginBase {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $form['display'] = array(
       '#type' => 'select',
-      '#title' => t('Display mode'),
+      '#title' => $this->t('Display mode'),
       '#options' => array(
-        'text' => t('Text, no link'),
-        'link' => t('Dispay as link'),
-        'wkt' => t('Render as WKT'),
+        'text' => $this->t('Text, no link'),
+        'link' => $this->t('Dispay as link'),
+        'wkt' => $this->t('Render as WKT'),
       ),
       '#default_value' => $this->options['display'],
     );
 
     $form['link_text'] = array(
       '#type' => 'textfield',
-      '#title' => t('Link text'),
-      '#description' => t('Text to use for link.'),
+      '#title' => $this->t('Link text'),
+      '#description' => $this->t('Text to use for link.'),
       '#default_value' => $this->options['link_text'],
     );
 
@@ -85,7 +85,7 @@ class Location extends FieldPluginBase {
         $text = "{$longitude}, {$latitude}";
       }
       else {
-        $text = t('Map');
+        $text = $this->t('Map');
       }
 
       if ('link' == $this->options['display']) {

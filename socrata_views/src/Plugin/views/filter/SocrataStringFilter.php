@@ -27,33 +27,33 @@ class SocrataStringFilter extends StringFilter {
   function operators() {
     $operators = array(
       '=' => array(
-        'title' => t('Is equal to'),
+        'title' => $this->t('Is equal to'),
         'method' => 'opEqual',
-        'short' => t('='),
+        'short' => $this->t('='),
         'values' => 1,
       ),
       '!=' => array(
-        'title' => t('Is not equal to'),
+        'title' => $this->t('Is not equal to'),
         'method' => 'opEqual',
-        'short' => t('!='),
+        'short' => $this->t('!='),
         'values' => 1,
       ),
       'starts_with' => array(
-        'title' => t('Starts with'),
-        'short' => t('starts_with'),
+        'title' => $this->t('Starts with'),
+        'short' => $this->t('starts_with'),
         'method' => 'opStartsWith',
         'values' => 1,
       ),
       'is null' => array(
-        'title' => t('Is empty (NULL)'),
+        'title' => $this->t('Is empty (NULL)'),
         'method' => 'opEmpty',
-        'short' => t('empty'),
+        'short' => $this->t('empty'),
         'values' => 0,
       ),
       'is not null' => array(
-        'title' => t('Is not empty (NOT NULL)'),
+        'title' => $this->t('Is not empty (NOT NULL)'),
         'method' => 'opEmpty',
-        'short' => t('not empty'),
+        'short' => $this->t('not empty'),
         'values' => 0,
       ),
     );

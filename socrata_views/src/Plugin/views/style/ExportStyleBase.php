@@ -55,7 +55,7 @@ abstract class ExportStyleBase extends StylePluginBase {
 
     $form['attach_text'] = [
       '#type' => 'textfield',
-      '#title' => t('Attach text'),
+      '#title' => $this->t('Attach text'),
       '#default_value' => $this->options['attach_text'] ?: $this->t('Download'),
       '#description' => $this->t('This text is used for building the export link.'),
     ];

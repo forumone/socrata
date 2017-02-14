@@ -45,11 +45,11 @@ class SocrataUrl extends Url {
     );
     $form['link_text_option'] = array(
       '#type' => 'radios',
-      '#title' => t('Select what to use as the link text'),
+      '#title' => $this->t('Select what to use as the link text'),
       '#options' => array(
-        'url' => t('URL'),
-        'socrata_description' => t('Description from Socrata, otherwise provided text.'),
-        'user_link_text' => t('Provided link text'),
+        'url' => $this->t('URL'),
+        'socrata_description' => $this->t('Description from Socrata, otherwise provided text.'),
+        'user_link_text' => $this->t('Provided link text'),
       ),
       '#default_value' => $this->options['link_text_option'],
       '#states' => array(
@@ -61,8 +61,8 @@ class SocrataUrl extends Url {
     );
     $form['link_text'] = array(
       '#type' => 'textfield',
-      '#title' => t('Link text'),
-      '#description' => t('Text to use for link based on selection above.'),
+      '#title' => $this->t('Link text'),
+      '#description' => $this->t('Text to use for link based on selection above.'),
       '#default_value' => $this->options['link_text'],
       '#states' => array(
         // Show only when link_text option selected & when the display_as_link checkbox is enabled.

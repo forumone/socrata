@@ -24,7 +24,7 @@ class SocrataCatalogSort extends SortPluginBase {
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
-    $form['order']['#description'] = t('Note that because of limitations in the Socrata Catalog Search API, sorting only works on the visible paged results and not the entire data set.');
+    $form['order']['#description'] = $this->t('Note that because of limitations in the Socrata Catalog Search API, sorting only works on the visible paged results and not the entire data set.');
   }
 
 }

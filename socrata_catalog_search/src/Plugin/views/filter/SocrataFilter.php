@@ -30,9 +30,9 @@ abstract class SocrataFilter extends StringFilter {
   function operators() {
     $operators = array(
       '=' => array(
-        'title' => t('Contains'),
+        'title' => $this->t('Contains'),
         'method' => 'opEqual',
-        'short' => t('='),
+        'short' => $this->t('='),
         'values' => 1,
       ),
     );
@@ -47,7 +47,7 @@ abstract class SocrataFilter extends StringFilter {
     parent::valueForm($form, $form_state);
 
     // Add help text.
-    $form['value']['#description'] = t('You may enter multiple values separated by a comma as "OR" query parameters.');
+    $form['value']['#description'] = $this->t('You may enter multiple values separated by a comma as "OR" query parameters.');
   }
 
   /**
