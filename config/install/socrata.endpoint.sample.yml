@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: sample
+label: Sample Endpoint
+url: 'https://data.seattle.gov/resource/rn6u-vkuv.json'
+app_token: ''
