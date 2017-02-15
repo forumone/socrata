@@ -12,7 +12,7 @@ function socrata_views_data() {
   $tables = array();
 
   // Load our available sources
-  $endpoints = \Drupal::entityManager()->getStorage('endpoint')->loadMultiple();
+  $endpoints = \Drupal::entityTypeManager()->getStorage('endpoint')->loadMultiple();
 
   // Iterate over all available tables, provide definitions to Views
   foreach ($endpoints as $endpoint_id => $endpoint) {
