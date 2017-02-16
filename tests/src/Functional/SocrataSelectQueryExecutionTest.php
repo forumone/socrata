@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\Tests\socrata\Kernel;
+namespace Drupal\Tests\socrata\Functional;
 
-use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\BrowserTestBase;
 use Drupal\Core\Database\Database;
 use Drupal\socrata\Entity\Endpoint;
 use Symfony\Component\Yaml\Yaml;
@@ -12,7 +12,7 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @group socrata
  */
-class SocrataSelectQueryTest extends KernelTestBase {
+class SocrataSelectQueryExecutionTest extends BrowserTestBase {
 
   /**
    * Endpoint data.
@@ -44,28 +44,45 @@ class SocrataSelectQueryTest extends KernelTestBase {
   }
 
   /**
-   * Test conversion of SocrataSelectQuery to a string.
+   * Test execution of a SocrataSelectQuery.
    */
-  public function testQueryToString() {
+  public function testExecuteQuery() {
     $connection = Database::getConnection();
-    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
-    $string = $query->__toString();
+    $query = $connection->select($this->data['endpoints']['valid']['url'])->extend('\Drupal\socrata\SocrataSelectQuery');
+    $endpoint = new Endpoint(['url' => $this->data['endpoints']['valid']['url']], 'endpoint');
+    $query->setEndpoint($endpoint);
+    $ret = $query->execute();
 
-    $this->assertContains('SELECT', $string);
-    $this->assertContains('FROM', $string);
+    $this->assertTrue(is_array($ret));
+    $this->assertArrayHasKey('data', $ret);
   }
 
   /**
-   * Test conversion of SocrataSelectQuery with an Endpoint to a string.
+   * Test execution of a SocrataSelectQuery using an invalid URL.
    */
-  public function testQueryToStringWithEndpoint() {
+  public function testExecuteQueryFailure() {
+    $connection = Database::getConnection();
+    $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
+    $endpoint = new Endpoint(['url' => $this->data['endpoints']['invalid']['url']], 'endpoint');
+    $query->setEndpoint($endpoint);
+    $ret = $query->execute();
+
+    $this->assertFalse($ret);
+  }
+
+  /**
+   * Test execution of a SocrataSelectQuery of type "metadata".
+   */
+  public function testExecuteQueryMetadata() {
     $connection = Database::getConnection();
     $query = $connection->select(NULL)->extend('\Drupal\socrata\SocrataSelectQuery');
     $endpoint = new Endpoint(['url' => $this->data['endpoints']['valid']['url']], 'endpoint');
     $query->setEndpoint($endpoint);
-    $string = $query->__toString();
+    $ret = $query->execute('metadata');
 
-    $this->assertContains($this->data['endpoints']['valid']['url'], $string);
+    $this->assertTrue(is_array($ret));
+    $this->assertArrayHasKey('data', $ret);
+    $this->assertArrayHasKey('metadata', $ret['data']);
   }
 
 }
