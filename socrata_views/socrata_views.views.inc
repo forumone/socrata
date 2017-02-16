@@ -22,7 +22,7 @@ function socrata_views_data() {
     $components = $endpoint->getComponents();
     $dataset = $components['dataset_id'];
 
-    $query = db_select($endpoint_id)->extend('Drupal\socrata\SocrataSelectQuery');
+    $query = \Drupal::database()->select($endpoint_id)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
     //@todo: fix and add tag:
     //$query->addTag('socrata_data_' . [4x4 w/ dashes converted to underscores]);

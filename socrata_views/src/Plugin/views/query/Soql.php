@@ -659,7 +659,7 @@ class Soql extends QueryPluginBase {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   public function query($get_count = FALSE) {
-    $query = db_select($this->base_table)->extend('Drupal\socrata\SocrataSelectQuery');
+    $query = \Drupal::database()->select($this->base_table)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->storage->id());
 

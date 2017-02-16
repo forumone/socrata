@@ -95,7 +95,7 @@ class EndpointForm extends EntityForm {
 
     // Ensure we get a valid response from the endpoint.
     $endpoint = new Endpoint(array('url' => $url), 'endpoint');
-    $query = db_select($url)->extend('Drupal\socrata\SocrataSelectQuery');
+    $query = \Drupal::database()->select($url)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->setEndpoint($endpoint);
     $query->params['$limit'] = 1;
     $resp = $query->execute();

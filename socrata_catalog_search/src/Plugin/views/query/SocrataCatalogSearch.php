@@ -51,7 +51,7 @@ class SocrataCatalogSearch extends Soql {
    */
   function query($get_count = FALSE) {
     // Build the query.
-    $query = db_select($this->base_table)->extend('Drupal\socrata_catalog_search\SocrataCatalogSearchSelectQuery');
+    $query = \Drupal::database()->select($this->base_table)->extend('Drupal\socrata_catalog_search\SocrataCatalogSearchSelectQuery');
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->storage->id());
 
