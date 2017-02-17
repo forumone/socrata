@@ -1,24 +1,24 @@
 <?php
+
 /**
  * @file
- *
- * Main code for Socrata Filter module
+ * Main code for Socrata Filter module.
  */
 
 /**
- * Implements hook_theme
+ * Implements hook_theme().
  */
 function socrata_filter_theme($existing, $type, $theme, $path) {
-  $items = array();
+  $items = [];
 
-  $items['socrata_filter'] = array(
-    'variables' => array(
+  $items['socrata_filter'] = [
+    'variables' => [
       'source' => NULL,
       'embed_url' => NULL,
       'width' => NULL,
       'height' => NULL,
-    ),
-  );
+    ],
+  ];
 
   return $items;
 }
