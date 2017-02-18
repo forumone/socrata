@@ -603,54 +603,6 @@ class Soql extends QueryPluginBase {
   }
 
   /**
-   * Adds fields to the query.
-   *
-   * @param \Drupal\Core\Database\Query\SelectInterface $query
-   *   The drupal query object.
-   */
-  protected function compileFields($query) {
-    foreach ($this->fields as $field) {
-      $string = '';
-      if (!empty($field['table'])) {
-        $string .= $field['table'] . '.';
-      }
-      $string .= $field['field'];
-      $fieldname = (!empty($field['alias']) ? $field['alias'] : $string);
-
-      if (!empty($field['count'])) {
-        // Retained for compatibility.
-        $field['function'] = 'count';
-      }
-
-      if (!empty($field['function'])) {
-        $info = $this->getAggregationInfo();
-        if (!empty($info[$field['function']]['method']) && is_callable(array($this, $info[$field['function']]['method']))) {
-          $string = $this::{$info[$field['function']]['method']}($field['function'], $string);
-          $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
-          $query->addExpression($string, $fieldname, $placeholders);
-        }
-
-        $this->hasAggregate = TRUE;
-      }
-      // This is a formula, using no tables.
-      elseif (empty($field['table'])) {
-        $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
-        $query->addExpression($string, $fieldname, $placeholders);
-      }
-      elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
-        $query->addField(!empty($field['table']) ? $field['table'] : $this->view->storage->get('base_table'), $field['field'], $fieldname);
-      }
-      elseif (empty($field['aggregate'])) {
-        $query->addField(!empty($field['table']) ? $field['table'] : $this->view->storage->get('base_table'), $field['field'], $fieldname);
-      }
-
-      if ($this->getCountOptimized) {
-        // We only want the first field in this case.
-        break;
-      }
-    }
-  }
-
   /**
    * Generate a query and a countquery from all of the information supplied
    * to the object.
