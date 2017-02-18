@@ -1,16 +1,12 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_catalog_search\Plugin\views\filter\SocrataType.
- */
-
 namespace Drupal\socrata_catalog_search\Plugin\views\filter;
 
 use Drupal\views\Plugin\views\filter\InOperator;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
+ * Socrata Catalog Search Type filter.
+ *
  * @ingroup views_filter_handlers
  *
  * @ViewsFilter("socrata_type")
@@ -21,7 +17,7 @@ class SocrataType extends InOperator {
    * {@inheritdoc}
    */
   public function getValueOptions() {
-   $this->valueOptions = [
+    $this->valueOptions = [
       'charts' => $this->t("Charts"),
       'datalenses' => $this->t("Datalenses"),
       'datasets' => $this->t("Datasets"),
@@ -36,7 +32,7 @@ class SocrataType extends InOperator {
   /**
    * {@inheritdoc}
    */
-  function operators() {
+  public function operators() {
     $operators = parent::operators();
 
     // Disable unsupported operator.

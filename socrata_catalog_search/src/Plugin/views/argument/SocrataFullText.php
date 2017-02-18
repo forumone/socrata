@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_views\Plugin\views\argument\StringArgument.
- */
-
 namespace Drupal\socrata_catalog_search\Plugin\views\argument;
 
 use Drupal\views\Plugin\views\argument\StringArgument;
