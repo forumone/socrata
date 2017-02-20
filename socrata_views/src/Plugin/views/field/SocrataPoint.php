@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of SocrataPoint.
- */
-
 namespace Drupal\socrata_views\Plugin\views\field;
 
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -12,15 +7,16 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ResultRow;
 
 /**
- * Field handler to provide simple renderer that turns a URL into a clickable link.
+ * Field handler to provide renderer for Socrata Point field.
  *
  * @ingroup views_field_handlers
  *
  * @ViewsField("socrata_point")
  */
 class SocrataPoint extends FieldPluginBase {
+
   /**
-   * Collect options for field display
+   * Collect options for field display.
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
@@ -67,7 +63,7 @@ class SocrataPoint extends FieldPluginBase {
       // at http://dev.socrata.com/docs/datatypes/point.html.
       $longitude = $this->sanitizeValue($value['coordinates'][0], 'xss');
       $latitude = $this->sanitizeValue($value['coordinates'][1], 'xss');
-      // Suss out default display text - TODO make themeable
+      // Suss out default display text - TODO make themeable.
       if (!empty($this->options['link_text'])) {
         $text = $this->sanitizeValue($this->options['link_text'], 'xss');
       }
@@ -94,4 +90,5 @@ class SocrataPoint extends FieldPluginBase {
 
     return $text;
   }
+
 }

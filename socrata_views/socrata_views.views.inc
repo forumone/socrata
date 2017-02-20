@@ -1,34 +1,36 @@
 <?php
+
 /**
  * @file
- *
  * Views data for socrata_catalog_search.
  */
 
 /**
- * Implements hook_views_data
+ * Implements hook_views_data().
  */
 function socrata_views_data() {
   $tables = array();
 
-  // Load our available sources
+  // Load our available sources.
   $endpoints = \Drupal::entityTypeManager()->getStorage('endpoint')->loadMultiple();
 
-  // Iterate over all available tables, provide definitions to Views
+  // Iterate over all available tables, provide definitions to Views.
   foreach ($endpoints as $endpoint_id => $endpoint) {
     $group = $endpoint->label;
 
-    // Retrieve table schema
+    // Retrieve table schema.
     $components = $endpoint->getComponents();
     $dataset = $components['dataset_id'];
 
     $query = \Drupal::database()->select($endpoint_id)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
-    //@todo: fix and add tag:
-    //$query->addTag('socrata_data_' . [4x4 w/ dashes converted to underscores]);
-    // Limit to 1 row
-    $query->params['$limit'] = 1; // SoQL params
-    $query->range(0, 1); // SelectQuery
+    $query->addTag('socrata_' . $dataset);
+
+    // Limit to 1 row.
+    // SoQL params.
+    $query->params['$limit'] = 1;
+    // SelectQuery.
+    $query->range(0, 1);
 
     $resp = $query->execute();
 
@@ -37,7 +39,7 @@ function socrata_views_data() {
       $resp_metadata = $query->execute('metadata');
       $metadata_field_list = $resp_metadata['data']['columns'];
 
-      // Define basic table info
+      // Define basic table info.
       $tables[$endpoint_id] = array();
       $table = &$tables[$endpoint_id];
       $table['table'] = array(
@@ -53,7 +55,7 @@ function socrata_views_data() {
         'query_id' => 'socrata_views_query',
       );
 
-      // Add fields to table
+      // Add fields to table.
       foreach ($resp['fields'] as $field_machine_name => $field_type) {
         $field_options = array(
           'dataset' => $dataset,
@@ -80,9 +82,11 @@ function socrata_views_data() {
             case ':created_at':
               $field_name = 'Created at';
               break;
+
             case ':updated_at':
               $field_name = 'Updated at';
               break;
+
             case ':id':
               $field_name = 'ID';
               break;
@@ -103,7 +107,7 @@ function socrata_views_data() {
         $table[$field_machine_name] = $field_def;
       }
 
-      // Add result id field since we have to define at least one initial field
+      // Add result id field since we have to define at least one initial field.
       if (isset($table[':id'])) {
         $table['table']['base']['field'] = ':id';
         $table['table']['base']['defaults'] = array(
@@ -117,15 +121,16 @@ function socrata_views_data() {
 }
 
 /**
- * Util function to map field handlers to Socrata field types
+ * Util function to map field handlers to Socrata field types.
  *
- * http://dev.socrata.com/docs/datatypes
+ * Http://dev.socrata.com/docs/datatypes.
  */
 function _socrata_views_handlers($name, $type, $options) {
-  // Initialize field handlers array
+  // Initialize field handlers array.
   $handlers = array();
 
-  // Catch the special "meta_data" fields and override their types based on field id so they make sense
+  // Catch the special "meta_data" fields and override their types based on
+  // field id so they make sense.
   // These are only returned with the old API.
   // @todo Add version number for "old".
   if ('meta_data' == $type) {
@@ -167,15 +172,18 @@ function _socrata_views_handlers($name, $type, $options) {
       $handlers['argument']['id'] = 'socrata_boolean';
       break;
 
-    case 'url': // Compound type: description, url.
+    // Compound type: description, url.
+    case 'url':
       $handlers['field']['id'] = 'socrata_url';
       break;
 
-    case 'location': // Compound type: needs_recoding, longitude, latitude, human_address (JSON).
+    // Compound type: needs_recoding, longitude, latitude, human_address (JSON).
+    case 'location':
       $handlers['field']['id'] = 'location';
       break;
 
-    case 'point': // Longitude, latitude geo data.
+    // Longitude, latitude geo data.
+    case 'point':
       $handlers['field']['id'] = 'socrata_point';
       break;
 
@@ -215,7 +223,7 @@ function _socrata_views_handlers($name, $type, $options) {
   }
 
   // Add field options to each handler group that has been defined.
-  foreach ($handlers as $group => &$info) {
+  foreach ($handlers as &$info) {
     $info += $options;
   }
 

@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata\socrata_views\Plugin\views\display\Export.
- */
-
 namespace Drupal\socrata_views\Plugin\views\display;
 
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
-use Drupal\views\Plugin\views\display\ResponseDisplayPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ViewExecutable;
-use Drupal\views\Views;
 use Drupal\socrata\Entity\Endpoint;
 
 /**
@@ -69,6 +62,8 @@ class Export extends DisplayPluginBase {
 
   /**
    * Socrata Endpoint object.
+   *
+   * @var string
    */
   protected $endpoint;
 
@@ -106,7 +101,7 @@ class Export extends DisplayPluginBase {
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    // Disable unused sections
+    // Disable unused sections.
     unset($options['row']);
     unset($options['pager']);
     unset($options['cache']);
@@ -115,11 +110,11 @@ class Export extends DisplayPluginBase {
     $options['attachment_position'] = ['default' => 'before'];
 
     // Overrides for standard stuff.
-    $options['style']['contains']['type']['default'] = 'csv';
-    $options['style']['contains']['options']['default']  = ['description' => ''];
-    $options['row']['contains']['type']['default'] = 'socrata_export';
-    $options['defaults']['default']['style'] = FALSE;
-    $options['defaults']['default']['row'] = FALSE;
+    $options['style']['contains']['type']['default']    = 'csv';
+    $options['style']['contains']['options']['default'] = ['description' => ''];
+    $options['row']['contains']['type']['default']      = 'socrata_export';
+    $options['defaults']['default']['style']            = FALSE;
+    $options['defaults']['default']['row']              = FALSE;
 
     // Make sure the query is not cached.
     $options['defaults']['default']['cache'] = FALSE;
@@ -131,6 +126,15 @@ class Export extends DisplayPluginBase {
     return $options;
   }
 
+  /**
+   * Position of attachment.
+   *
+   * @param string $position
+   *   Where the attachment should be placed.
+   *
+   * @return arraystring
+   *   Array of positions or string of single position.
+   */
   public function attachmentPositions($position = NULL) {
     $positions = [
       'before' => $this->t('Before'),
@@ -151,7 +155,7 @@ class Export extends DisplayPluginBase {
   public function optionsSummary(&$categories, &$options) {
     parent::optionsSummary($categories, $options);
 
-    // Disable unused sections
+    // Disable unused sections.
     unset($options['title']);
     unset($options['pager']);
     unset($options['cache']);
@@ -223,6 +227,7 @@ class Export extends DisplayPluginBase {
           '#default_value' => $this->getOption('displays'),
         ];
         break;
+
       case 'attachment_position':
         $form['#title'] .= $this->t('Position');
         $form['attachment_position'] = [
@@ -272,9 +277,11 @@ class Export extends DisplayPluginBase {
         case 'before':
           $this->view->attachment_before[] = $attachment;
           break;
+
         case 'after':
           $this->view->attachment_after[] = $attachment;
           break;
+
         case 'both':
           $this->view->attachment_before[] = $attachment;
           $this->view->attachment_after[] = $attachment;
@@ -282,4 +289,5 @@ class Export extends DisplayPluginBase {
       }
     }
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_views\Plugin\views\argument\StringArgument.
- */
-
 namespace Drupal\socrata_views\Plugin\views\argument;
 
 use Drupal\views\Plugin\views\argument\StringArgument;
@@ -17,6 +12,7 @@ use Drupal\views\Plugin\views\argument\StringArgument;
  * @ViewsArgument("socrata_string")
  */
 class SocrataStringArgument extends StringArgument {
+
   /**
    * Add this argument to the query.
    *

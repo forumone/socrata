@@ -1,24 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata\socrata_views\Plugin\views\query\Soql.
- */
-
 namespace Drupal\socrata_views\Plugin\views\query;
 
 use Drupal\views\Plugin\views\query\QueryPluginBase;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
-use Drupal\Core\Database\DatabaseExceptionWrapper;
 use Drupal\views\Plugin\views\join\JoinPluginBase;
-use Drupal\views\Plugin\views\HandlerBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
-use Drupal\views\Views;
 
 /**
  * Views query plugin for an SoQL query.
@@ -35,74 +26,98 @@ class Soql extends QueryPluginBase {
 
   /**
    * A list of tables in the order they should be added, keyed by alias.
+   *
+   * @var array
    */
-  protected $tableQueue = array();
+  protected $tableQueue = [];
 
   /**
-   * Holds an array of tables and counts added so that we can create aliases
+   * Holds an array of tables and counts added so that we can create aliases.
+   *
+   * @var array
    */
-  var $tables = array();
+  public $tables = [];
 
   /**
-   * An array of sections of the WHERE query. Each section is in itself
+   * An array of sections of the WHERE query.
+   *
+   * Each section is in itself
    * an array of pieces and a flag as to whether or not it should be AND
    * or OR.
+   *
+   * @var array
    */
-  var $where = array();
+  public $where = [];
   /**
-   * An array of sections of the HAVING query. Each section is in itself
+   * An array of sections of the HAVING query.
+   *
+   * Each section is in itself
    * an array of pieces and a flag as to whether or not it should be AND
    * or OR.
+   *
+   * @var array
    */
-  var $having = array();
+  public $having = [];
   /**
-   * The default operator to use when connecting the WHERE groups. May be
-   * AND or OR.
+   * The default operator to use when connecting the WHERE groups.
+   *
+   * May be AND or OR.
+   *
+   * @var string
    */
   protected $groupOperator = 'AND';
 
   /**
    * A simple array of order by clauses.
+   *
+   * @var array
    */
-  var $orderby = array();
+  public $orderBy = [];
 
   /**
    * A simple array of group by clauses.
+   *
+   * @var array
    */
-  var $groupby = array();
+  public $groupby = [];
 
 
   /**
    * An array of fields.
+   *
+   * @var array
    */
-  var $fields = array();
+  public $fields = [];
 
   /**
    * A flag as to whether or not to make the primary field distinct.
+   *
+   * @var bool
    */
-  var $distinct = FALSE;
+  public $distinct = FALSE;
 
   protected $hasAggregate = FALSE;
 
   /**
    * Should this query be optimized for counts, for example no sorts.
+   *
+   * @var string
    */
   protected $getCountOptimized = NULL;
 
   /**
-   * An array mapping table aliases and field names to field aliases.
-   */
-  // protected $fieldAliases = array();
-
-  /**
    * Query tags which will be passed over to the dbtng query object.
+   *
+   * @var array
    */
-  var $tags = array();
+  public $tags = [];
 
   /**
-   * Socrata endpoint machine name.
+   * Socrata endpoint machine name, aka the "base table".
+   *
+   * @var string
    */
-  var $base_table = '';
+  public $baseTable = '';
 
   /**
    * Is the view marked as not distinct.
@@ -118,29 +133,29 @@ class Soql extends QueryPluginBase {
     parent::init($view, $display, $options);
 
     $base_table = $this->view->storage->get('base_table');
-    $this->base_table = $base_table;
+    $this->baseTable = $base_table;
     $base_field = $this->view->storage->get('base_field');
 
-    // init the table queue with our primary table.
-    $this->tableQueue[$base_table] = array(
+    // Init the table queue with our primary table.
+    $this->tableQueue[$base_table] = [
       'alias' => $base_table,
       'table' => $base_table,
       'relationship' => $base_table,
       'join' => NULL,
-    );
+    ];
 
-    // init the tables with our primary table
-    $this->tables[$base_table][$base_table] = array(
+    // Init the tables with our primary table.
+    $this->tables[$base_table][$base_table] = [
       'count' => 1,
       'alias' => $base_table,
-    );
+    ];
 
-    $this->count_field = array(
+    $this->count_field = [
       'table' => $base_table,
       'field' => $base_field,
       'alias' => $base_field,
       'count' => TRUE,
-    );
+    ];
   }
 
   /**
@@ -150,22 +165,25 @@ class Soql extends QueryPluginBase {
     if (empty($alias)) {
       $alias = $table . '_' . $field;
     }
-    $this->count_field = array(
+    $this->count_field = [
       'table' => $table,
       'field' => $field,
       'alias' => $alias,
       'count' => TRUE,
-    );
+    ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['query_comment'] = array(
+    $options['query_comment'] = [
       'default' => '',
-    );
-    $options['query_tags'] = array(
-      'default' => array(),
-    );
+    ];
+    $options['query_tags'] = [
+      'default' => [],
+    ];
 
     return $options;
   }
@@ -176,46 +194,48 @@ class Soql extends QueryPluginBase {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $form['query_comment'] = array(
+    $form['query_comment'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Query Comment'),
       '#description' => $this->t('If set, this comment will be embedded in the query and passed to the SQL server. This can be helpful for logging or debugging.'),
       '#default_value' => $this->options['query_comment'],
-    );
-    $form['query_tags'] = array(
+    ];
+    $form['query_tags'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Query Tags'),
       '#description' => $this->t('If set, these tags will be appended to the query and can be used to identify the query in a module. This can be helpful for altering queries.'),
       '#default_value' => implode(', ', $this->options['query_tags']),
-      '#element_validate' => array('views_element_validate_tags'),
-    );
+      '#element_validate' => ['views_element_validate_tags'],
+    ];
   }
 
   /**
    * Special submit handling.
    */
   public function submitOptionsForm(&$form, FormStateInterface $form_state) {
-    $element = array('#parents' => array('query', 'options', 'query_tags'));
+    $element = ['#parents' => ['query', 'options', 'query_tags']];
     $value = explode(',', NestedArray::getValue($form_state->getValues(), $element['#parents']));
     $value = array_filter(array_map('trim', $value));
     $form_state->setValueForElement($element, $value);
   }
 
   /**
-   * Ensure a table exists in the queue; if it already exists it won't
+   * Ensure a table exists in the queue.
+   *
+   * If it already exists it won't
    * do anything, but if it doesn't it will add the table queue. It will ensure
    * a path leads back to the relationship table.
    *
-   * @param $table
+   * @param string $table
    *   The unaliased name of the table to ensure.
-   * @param $relationship
+   * @param string $relationship
    *   The relationship to ensure the table links to. Each relationship will
    *   get a unique instance of the table being added. If not specified,
    *   will be the primary table.
    * @param \Drupal\views\Plugin\views\join\JoinPluginBase $join
    *   A Join object (or derived object) to join the alias in.
    *
-   * @return
+   * @return string
    *   The alias used to refer to this specific table, or NULL if the table
    *   cannot be ensured.
    */
@@ -224,21 +244,23 @@ class Soql extends QueryPluginBase {
   }
 
   /**
-   * Add a field to the query table, possibly with an alias. This will
+   * Add a field to the query table, possibly with an alias.
+   *
+   * This will
    * automatically call ensureTable to make sure the required table
    * exists, *unless* $table is unset.
    *
-   * @param $table
+   * @param string $table
    *   The table this field is attached to. If NULL, it is assumed this will
    *   be a formula; otherwise, ensureTable is used to make sure the
    *   table exists.
-   * @param $field
+   * @param string $field
    *   The name of the field to add. This may be a real field or a formula.
-   * @param $alias
+   * @param string $alias
    *   The alias to create. If not specified, the alias will be $table_$field
    *   unless $table is NULL. When adding formulae, it is recommended that an
    *   alias be used.
-   * @param $params
+   * @param array $params
    *   An array of parameters additional to the field that will control items
    *   such as aggregation functions and DISTINCT. Some values that are
    *   recognized:
@@ -246,23 +268,25 @@ class Soql extends QueryPluginBase {
    *   - aggregate: Set to TRUE to indicate that this value should be
    *     aggregated in a GROUP BY.
    *
-   * @return $name
-   *   The name that this field can be referred to as. Usually this is the alias.
+   * @return string
+   *   The name that this field can be referred to as. Usually this is the
+   *   alias.
    */
-  public function addField($table, $field, $alias = '', $params = array()) {
+  public function addField($table, $field, $alias = '', array $params = []) {
     // Fields will alwasy be unique in Socrata endpoints.  Creating a custom
     // array makes it much easier to craft the query URL.
     if (isset($params['function'])) {
       $alias = $params['function'] . '_' . $field;
-    } elseif (empty($alias)) {
+    }
+    elseif (empty($alias)) {
       $alias = $table . '_' . $field;
     }
     // Create a field info array.
-    $field_info = array(
+    $field_info = [
       'field' => $field,
       'table' => $table,
       'alias' => $alias,
-    ) + $params;
+    ] + $params;
 
     $this->fields[$field] = $field_info;
 
@@ -271,42 +295,49 @@ class Soql extends QueryPluginBase {
   }
 
   /**
-   * Remove all fields that may've been added; primarily used for summary
+   * Remove all fields that may've been added.
+   *
+   * Primarily used for summary
    * mode where we're changing the query because we didn't get data we needed.
    */
   public function clearFields() {
-    $this->fields = array();
+    $this->fields = [];
   }
 
   /**
-   * Add a simple WHERE clause to the query. The caller is responsible for
+   * Add a simple WHERE clause to the query.
+   *
+   * The caller is responsible for
    * ensuring that all fields are fully qualified (TABLE.FIELD) and that
    * the table already exists in the query.
    *
-   * @param $group
+   * @param string $group
    *   The WHERE group to add these to; groups are used to create AND/OR
    *   sections. Groups cannot be nested. Use 0 as the default group.
    *   If the group does not yet exist it will be created as an AND group.
-   * @param $field
+   * @param string $field
    *   The name of the field to check.
-   * @param $value
-   *   The value to test the field against. In most cases, this is a scalar. For more
-   *   complex options, it is an array. The meaning of each element in the array is
-   *   dependent on the $operator.
-   * @param $operator
+   * @param string $value
+   *   The value to test the field against. In most cases, this is a scalar. For
+   *   more complex options, it is an array. The meaning of each element in the
+   *   array is dependent on the $operator.
+   * @param string $operator
    *   The comparison operator, such as =, <, or >=. It also accepts more
    *   complex options such as IN, LIKE, LIKE BINARY, or BETWEEN. Defaults to =.
    *   If $field is a string you have to use 'formula' here.
    *
-   * The $field, $value and $operator arguments can also be passed in with a
-   * single DatabaseCondition object, like this:
+   * @codingStandardsIgnoreStart
+   *   The $field, $value and $operator arguments can also be passed in with a
+   *   single DatabaseCondition object, like this:
+   *  @codingStandardsIgnoreEnd
+   *
    * @code
    *   $this->query->addWhere(
    *     $this->options['group'],
    *     db_or()
    *       ->condition($field, $value, 'NOT IN')
    *       ->condition($field, $value, 'IS NULL')
-   *   );
+   *   ];
    * @endcode
    *
    * @see \Drupal\Core\Database\Query\ConditionInterface::condition()
@@ -324,11 +355,11 @@ class Soql extends QueryPluginBase {
       $this->setWhereGroup('AND', $group);
     }
 
-    $this->where[$group]['conditions'][] = array(
+    $this->where[$group]['conditions'][] = [
       'field' => $field,
       'value' => $value,
       'operator' => $operator,
-    );
+    ];
   }
 
   /**
@@ -338,19 +369,19 @@ class Soql extends QueryPluginBase {
    * (TABLE.FIELD) and that the table already exists in the query.
    * Internally the dbtng method "where" is used.
    *
-   * @param $group
+   * @param string $group
    *   The WHERE group to add these to; groups are used to create AND/OR
    *   sections. Groups cannot be nested. Use 0 as the default group.
    *   If the group does not yet exist it will be created as an AND group.
-   * @param $snippet
+   * @param string $snippet
    *   The snippet to check. This can be either a column or
-   *   a complex expression like "UPPER(table.field) = 'value'"
-   * @param $args
+   *   a complex expression like "UPPER(table.field) = 'value'".
+   * @param array $args
    *   An associative array of arguments.
    *
    * @see QueryConditionInterface::where()
    */
-  public function addWhereExpression($group, $snippet, $args = array()) {
+  public function addWhereExpression($group, $snippet, array $args = []) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
     // the default group.
     if (empty($group)) {
@@ -362,32 +393,33 @@ class Soql extends QueryPluginBase {
       $this->setWhereGroup('AND', $group);
     }
 
-    $this->where[$group]['conditions'][] = array(
+    $this->where[$group]['conditions'][] = [
       'field' => $snippet,
       'value' => $args,
       'operator' => 'formula',
-    );
+    ];
   }
 
   /**
    * Add a complex HAVING clause to the query.
-   * The caller is responsible for ensuring that all fields are fully qualified
-   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
-   * Internally the dbtng method "having" is used.
    *
-   * @param $group
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist
+   * in the query. Internally the dbtng method "having" is used.
+   *
+   * @param string $group
    *   The HAVING group to add these to; groups are used to create AND/OR
    *   sections. Groups cannot be nested. Use 0 as the default group.
    *   If the group does not yet exist it will be created as an AND group.
-   * @param $snippet
+   * @param string $snippet
    *   The snippet to check. This can be either a column or
-   *   a complex expression like "COUNT(table.field) > 3"
-   * @param $args
+   *   a complex expression like "COUNT(table.field) > 3".
+   * @param array $args
    *   An associative array of arguments.
    *
    * @see QueryConditionInterface::having()
    */
-  public function addHavingExpression($group, $snippet, $args = array()) {
+  public function addHavingExpression($group, $snippet, array $args = []) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
     // the default group.
     if (empty($group)) {
@@ -400,33 +432,33 @@ class Soql extends QueryPluginBase {
     }
 
     // Add the clause and the args.
-    $this->having[$group]['conditions'][] = array(
+    $this->having[$group]['conditions'][] = [
       'field' => $snippet,
       'value' => $args,
       'operator' => 'formula',
-    );
+    ];
   }
 
   /**
    * Add an ORDER BY clause to the query.
    *
-   * @param $table
+   * @param string $table
    *   The table this field is part of. If a formula, enter NULL.
    *   If you want to orderby random use "rand" as table and nothing else.
-   * @param $field
+   * @param string $field
    *   The field or formula to sort on. If already a field, enter NULL
    *   and put in the alias.
-   * @param $order
+   * @param string $order
    *   Either ASC or DESC.
-   * @param $alias
+   * @param string $alias
    *   The alias to add the field as. In SQL, all fields in the order by
    *   must also be in the SELECT portion. If an $alias isn't specified
    *   one will be generated for from the $field; however, if the
    *   $field is a formula, this alias will likely fail.
-   * @param $params
+   * @param array $params
    *   Any params that should be passed through to the addField.
    */
-  public function addOrderBy($table, $field = NULL, $order = 'ASC', $alias = '', $params = array()) {
+  public function addOrderBy($table, $field = NULL, $order = 'ASC', $alias = '', array $params = []) {
     // Only ensure the table if it's not the special random key.
     // @todo: Maybe it would make sense to just add an addOrderByRand or something similar.
     if ($table && $table != 'rand') {
@@ -446,14 +478,16 @@ class Soql extends QueryPluginBase {
       $as = $this->addField($table, $field, $as, $params);
     }
 
-    $this->orderby[] = array(
+    $this->orderBy[] = [
       'field' => $as,
-      'direction' => strtoupper($order)
-    );
+      'direction' => strtoupper($order),
+    ];
   }
 
   /**
-   * Add a simple GROUP BY clause to the query. The caller is responsible
+   * Add a simple GROUP BY clause to the query.
+   *
+   * The caller is responsible
    * for ensuring that the fields are fully qualified and the table is properly
    * added.
    */
@@ -463,17 +497,6 @@ class Soql extends QueryPluginBase {
       $this->groupby[] = $clause;
     }
   }
-
-  /**
-   * Returns the alias for the given field added to $table.
-   *
-   * @access protected
-   *
-   * @see \Drupal\views\Plugin\views\query\Sql::addField
-   */
-  /*protected function getFieldAlias($table_alias, $field) {
-    return isset($this->fieldAliases[$table_alias][$field]) ? $this->fieldAliases[$table_alias][$field] : FALSE;
-  }*/
 
   /**
    * Adds a query tag to the sql object.
@@ -487,8 +510,8 @@ class Soql extends QueryPluginBase {
   /**
    * Generates a unique placeholder used in the db query.
    */
-  function placeholder($base = 'views') {
-    static $placeholders = array();
+  public function placeholder($base = 'views') {
+    static $placeholders = [];
     if (!isset($placeholders[$base])) {
       $placeholders[$base] = 0;
       return ':' . $base;
@@ -506,8 +529,8 @@ class Soql extends QueryPluginBase {
    * There is other code in filters which makes sure that the group IDs are
    * higher than zero.
    *
-   * @param $where
-   *   'where' or 'having'.
+   * @param string $where
+   *   Query term 'where' or 'having'.
    */
   protected function buildCondition($where = 'where') {
     $has_condition = FALSE;
@@ -568,7 +591,7 @@ class Soql extends QueryPluginBase {
    *   An array of the fieldnames which are non-aggregates.
    */
   protected function getNonAggregates() {
-    $non_aggregates = array();
+    $non_aggregates = [];
     foreach ($this->fields as $field) {
       $string = '';
       if (!empty($field['table'])) {
@@ -603,28 +626,26 @@ class Soql extends QueryPluginBase {
   }
 
   /**
-  /**
-   * Generate a query and a countquery from all of the information supplied
-   * to the object.
+   * {@inheritdoc}
    *
-   * @param $get_count
+   * @param bool $get_count
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   public function query($get_count = FALSE) {
-    $query = \Drupal::database()->select($this->base_table)->extend('Drupal\socrata\SocrataSelectQuery');
+    $query = \Drupal::database()->select($this->baseTable)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->addTag('socrata');
     $query->addTag('socrata_' . $this->view->storage->id());
 
     // Construct where clause from Views filter grouping.
-    $groups = array();
+    $groups = [];
     foreach ($this->where as $where) {
-      $queries = array();
+      $queries = [];
       foreach ($where['conditions'] as $cond) {
         // Multiple values for condition, suss out.
         if (is_array($cond['value']) && !is_string($cond['value']) && !empty($cond['value'])) {
-          $in_queries = array();
+          $in_queries = [];
           foreach ($cond['value'] as $in_val) {
-            $in_queries[] = $this->constructQueryComponent($cond['field'], $in_val, $cond['operator']);
+            $in_queries[] = $this->constructQueryParameter($cond['field'], $in_val, $cond['operator']);
           }
           if (!empty($in_queries)) {
             $queries[] = '(' . implode(' AND ', $in_queries) . ')';
@@ -632,7 +653,7 @@ class Soql extends QueryPluginBase {
         }
         // Otherwise simple field-value comparison.
         else {
-          $queries[] = $this->constructQueryComponent($cond['field'], $cond['value'], $cond['operator']);
+          $queries[] = $this->constructQueryParameter($cond['field'], $cond['value'], $cond['operator']);
         }
       }
       if (!empty($queries)) {
@@ -646,7 +667,7 @@ class Soql extends QueryPluginBase {
     $this->hasAggregate = $this->view->display_handler->getOption('group_by');
 
     if (!empty($this->fields)) {
-      $fields_list = $non_aggregates = array();
+      $fields_list = $non_aggregates = [];
       foreach ($this->fields as $field => $field_info) {
         // If an aggregate function is specified, wrap it around the field.
         if (isset($field_info['function']) && $this->hasAggregate) {
@@ -666,7 +687,7 @@ class Soql extends QueryPluginBase {
       $fields_list = $non_aggregates;
     }
     $query->params['$select'] = implode(',', $fields_list);
-    $query->fields($this->base_table, $fields_list);
+    $query->fields($this->baseTable, $fields_list);
 
     // If this is a full query build vs a counter query, add on options.
     if (!$get_count) {
@@ -682,9 +703,9 @@ class Soql extends QueryPluginBase {
       }
 
       // Suss out sort fields.
-      if (!empty($this->orderby)) {
-        $sort_fields = array();
-        foreach ($this->orderby as $orderby) {
+      if (!empty($this->orderBy)) {
+        $sort_fields = [];
+        foreach ($this->orderBy as $orderby) {
           $sort_fields[] = "{$orderby['field']} {$orderby['direction']}";
           $query->orderBy($orderby['field'], $orderby['direction']);
         }
@@ -701,35 +722,39 @@ class Soql extends QueryPluginBase {
     return $query;
   }
 
-/**
- * Utility method for constructing components for predicate.
- *
- * @param string $field
- * @param string $value
- * @param string $operator
- *
- * @return string
- */
-private function constructQueryComponent($field, $value, $operator) {
-  $component = '';
+  /**
+   * Utility method for constructing parameters for query predicate.
+   *
+   * @param string $field
+   *   The field name.
+   * @param string $value
+   *   The parameter value.
+   * @param string $operator
+   *   The comparison operator.
+   *
+   * @return string
+   *   Query parameter.
+   */
+  private function constructQueryParameter($field, $value, $operator) {
+    $parameter = '';
 
-  // Check to see if the predicate component is a prebuilt formula.
-  if ($operator == 'formula') {
-    $component = $field;
-  }
-  // Otherwise, build a "normal" comparison predicate component.
-  else {
-    $component = "{$field}{$operator}'{$value}'";
-  }
+    // Check to see if the predicate parameter is a prebuilt formula.
+    if ($operator == 'formula') {
+      $parameter = $field;
+    }
+    // Otherwise, build a "normal" comparison predicate parameter.
+    else {
+      $parameter = "{$field}{$operator}'{$value}'";
+    }
 
-  return $component;
-}
+    return $parameter;
+  }
 
   /**
    * Get the arguments attached to the WHERE and HAVING clauses of this query.
    */
   public function getWhereArgs() {
-    $args = array();
+    $args = [];
     foreach ($this->where as $where) {
       $args = array_merge($args, $where['args']);
     }
@@ -742,14 +767,14 @@ private function constructQueryComponent($field, $value, $operator) {
   /**
    * Let modules modify the query just prior to finalizing it.
    */
-  function alter(ViewExecutable $view) {
-    \Drupal::moduleHandler()->invokeAll('views_query_alter', array($view, $this));
+  public function alter(ViewExecutable $view) {
+    \Drupal::moduleHandler()->invokeAll('views_query_alter', [$view, $this]);
   }
 
   /**
    * Builds the necessary info to execute the query.
    */
-  function build(ViewExecutable $view) {
+  public function build(ViewExecutable $view) {
     // Store the view in the object to be able to use it later.
     $this->view = $view;
 
@@ -768,18 +793,14 @@ private function constructQueryComponent($field, $value, $operator) {
   }
 
   /**
-   * Executes the query and fills the associated view object with according
-   * values.
-   *
-   * Values to set: $view->result, $view->total_rows, $view->execute_time,
-   * $view->current_page.
+   * {@inheritdoc}
    */
-  function execute(ViewExecutable $view) {
+  public function execute(ViewExecutable $view) {
     $query = $view->build_info['query'];
     $count_query = $view->build_info['count_query'];
 
     if ($query) {
-      $result = array();
+      $result = [];
       // Count queries must be run through the preExecute() method.
       $count_query->preExecute();
 
@@ -791,8 +812,9 @@ private function constructQueryComponent($field, $value, $operator) {
         $total_items = intval($resp['data'][0]['count']);
       }
 
-      // Just set total rows on pager instead of calling pager->executeCountQuery()
-      // because method calls fetchField(), which breaks for non-SQL queries.
+      // Just set total rows on pager instead of calling
+      // pager->executeCountQuery() because method calls fetchField(), which
+      // breaks for non-SQL queries.
       $view->pager->total_items = $total_items;
 
       // Let the pager modify the query to add limits.
@@ -802,9 +824,10 @@ private function constructQueryComponent($field, $value, $operator) {
       do {
         $resp = $query->execute();
         if ($resp !== FALSE && isset($resp['data'])) {
-          // Have to map Socrata result field labels back onto what Views knows them as.
+          // Have to map Socrata result field labels back onto what Views knows
+          // them as.
           $original_field_names = $view->query->fields;
-          $field_name_map = array();
+          $field_name_map = [];
           foreach ($original_field_names as $field => $attributes) {
             if (isset($attributes['function']) && $this->hasAggregate) {
               $field_alias = $attributes['alias'];
@@ -842,10 +865,12 @@ private function constructQueryComponent($field, $value, $operator) {
       // Store off values from query in View.
       $view->result = $result;
 
-      // The mini pager changes its total_items property in its postExecute() method
-      // which breaks the mini pager so we'll just disable calling that method.
+      // The mini pager changes its total_items property in its postExecute()
+      // method which breaks the mini pager so we'll just disable calling that
+      // method for now.
+      // @codingStandardsIgnoreStart
       // $view->pager->postExecute($view->result);
-
+      // @codingStandardsIgnoreEnd
       $view->pager->updatePageInfo();
       $view->total_rows = $view->pager->getTotalItems();
     }
@@ -855,69 +880,78 @@ private function constructQueryComponent($field, $value, $operator) {
     $view->execute_time = microtime(TRUE) - $start;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function addSignature(ViewExecutable $view) {
     $view->query->addField(NULL, "'" . $view->storage->id() . ':' . $view->current_display . "'", 'view_name');
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getAggregationInfo() {
-    return array(
-      'group' => array(
+    return [
+      'group' => [
         'title' => $this->t('Group results together'),
         'is aggregate' => FALSE,
-      ),
-      'count' => array(
+      ],
+      'count' => [
         'title' => $this->t('Count'),
         'method' => 'aggregationMethodSimple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'groupby_numeric',
           'field' => 'numeric',
           'filter' => 'groupby_numeric',
           'sort' => 'groupby_numeric',
-        ),
-      ),
-      'sum' => array(
+        ],
+      ],
+      'sum' => [
         'title' => $this->t('Sum'),
         'method' => 'aggregationMethodSimple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'groupby_numeric',
           'field' => 'numeric',
           'filter' => 'groupby_numeric',
           'sort' => 'groupby_numeric',
-        ),
-      ),
-      'avg' => array(
+        ],
+      ],
+      'avg' => [
         'title' => $this->t('Average'),
         'method' => 'aggregationMethodSimple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'groupby_numeric',
           'field' => 'numeric',
           'filter' => 'groupby_numeric',
           'sort' => 'groupby_numeric',
-        ),
-      ),
-      'min' => array(
+        ],
+      ],
+      'min' => [
         'title' => $this->t('Minimum'),
         'method' => 'aggregationMethodSimple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'groupby_numeric',
           'field' => 'numeric',
           'filter' => 'groupby_numeric',
           'sort' => 'groupby_numeric',
-        ),
-      ),
-      'max' => array(
+        ],
+      ],
+      'max' => [
         'title' => $this->t('Maximum'),
         'method' => 'aggregationMethodSimple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'groupby_numeric',
           'field' => 'numeric',
           'filter' => 'groupby_numeric',
           'sort' => 'groupby_numeric',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function aggregationMethodSimple($group_type, $field) {
     return strtoupper($group_type) . '(' . $field . ')';
   }

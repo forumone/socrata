@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_views\Plugin\views\argument\SocrataBooleanArgument.
- */
-
 namespace Drupal\socrata_views\Plugin\views\argument;
 
 use Drupal\views\Plugin\views\argument\StringArgument;
@@ -17,6 +12,7 @@ use Drupal\views\Plugin\views\argument\StringArgument;
  * @ViewsArgument("socrata_boolean")
  */
 class SocrataBooleanArgument extends StringArgument {
+
   /**
    * Add this argument to the query.
    *
@@ -28,11 +24,11 @@ class SocrataBooleanArgument extends StringArgument {
     $field = $this->realField;
 
     switch ($this->value[0]) {
-     case 'false':
+      case 'false':
       case '0':
         $value = 'false';
         break;
-      
+
       case 'true':
       case '1':
       default:

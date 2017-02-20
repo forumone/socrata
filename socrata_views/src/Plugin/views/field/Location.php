@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_views\Plugin\views\field\Location.
- */
-
 namespace Drupal\socrata_views\Plugin\views\field;
 
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -12,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ResultRow;
 
 /**
- * Field handler to provide simple renderer that turns a URL into a clickable link.
+ * Field handler to provide renderer for Socrata Location field.
  *
  * @ingroup views_field_handlers
  *
