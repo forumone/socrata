@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_views\Plugin\views\field\Location.
- */
-
 namespace Drupal\socrata_views\Plugin\views\field;
 
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -12,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ResultRow;
 
 /**
- * Field handler to provide simple renderer that turns a URL into a clickable link.
+ * Field handler to provide renderer for Socrata Location field.
  *
  * @ingroup views_field_handlers
  *
@@ -26,8 +21,8 @@ class Location extends FieldPluginBase {
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['display'] = array('default' => 'text');
-    $options['link_text'] = array('default' => 'Map', 'translatable' => TRUE);
+    $options['display'] = ['default' => 'text'];
+    $options['link_text'] = ['default' => 'Map', 'translatable' => TRUE];
 
     return $options;
   }
@@ -36,23 +31,23 @@ class Location extends FieldPluginBase {
    * Provide link to the page being visited.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    $form['display'] = array(
+    $form['display'] = [
       '#type' => 'select',
       '#title' => $this->t('Display mode'),
-      '#options' => array(
+      '#options' => [
         'text' => $this->t('Text, no link'),
         'link' => $this->t('Dispay as link'),
         'wkt' => $this->t('Render as WKT'),
-      ),
+      ],
       '#default_value' => $this->options['display'],
-    );
+    ];
 
-    $form['link_text'] = array(
+    $form['link_text'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Link text'),
       '#description' => $this->t('Text to use for link.'),
       '#default_value' => $this->options['link_text'],
-    );
+    ];
 
     parent::buildOptionsForm($form, $form_state);
   }

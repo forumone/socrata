@@ -1,12 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_views\Plugin\views\field\CalendarDate.
- * Based heavily on date with the only major difference
- * being that Socrata stores this field type in ISO 8601 format.
- */
-
 namespace Drupal\socrata_views\Plugin\views\field;
 
 use Drupal\views\ResultRow;
@@ -24,7 +17,7 @@ class CalendarDate extends Date {
   /**
    * {@inheritdoc}
    */
-  function getValue(ResultRow $values, $field = NULL) {
+  public function getValue(ResultRow $values, $field = NULL) {
     $values = parent::getValue($values, $field);
 
     // Convert the date string to a timestamp.

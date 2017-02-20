@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of SocrataPoint.
- */
-
 namespace Drupal\socrata_views\Plugin\views\field;
 
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -12,21 +7,22 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\ResultRow;
 
 /**
- * Field handler to provide simple renderer that turns a URL into a clickable link.
+ * Field handler to provide renderer for Socrata Point field.
  *
  * @ingroup views_field_handlers
  *
  * @ViewsField("socrata_point")
  */
 class SocrataPoint extends FieldPluginBase {
+
   /**
-   * Collect options for field display
+   * Collect options for field display.
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['display'] = array('default' => 'text');
-    $options['link_text'] = array('default' => 'Map', 'translatable' => TRUE);
+    $options['display'] = ['default' => 'text'];
+    $options['link_text'] = ['default' => 'Map', 'translatable' => TRUE];
 
     return $options;
   }
@@ -35,23 +31,23 @@ class SocrataPoint extends FieldPluginBase {
    * Option form.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    $form['display'] = array(
+    $form['display'] = [
       '#type' => 'select',
       '#title' => $this->t('Display mode'),
-      '#options' => array(
+      '#options' => [
         'text' => $this->t('Text, no link'),
         'link' => $this->t('Dispay as link'),
         'wkt' => $this->t('Render as WKT'),
-      ),
+      ],
       '#default_value' => $this->options['display'],
-    );
+    ];
 
-    $form['link_text'] = array(
+    $form['link_text'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Link text'),
       '#description' => $this->t('Text to use for link'),
       '#default_value' => $this->options['link_text'],
-    );
+    ];
 
     parent::buildOptionsForm($form, $form_state);
   }
@@ -67,7 +63,7 @@ class SocrataPoint extends FieldPluginBase {
       // at http://dev.socrata.com/docs/datatypes/point.html.
       $longitude = $this->sanitizeValue($value['coordinates'][0], 'xss');
       $latitude = $this->sanitizeValue($value['coordinates'][1], 'xss');
-      // Suss out default display text - TODO make themeable
+      // Suss out default display text - TODO make themeable.
       if (!empty($this->options['link_text'])) {
         $text = $this->sanitizeValue($this->options['link_text'], 'xss');
       }
@@ -94,4 +90,5 @@ class SocrataPoint extends FieldPluginBase {
 
     return $text;
   }
+
 }

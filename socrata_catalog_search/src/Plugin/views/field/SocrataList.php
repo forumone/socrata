@@ -1,12 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_catalog_search\Plugin\views\field\SocrataList.
- * Based heavily on date with the only major difference
- * being that Socrata stores this field type in ISO 8601 format.
- */
-
 namespace Drupal\socrata_catalog_search\Plugin\views\field;
 
 use Drupal\views\ResultRow;
@@ -41,7 +34,7 @@ class SocrataList extends PrerenderList {
         // Array needs to have a themeable keyed value.
         $this->items[$count] = ['#plain_text' => $value];
       }
-  
+
       return $this->items;
     }
 
@@ -55,4 +48,5 @@ class SocrataList extends PrerenderList {
     // Return the bare value so that the string isn't double-escaped.
     return $item['#plain_text'];
   }
+
 }

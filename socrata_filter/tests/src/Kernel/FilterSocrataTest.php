@@ -48,7 +48,7 @@ class FilterSocrataTest extends KernelTestBase {
     $this->endpoint->save();
 
     $this->filters = $manager = $this->container->get('plugin.manager.filter');
-    $bag = new FilterPluginCollection($manager, array());
+    $bag = new FilterPluginCollection($manager, []);
     $this->filter = $bag->get('filter_socrata');
   }
 

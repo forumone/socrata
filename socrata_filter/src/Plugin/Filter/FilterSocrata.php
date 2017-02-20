@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains Drupal\socrata_filter\Plugin\Filter\FilterSocrata
- */
 
 namespace Drupal\socrata_filter\Plugin\Filter;
 
@@ -35,9 +31,14 @@ class FilterSocrata extends FilterBase {
     $new_text = preg_replace_callback(
       '/\[socrata((?:\s).*)]/i',
       function ($matches) {
+        // @codingStandardsIgnoreStart
+        // Suppressing the unused variable warning because it really is
+        // used below.
         $retval = '';
+        // @codingStandardsIgnoreEnd
         if (isset($matches[1])) {
           $attrs = explode(' ', trim($matches[1]));
+          $vars = [];
           foreach ($attrs as $attr) {
             list($name, $val) = explode('=', trim($attr), 2);
             $vars[Xss::filter($name)] = Xss::filter($val);
@@ -55,7 +56,7 @@ class FilterSocrata extends FilterBase {
           }
 
           $render_array['#theme'] = 'socrata_filter';
-          $render_array['#embed_url'] = $endpoint->getEmbedURL();
+          $render_array['#embed_url'] = $endpoint->getEmbedUrl();
           $render_array['#source'] = $vars['source'];
           $render_array['#width'] = $this->getWidth($vars);
           $render_array['#height'] = $this->getHeight($vars);;
@@ -74,19 +75,19 @@ class FilterSocrata extends FilterBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $form['socrata_filter_width'] = array(
+    $form['socrata_filter_width'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Default width of embed'),
       '#description' => $this->t('The default width of the embedded Socrata view (in pixels) to use if not specified in the embed tag.'),
       '#default_value' => $this->settings['socrata_filter_width'],
-    );
+    ];
 
-    $form['socrata_filter_height'] = array(
+    $form['socrata_filter_height'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Default height of embed'),
       '#description' => $this->t('The default height of the embedded Socrata view (in pixels) to use if not specified in the embed tag.'),
       '#default_value' => $this->settings['socrata_filter_height'],
-    );
+    ];
     return $form;
   }
 
@@ -112,10 +113,12 @@ class FilterSocrata extends FilterBase {
    * Returns the set width or the default.
    *
    * @param array $vars
+   *   An array of filter arguments.
    *
    * @return int
+   *   The width of the iframe.
    */
-  protected function getWidth($vars) {
+  protected function getWidth(array $vars) {
     if (isset($vars['width']) && is_numeric($vars['width'])) {
       return $vars['width'];
     }
@@ -127,10 +130,12 @@ class FilterSocrata extends FilterBase {
    * Returns the set height or the default.
    *
    * @param array $vars
+   *   An array of filter arguments.
    *
    * @return int
+   *   The height of the iframe.
    */
-  protected function getHeight($vars) {
+  protected function getHeight(array $vars) {
     if (isset($vars['height']) && is_numeric($vars['height'])) {
       return $vars['height'];
     }

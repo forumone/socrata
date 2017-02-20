@@ -86,7 +86,7 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * @return string
    *   Formatted URL
    */
-  public function getSodaURL(array $params = []) {
+  public function getSodaUrl(array $params = []) {
     // Add app token if available.
     if ($this->getAppToken()) {
       $params['$$app_token'] = $this->getAppToken();
@@ -104,14 +104,13 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * @return string
    *   Formatted URL
    */
-  public function getUnencodedSodaURL(array $params = []) {
+  public function getUnencodedSodaUrl(array $params = []) {
     // We might not want to encode the URL in cases where we just want it to be
     // output for humans to read, most notably in the query displayed in the
     // views preview.
     // In this case, assemble our URL with the query parameters directly,
     // rather than passing them in as query arguments to the URL function, where
     // they'll be URL-encoded.
-
     // Add app token if available.
     if ($this->getAppToken()) {
       $params['$$app_token'] = $this->getAppToken();
@@ -134,8 +133,9 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * Returns an embed URL.
    *
    * @return string
+   *   The embed URL.
    */
-  public function getEmbedURL() {
+  public function getEmbedUrl() {
     $components = $this->getComponents();
     return "https://{$components['host']}/w/{$components['dataset_id']}";
   }
@@ -143,9 +143,11 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
   /**
    * Return download Socrata URL.
    *
-   * @param $format string
+   * @param string $format
+   *   The download format.
    *
    * @return string
+   *   The download URL.
    */
   public function getDownloadUrl($format = 'csv') {
     $components = $this->getComponents();
@@ -158,7 +160,7 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
    * Return Socrata metadata URL.
    *
    * @return string
-   *   The download URL
+   *   The metadata URL
    */
   public function getMetaDataUrl() {
     $components = $this->getComponents();
@@ -169,7 +171,8 @@ class Endpoint extends ConfigEntityBase implements EndpointInterface {
   /**
    * Parse out the components of endpoint URL.
    *
-   * @return string
+   * @return array
+   *   Array of components.
    */
   public function getComponents() {
     $components = parse_url($this->url);

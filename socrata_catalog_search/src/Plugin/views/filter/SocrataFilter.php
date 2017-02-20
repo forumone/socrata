@@ -1,16 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\socrata_catalog_search\Plugin\views\filter\SocrataFilter.
- */
-
 namespace Drupal\socrata_catalog_search\Plugin\views\filter;
 
 use Drupal\views\Plugin\views\filter\StringFilter;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
+ * Base class for some Socrata Catalog Search filters.
+ *
  * @ingroup views_filter_handlers
  *
  * @ViewsFilter("socrata_full_text")
@@ -22,20 +19,20 @@ abstract class SocrataFilter extends StringFilter {
    *
    * @var string
    */
-  public $search_field;
+  public $searchField;
 
   /**
    * {@inheritdoc}
    */
-  function operators() {
-    $operators = array(
-      '=' => array(
+  public function operators() {
+    $operators = [
+      '=' => [
         'title' => $this->t('Contains'),
         'method' => 'opEqual',
         'short' => $this->t('='),
         'values' => 1,
-      ),
-    );
+      ],
+    ];
 
     return $operators;
   }
@@ -60,8 +57,9 @@ abstract class SocrataFilter extends StringFilter {
   public function query() {
     $info = $this->operators();
 
-    // Override the field name per http://labs.socrata.com/docs/search.html#-full-text-search.
-    $field = $this->search_field;
+    // Override the field name per
+    // http://labs.socrata.com/docs/search.html#-full-text-search.
+    $field = $this->searchField;
 
     if (!empty($info[$this->operator]['method'])) {
       $this->{$info[$this->operator]['method']}($field);

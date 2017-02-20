@@ -1,21 +1,21 @@
 <?php
-/**
- * @file
- * Contains \Drupal\socrata\Form\EndpointForm.
- */
 
 namespace Drupal\socrata\Form;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\socrata\Entity\Endpoint;
 
+/**
+ * Endpoint entity form.
+ */
 class EndpointForm extends EntityForm {
 
   /**
+   * Constructor method.
+   *
    * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
    *   The entity query.
    */
@@ -40,15 +40,15 @@ class EndpointForm extends EntityForm {
 
     $endpoint = $this->entity;
 
-    $form['id'] = array(
+    $form['id'] = [
       '#type' => 'machine_name',
       '#default_value' => $endpoint->id(),
-      '#machine_name' => array(
-        'exists' => array($this, 'exist'),
-      ),
+      '#machine_name' => [
+        'exists' => [$this, 'exist'],
+      ],
       '#disabled' => !$endpoint->isNew(),
-    );
-    $form['label'] = array(
+    ];
+    $form['label'] = [
       '#id' => 'id',
       '#type' => 'textfield',
       '#title' => $this->t('Name'),
@@ -56,23 +56,23 @@ class EndpointForm extends EntityForm {
       '#default_value' => $endpoint->label(),
       '#description' => $this->t("The human-readable name of this endpoint."),
       '#required' => TRUE,
-    );
-    $form['url'] = array(
+    ];
+    $form['url'] = [
       '#type' => 'url',
       '#title' => $this->t('URL'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getUrl(),
       '#description' => $this->t("URL of the dataset endpoint (e.g., https://data.seattle.gov/resource/tqh5-8vm2.json)."),
       '#required' => TRUE,
-    );
-    $form['app_token'] = array(
+    ];
+    $form['app_token'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Application token'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getAppToken(),
       '#description' => $this->t("Application token (some endpoints require this for access)."),
       '#required' => FALSE,
-    );
+    ];
 
     return $form;
   }
@@ -87,14 +87,20 @@ class EndpointForm extends EntityForm {
     $app_token = $form_state->getValue('app_token');
 
     // Ensure we have a SODA2 URL for the endpoint.
-    if (strpos($url, 'resource/') === false) {
+    if (strpos($url, 'resource/') === FALSE) {
       $form_state->setErrorByName('url', $this->t('The endpoint "@url" does not point to a valid SODA2 resource. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json', ['@url' => $url]));
       // Bail out or otherwise the query below will bork.
       return;
     }
 
     // Ensure we get a valid response from the endpoint.
-    $endpoint = new Endpoint(array('url' => $url), 'endpoint');
+    $endpoint = new Endpoint(
+      [
+        'url' => $url,
+        'app_token' => $app_token,
+      ],
+      'endpoint'
+    );
     $query = \Drupal::database()->select($url)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->setEndpoint($endpoint);
     $query->params['$limit'] = 1;
@@ -118,23 +124,41 @@ class EndpointForm extends EntityForm {
     $status = $endpoint->save();
 
     if ($status) {
-      drupal_set_message($this->t('Saved the %label endpoint.', array(
-        '%label' => $endpoint->label(),
-      )));
+      drupal_set_message(
+        $this->t('Saved the %label endpoint.',
+          [
+            '%label' => $endpoint->label(),
+          ]
+        )
+      );
     }
     else {
-      drupal_set_message($this->t('The %label endpoint was not saved.', array(
-        '%label' => $endpoint->label(),
-      )));
+      drupal_set_message(
+        $this->t('The %label endpoint was not saved.',
+          [
+            '%label' => $endpoint->label(),
+          ]
+        )
+      );
     }
 
     $form_state->setRedirect('entity.endpoint.collection');
   }
 
+  /**
+   * Check if the endpoint exists.
+   *
+   * @param string $id
+   *   The endpoint identifier.
+   *
+   * @return bool
+   *   Whether the endpoint exists.
+   */
   public function exist($id) {
     $entity = $this->entityQuery->get('endpoint')
       ->condition('id', $id)
       ->execute();
     return (bool) $entity;
   }
+
 }
