@@ -40,15 +40,15 @@ class EndpointForm extends EntityForm {
 
     $endpoint = $this->entity;
 
-    $form['id'] = array(
+    $form['id'] = [
       '#type' => 'machine_name',
       '#default_value' => $endpoint->id(),
-      '#machine_name' => array(
-        'exists' => array($this, 'exist'),
-      ),
+      '#machine_name' => [
+        'exists' => [$this, 'exist'],
+      ],
       '#disabled' => !$endpoint->isNew(),
-    );
-    $form['label'] = array(
+    ];
+    $form['label'] = [
       '#id' => 'id',
       '#type' => 'textfield',
       '#title' => $this->t('Name'),
@@ -56,23 +56,23 @@ class EndpointForm extends EntityForm {
       '#default_value' => $endpoint->label(),
       '#description' => $this->t("The human-readable name of this endpoint."),
       '#required' => TRUE,
-    );
-    $form['url'] = array(
+    ];
+    $form['url'] = [
       '#type' => 'url',
       '#title' => $this->t('URL'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getUrl(),
       '#description' => $this->t("URL of the dataset endpoint (e.g., https://data.seattle.gov/resource/tqh5-8vm2.json)."),
       '#required' => TRUE,
-    );
-    $form['app_token'] = array(
+    ];
+    $form['app_token'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Application token'),
       '#maxlength' => 255,
       '#default_value' => $endpoint->getAppToken(),
       '#description' => $this->t("Application token (some endpoints require this for access)."),
       '#required' => FALSE,
-    );
+    ];
 
     return $form;
   }
@@ -124,14 +124,22 @@ class EndpointForm extends EntityForm {
     $status = $endpoint->save();
 
     if ($status) {
-      drupal_set_message($this->t('Saved the %label endpoint.', array(
-        '%label' => $endpoint->label(),
-      )));
+      drupal_set_message(
+        $this->t('Saved the %label endpoint.',
+          [
+            '%label' => $endpoint->label(),
+          ]
+        )
+      );
     }
     else {
-      drupal_set_message($this->t('The %label endpoint was not saved.', array(
-        '%label' => $endpoint->label(),
-      )));
+      drupal_set_message(
+        $this->t('The %label endpoint was not saved.',
+          [
+            '%label' => $endpoint->label(),
+          ]
+        )
+      );
     }
 
     $form_state->setRedirect('entity.endpoint.collection');

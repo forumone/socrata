@@ -25,14 +25,14 @@ abstract class SocrataFilter extends StringFilter {
    * {@inheritdoc}
    */
   public function operators() {
-    $operators = array(
-      '=' => array(
+    $operators = [
+      '=' => [
         'title' => $this->t('Contains'),
         'method' => 'opEqual',
         'short' => $this->t('='),
         'values' => 1,
-      ),
-    );
+      ],
+    ];
 
     return $operators;
   }

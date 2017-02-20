@@ -134,7 +134,7 @@ class SocrataSelectQuery extends SelectExtender {
         continue;
       }
       $name = strtolower(trim($header));
-      if (in_array($name, array('x-soda2-fields', 'x-soda2-types'))) {
+      if (in_array($name, ['x-soda2-fields', 'x-soda2-types'])) {
         $headers_arr[$name] = [];
         foreach ($values as $value) {
           $headers_arr[$name] = array_merge($headers_arr[$name], json_decode($value));

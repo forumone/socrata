@@ -16,9 +16,9 @@
  * NOTE that values may also be set in the settings.php file as an array in
  * the form (same as used by curl_setopt_array):
  *
- * $conf['backup_socrata_curl_options'] = array(
+ * $conf['backup_socrata_curl_options'] = [
  *   CURLOPT_PROXY => 'http://127.0.0.1:3128',
- * );
+ * ];
  *
  * These values will then be amended by any alter hook implementations.
  *
