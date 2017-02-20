@@ -1,12 +1,12 @@
 <?php
+
 /**
  * @file
- *
- * This file contains sample hook implementations specific to this module
+ * This file contains sample hook implementations specific to this module.
  */
 
 /**
- * hook_socrata_curl_options_alter
+ * Hook_socrata_curl_options_alter.
  *
  * This hook allows modules to alter the curl options used to connect to the
  * Socrata endpoint.  See the following for various options:
@@ -22,9 +22,10 @@
  *
  * These values will then be amended by any alter hook implementations.
  *
- * @param $curl_options
+ * @param array $curl_options
+ *   Array of curl options.
  */
-function hook_socrata_curl_options_alter(&$curl_options) {
+function hook_socrata_curl_options_alter(array &$curl_options) {
   if (!isset($curl_options[CURLOPT_PROXY])) {
     $curl_options[CURLOPT_PROXY] = 'http://127.0.0.1:3128';
   }

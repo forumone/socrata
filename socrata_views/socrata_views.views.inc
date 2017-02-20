@@ -9,7 +9,7 @@
  * Implements hook_views_data().
  */
 function socrata_views_data() {
-  $tables = array();
+  $tables = [];
 
   // Load our available sources.
   $endpoints = \Drupal::entityTypeManager()->getStorage('endpoint')->loadMultiple();
@@ -40,27 +40,27 @@ function socrata_views_data() {
       $metadata_field_list = $resp_metadata['data']['columns'];
 
       // Define basic table info.
-      $tables[$endpoint_id] = array();
+      $tables[$endpoint_id] = [];
       $table = &$tables[$endpoint_id];
-      $table['table'] = array(
+      $table['table'] = [
         'group' => $group,
         'title' => $endpoint_id,
         'help' => "Field in {$endpoint_id}",
-      );
+      ];
 
       // Stub out the base table information (key field will be extracted below)
-      $table['table']['base'] = array(
+      $table['table']['base'] = [
         'title' => "Socrata: {$group}",
         'help' => $group,
         'query_id' => 'socrata_views_query',
-      );
+      ];
 
       // Add fields to table.
       foreach ($resp['fields'] as $field_machine_name => $field_type) {
-        $field_options = array(
+        $field_options = [
           'dataset' => $dataset,
           'soda2_type' => $field_type,
-        );
+        ];
         $handlers = _socrata_views_handlers($field_machine_name, $field_type, $field_options);
 
         // Get a human-readable field name.
@@ -95,13 +95,13 @@ function socrata_views_data() {
 
         $field_def = array_merge_recursive(
           $handlers,
-          array(
+          [
             'title' => $field_name,
-            'help' => t('Socrata data field of type %field_type.', array('%field_type' => $field_type)),
-            'field' => array(
+            'help' => t('Socrata data field of type %field_type.', ['%field_type' => $field_type]),
+            'field' => [
               'title' => $field_name,
-            ),
-          )
+            ],
+          ]
         );
 
         $table[$field_machine_name] = $field_def;
@@ -110,9 +110,9 @@ function socrata_views_data() {
       // Add result id field since we have to define at least one initial field.
       if (isset($table[':id'])) {
         $table['table']['base']['field'] = ':id';
-        $table['table']['base']['defaults'] = array(
+        $table['table']['base']['defaults'] = [
           'field' => ':id',
-        );
+        ];
       }
     }
   }
@@ -127,7 +127,7 @@ function socrata_views_data() {
  */
 function _socrata_views_handlers($name, $type, $options) {
   // Initialize field handlers array.
-  $handlers = array();
+  $handlers = [];
 
   // Catch the special "meta_data" fields and override their types based on
   // field id so they make sense.

@@ -1,21 +1,21 @@
 <?php
-/**
- * @file
- * Contains \Drupal\socrata\Form\EndpointForm.
- */
 
 namespace Drupal\socrata\Form;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\socrata\Entity\Endpoint;
 
+/**
+ * Endpoint entity form.
+ */
 class EndpointForm extends EntityForm {
 
   /**
+   * Constructor method.
+   *
    * @param \Drupal\Core\Entity\Query\QueryFactory $entity_query
    *   The entity query.
    */
@@ -87,14 +87,20 @@ class EndpointForm extends EntityForm {
     $app_token = $form_state->getValue('app_token');
 
     // Ensure we have a SODA2 URL for the endpoint.
-    if (strpos($url, 'resource/') === false) {
+    if (strpos($url, 'resource/') === FALSE) {
       $form_state->setErrorByName('url', $this->t('The endpoint "@url" does not point to a valid SODA2 resource. The URL should be formatted like: http://data.example.com/resource/1234-abcd.json', ['@url' => $url]));
       // Bail out or otherwise the query below will bork.
       return;
     }
 
     // Ensure we get a valid response from the endpoint.
-    $endpoint = new Endpoint(array('url' => $url), 'endpoint');
+    $endpoint = new Endpoint(
+      [
+        'url' => $url,
+        'app_token' => $app_token,
+      ],
+      'endpoint'
+    );
     $query = \Drupal::database()->select($url)->extend('Drupal\socrata\SocrataSelectQuery');
     $query->setEndpoint($endpoint);
     $query->params['$limit'] = 1;
@@ -131,10 +137,20 @@ class EndpointForm extends EntityForm {
     $form_state->setRedirect('entity.endpoint.collection');
   }
 
+  /**
+   * Check if the endpoint exists.
+   *
+   * @param string $id
+   *   The endpoint identifier.
+   *
+   * @return bool
+   *   Whether the endpoint exists.
+   */
   public function exist($id) {
     $entity = $this->entityQuery->get('endpoint')
       ->condition('id', $id)
       ->execute();
     return (bool) $entity;
   }
+
 }

@@ -31,7 +31,11 @@ class FilterSocrata extends FilterBase {
     $new_text = preg_replace_callback(
       '/\[socrata((?:\s).*)]/i',
       function ($matches) {
+        // @codingStandardsIgnoreStart
+        // Suppressing the unused variable warning because it really is
+        // used below.
         $retval = '';
+        // @codingStandardsIgnoreEnd
         if (isset($matches[1])) {
           $attrs = explode(' ', trim($matches[1]));
           $vars = [];
@@ -52,7 +56,7 @@ class FilterSocrata extends FilterBase {
           }
 
           $render_array['#theme'] = 'socrata_filter';
-          $render_array['#embed_url'] = $endpoint->getEmbedURL();
+          $render_array['#embed_url'] = $endpoint->getEmbedUrl();
           $render_array['#source'] = $vars['source'];
           $render_array['#width'] = $this->getWidth($vars);
           $render_array['#height'] = $this->getHeight($vars);;

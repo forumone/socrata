@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\socrata\Form\EndpointDeleteForm.
- */
 
 namespace Drupal\socrata\Form;
 
@@ -13,7 +9,6 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Builds the form to delete an Endpoint.
  */
-
 class EndpointDeleteForm extends EntityConfirmFormBase {
 
   /**
@@ -46,4 +41,5 @@ class EndpointDeleteForm extends EntityConfirmFormBase {
 
     $form_state->setRedirectUrl($this->getCancelUrl());
   }
+
 }

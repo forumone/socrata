@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\socrata\Controller\EndpointListBuilder.
- */
 
 namespace Drupal\socrata\Controller;
 
@@ -31,7 +27,6 @@ class EndpointListBuilder extends ConfigEntityListBuilder {
     $row['id'] = $entity->id();
 
     // You probably want a few more properties here...
-
     return $row + parent::buildRow($entity);
   }
 

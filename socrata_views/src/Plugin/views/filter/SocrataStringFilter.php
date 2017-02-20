@@ -17,38 +17,38 @@ class SocrataStringFilter extends StringFilter {
    * {@inheritdoc}
    */
   public function operators() {
-    $operators = array(
-      '=' => array(
+    $operators = [
+      '=' => [
         'title' => $this->t('Is equal to'),
         'method' => 'opEqual',
         'short' => $this->t('='),
         'values' => 1,
-      ),
-      '!=' => array(
+      ],
+      '!=' => [
         'title' => $this->t('Is not equal to'),
         'method' => 'opEqual',
         'short' => $this->t('!='),
         'values' => 1,
-      ),
-      'starts_with' => array(
+      ],
+      'starts_with' => [
         'title' => $this->t('Starts with'),
         'short' => $this->t('starts_with'),
         'method' => 'opStartsWith',
         'values' => 1,
-      ),
-      'is null' => array(
+      ],
+      'is null' => [
         'title' => $this->t('Is empty (NULL)'),
         'method' => 'opEmpty',
         'short' => $this->t('empty'),
         'values' => 0,
-      ),
-      'is not null' => array(
+      ],
+      'is not null' => [
         'title' => $this->t('Is not empty (NOT NULL)'),
         'method' => 'opEmpty',
         'short' => $this->t('not empty'),
         'values' => 0,
-      ),
-    );
+      ],
+    ];
 
     return $operators;
   }

@@ -78,7 +78,7 @@ class SocrataSelectQuery extends SelectExtender {
       }
       else {
         // Can build the SODA URL now that all the parameters have been set.
-        $url = $this->endpoint->getSodaURL($this->params);
+        $url = $this->endpoint->getSodaUrl($this->params);
       }
 
       _socrata_dbg($url);
@@ -118,7 +118,7 @@ class SocrataSelectQuery extends SelectExtender {
    */
   public function __toString() {
     if ($this->endpoint) {
-      $soda_url = $this->endpoint->getUnencodedSodaURL($this->params);
+      $soda_url = $this->endpoint->getUnencodedSodaUrl($this->params);
       $this->query->comment('Socrata URL: "' . $soda_url . '"' . "\r\nCorresponding SQL query: ");
     }
     return (string) $this->query;

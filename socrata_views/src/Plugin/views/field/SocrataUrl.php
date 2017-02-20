@@ -21,9 +21,9 @@ class SocrataUrl extends Url {
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['display_as_link'] = array('default' => TRUE);
-    $options['link_text_option'] = array('default' => 'socrata_description');
-    $options['link_text'] = array('default' => '', 'translatable' => TRUE);
+    $options['display_as_link'] = ['default' => TRUE];
+    $options['link_text_option'] = ['default' => 'socrata_description'];
+    $options['link_text'] = ['default' => '', 'translatable' => TRUE];
 
     return $options;
   }
@@ -32,43 +32,43 @@ class SocrataUrl extends Url {
    * Provide link to the page being visited.
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    $form['display_as_link'] = array(
+    $form['display_as_link'] = [
       '#title' => $this->t('Display as link'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['display_as_link']),
-    );
-    $form['link_text_option'] = array(
+    ];
+    $form['link_text_option'] = [
       '#type' => 'radios',
       '#title' => $this->t('Select what to use as the link text'),
-      '#options' => array(
+      '#options' => [
         'url' => $this->t('URL'),
         'socrata_description' => $this->t('Description from Socrata, otherwise provided text.'),
         'user_link_text' => $this->t('Provided link text'),
-      ),
+      ],
       '#default_value' => $this->options['link_text_option'],
-      '#states' => array(
+      '#states' => [
         // Hide the settings when the display_as_link checkbox is disabled.
-        'invisible' => array(
-          ':input[name="options[display_as_link]"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
-    $form['link_text'] = array(
+        'invisible' => [
+          ':input[name="options[display_as_link]"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
+    $form['link_text'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Link text'),
       '#description' => $this->t('Text to use for link based on selection above.'),
       '#default_value' => $this->options['link_text'],
-      '#states' => array(
+      '#states' => [
         // Show only when link_text option selected & when the display_as_link
         // checkbox is enabled.
-        'invisible' => array(
-          ':input[name="options[link_text_option]"]' => array('value' => 'url'),
-        ),
-        'visible' => array(
-          ':input[name="options[display_as_link]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+        'invisible' => [
+          ':input[name="options[link_text_option]"]' => ['value' => 'url'],
+        ],
+        'visible' => [
+          ':input[name="options[display_as_link]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     parent::buildOptionsForm($form, $form_state);
   }
 

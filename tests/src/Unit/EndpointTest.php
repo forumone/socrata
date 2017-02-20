@@ -71,7 +71,7 @@ class EndpointTest extends UnitTestCase {
    * Test getting the SODA URL.
    */
   public function testGetSodaUrlWithoutParams() {
-    $this->assertEquals($this->data['endpoints']['valid']['url'], $this->endpoint->getSodaURL());
+    $this->assertEquals($this->data['endpoints']['valid']['url'], $this->endpoint->getSodaUrl());
   }
 
   /**
@@ -84,14 +84,14 @@ class EndpointTest extends UnitTestCase {
     $query_params = isset($token) ? $params + ['$$app_token' => $token] : $params;
     $url = $this->data['endpoints']['valid']['url'] . '?' . UrlHelper::buildQuery($query_params);
 
-    $this->assertEquals($url, $this->endpoint->getSodaURL($params));
+    $this->assertEquals($url, $this->endpoint->getSodaUrl($params));
   }
 
   /**
    * Test getting the SODA URL.
    */
   public function testGetUnencodedSodaUrlWithoutParams() {
-    $this->assertEquals($this->data['endpoints']['valid']['url'], $this->endpoint->getUnencodedSodaURL());
+    $this->assertEquals($this->data['endpoints']['valid']['url'], $this->endpoint->getUnencodedSodaUrl());
   }
 
   /**
@@ -104,7 +104,7 @@ class EndpointTest extends UnitTestCase {
     $query_params = isset($token) ? $params + ['$$app_token' => $token] : $params;
     $url = $this->data['endpoints']['valid']['url'] . '?' . urldecode(http_build_query($query_params));
 
-    $this->assertEquals($url, $this->endpoint->getUnencodedSodaURL($params));
+    $this->assertEquals($url, $this->endpoint->getUnencodedSodaUrl($params));
   }
 
   /**
